@@ -1,0 +1,273 @@
+@import "color";
+@import "shadow";
+
+
+.date-picker, .time-picker {
+    display: flex;
+    flex-direction: column;
+    font-size: 10pt;
+    user-select: none;
+
+
+    &.date-picker {
+        align-items: stretch;
+        background: white;
+        border: 1px solid $color-grey-500;
+    }
+
+    &.time-picker {
+        align-items: center;
+    }
+
+    & > div {
+
+        .current {
+            background-color: $color-grey-300;
+        }
+
+        .today {
+            border: 1px solid $color-grey-600;
+        }
+
+        & > .header {
+            height: 25px;
+            display: flex;
+            font-size: 1.1em;
+            border-bottom: 1px solid $color-grey-400;
+
+            & > div {
+                flex-grow: 1;
+                display: inline-flex;
+                justify-content: space-between;
+
+                &.year {
+                    flex-basis: 40%;
+                    flex-grow: 0;
+                }
+
+                &:not(:last-child) {
+                    border-right: 1px solid $color-grey-400;
+                    padding-right: 1px;
+                }
+
+                & > span {
+                    display: inline-flex;
+                    justify-content: center;
+                    align-items: center;
+                    padding: 4px;
+
+                    &.title {
+                        flex-grow: 1;
+                    }
+
+                    &.fa {
+                        color: $color-grey-500;
+
+                        &:hover {
+                            color: $color-grey-900;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    & > .year-picker {
+        height: 100%;
+
+        & > .year-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: 35px 1fr 1fr 35px;
+            height: 100%;
+
+            & > div {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                &.nav {
+                    grid-column-start: 1;
+                    grid-column-end: 6;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1.1em;
+                    color: $color-grey-500;
+
+                    &.top {
+                        border-bottom: 1px solid $color-grey-400;
+                    }
+
+                    &.bottom {
+                        border-top: 1px solid $color-grey-400;
+                    }
+
+                    &:hover {
+                        color: $color-grey-900;
+                    }
+                }
+
+                &.year:hover {
+                    background-color: $color-grey-200;
+                }
+            }
+        }
+    }
+
+    & > .month-picker {
+        height: 100%;
+
+        & > .month-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            height: 100%;
+
+            & > div {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                &:hover {
+                    background-color: $color-grey-200;
+                }
+            }
+        }
+    }
+
+    & > .day-picker {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+
+        & > .day-grid {
+            display: grid;
+            flex-grow: 1;
+            grid-template-columns: repeat(7, 1fr);
+            grid-template-rows: repeat(7, 1fr);
+
+            & > div {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-sizing: border-box;
+
+                &:nth-child(7n+7) {
+                    color: $color-red;
+                }
+            }
+
+            & > .weekday {
+                font-weight: 500;
+            }
+
+            & > .day {
+
+                &:hover {
+                    background-color: $color-grey-200;
+                }
+            }
+        }
+    }
+
+    & > .time-picker {
+
+        svg {
+
+            .central {
+
+                text {
+                    font-size:22px;
+                    font-weight:bold;
+                    alignment-baseline:middle;
+                    text-anchor:middle;
+
+                    &.seconds {
+                        font-size:16px;
+                    }
+                }
+            }
+
+            .outer-ring {
+                stroke: $color-grey-700;
+            }
+
+            .hour-ring {
+                stroke: $color-grey-700;
+            }
+
+            .minute-ring {
+                stroke: $color-grey-300;
+            }
+
+            .second-ring {
+                stroke: $color-grey-400;
+            }
+
+            .minute-tick {
+                stroke: $color-grey-700;
+            }
+
+            .second-tick {
+                stroke: $color-grey-400;
+            }
+
+            .hour-box {
+
+                .box {
+                    fill: transparent;
+                }
+
+                &:hover {
+
+                    .box {
+                        fill: $color-grey-200;
+                    }
+                }
+
+                &.selected {
+
+                    .box {
+                        fill: $color-grey-300;
+                    }
+                }
+            }
+
+            .minute-second-box {
+                fill: transparent;
+            }
+
+            .minutes-pointer {
+                fill: $color-red;
+            }
+
+            .seconds-pointer {
+                stroke: $color-yellow;
+                stroke-width: 3px;
+            }
+
+            .minute-text {
+                fill: $color-grey-700;
+            }
+
+            .complication {
+
+                & > circle {
+                    stroke: $color-grey-700;
+                }
+
+                & > text {
+                    fill: $color-grey-800;
+                }
+
+                &:hover {
+
+                    & > circle {
+                        fill: $color-grey-200;
+                    }
+                }
+            }
+        }
+
+    }
+}
