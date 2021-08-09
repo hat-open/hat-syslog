@@ -3,5 +3,4 @@ click
 hat-aio
 hat-json
 hat-juggler
-hat-sqlite3
 hat-util

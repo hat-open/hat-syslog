@@ -2,10 +2,10 @@
 
 from pathlib import Path
 import logging
+import sqlite3
 import typing
 
 from hat import aio
-from hat import sqlite3
 from hat.syslog.server import common
 
 
