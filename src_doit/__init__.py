@@ -75,7 +75,8 @@ def task_check():
 
 def task_test():
     """Test"""
-    return {'actions': [lambda args: run_pytest(pytest_dir, *(args or []))],
+    return {'actions': [(common.mkdir_p, [ui_dir]),
+                        lambda args: run_pytest(pytest_dir, *(args or []))],
             'pos_arg': 'args',
             'task_dep': ['json_schema_repo']}
 
