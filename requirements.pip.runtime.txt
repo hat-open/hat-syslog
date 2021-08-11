@@ -1,6 +1,6 @@
-appdirs
-click
-hat-aio
-hat-json
-hat-juggler
-hat-util
+appdirs >= 1.4.4
+click >= 8.0.1
+hat-aio >= 0.5.1
+hat-json >= 0.5.1
+hat-juggler >= 0.5.5
+hat-util >= 0.5.4
