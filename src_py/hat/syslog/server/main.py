@@ -95,7 +95,9 @@ def main(conf: typing.Optional[Path],
         else:
             conf = None
 
-    if conf:
+    if conf == Path('-'):
+        conf = json.decode_stream(sys.stdin)
+    elif conf:
         conf = json.decode_file(conf)
 
     sync_main(conf=conf,
