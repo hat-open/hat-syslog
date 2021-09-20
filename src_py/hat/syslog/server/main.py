@@ -87,8 +87,6 @@ def main(conf: typing.Optional[Path],
          db_enable_archive: bool,
          db_disable_journal: bool):
     """Syslog Server"""
-    aio.init_asyncio()
-
     if not conf:
         for suffix in ('.yaml', '.yml', '.json'):
             conf = (user_conf_dir / 'syslog').with_suffix(suffix)
@@ -96,8 +94,38 @@ def main(conf: typing.Optional[Path],
                 break
         else:
             conf = None
+
     if conf:
         conf = json.decode_file(conf)
+
+    sync_main(conf=conf,
+              log=log,
+              syslog_addr=syslog_addr,
+              syslog_pem=syslog_pem,
+              ui_addr=ui_addr,
+              ui_pem=ui_pem,
+              db_path=db_path,
+              db_low_size=db_low_size,
+              db_high_size=db_high_size,
+              db_enable_archive=db_enable_archive,
+              db_disable_journal=db_disable_journal)
+
+
+def sync_main(conf: typing.Optional[json.Data],
+              log: typing.Optional[str],
+              syslog_addr: typing.Optional[str],
+              syslog_pem: typing.Optional[Path],
+              ui_addr: typing.Optional[str],
+              ui_pem: typing.Optional[Path],
+              db_path: typing.Optional[Path],
+              db_low_size: typing.Optional[int],
+              db_high_size: typing.Optional[int],
+              db_enable_archive: bool,
+              db_disable_journal: bool):
+    """Syslog Server sync main"""
+    aio.init_asyncio()
+
+    if conf:
         common.json_schema_repo.validate('hat-syslog://syslog.yaml#', conf)
 
     if log:
