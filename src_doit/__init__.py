@@ -1,6 +1,5 @@
 from pathlib import Path
 import subprocess
-import sys
 import tempfile
 
 from hat import json
@@ -53,8 +52,6 @@ def task_build():
         build_wheel(
             src_dir=src_py_dir,
             dst_dir=build_py_dir,
-            src_paths=list(common.path_rglob(src_py_dir,
-                                             blacklist={'__pycache__'})),
             name='hat-syslog',
             description='Hat Syslog',
             url='https://github.com/hat-open/hat-syslog',
