@@ -125,7 +125,7 @@ def sync_main(conf: typing.Optional[json.Data],
               db_enable_archive: bool,
               db_disable_journal: bool):
     """Syslog Server sync main"""
-    aio.init_asyncio()
+    loop = aio.init_asyncio()
 
     if conf:
         common.json_schema_repo.validate('hat-syslog://syslog.yaml#', conf)
@@ -174,7 +174,8 @@ def sync_main(conf: typing.Optional[json.Data],
                                    db_low_size=db_low_size,
                                    db_high_size=db_high_size,
                                    db_enable_archive=db_enable_archive,
-                                   db_disable_journal=db_disable_journal))
+                                   db_disable_journal=db_disable_journal),
+                        loop=loop)
 
 
 async def async_main(syslog_addr: str,

@@ -26,7 +26,7 @@ async def create_syslog_server(addr: str,
     """Create syslog server"""
     addr = urllib.parse.urlparse(addr)
     if addr.scheme == 'ssl':
-        ssl_ctx = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+        ssl_ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         ssl_ctx.load_cert_chain(pem)
     else:
         ssl_ctx = None
