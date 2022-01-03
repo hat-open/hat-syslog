@@ -349,3 +349,49 @@ async def test_disable_journal(create_backend, create_msg, timestamp, db_path,
     assert exists == (not disable_journal)
 
     await backend.async_close()
+
+
+async def test_create_unique_archive(create_backend, create_msg, timestamp,
+                                     db_path, short_register_delay):
+    low_size = 1
+    high_size = 2
+
+    backend = await create_backend(low_size=low_size,
+                                   high_size=high_size,
+                                   enable_archive=True)
+
+    assert db_path.exists()
+    assert not db_path.with_suffix('.db.1').exists()
+
+    for i in range(high_size + 1):
+        await backend.register(timestamp, create_msg())
+
+    await asyncio.sleep(0.1)
+
+    assert db_path.exists()
+    assert db_path.with_suffix('.db.1').exists()
+    assert backend.last_id - backend.first_id + 1 == low_size
+
+    for i in range(high_size + 1 - low_size):
+        await backend.register(timestamp, create_msg())
+
+    await asyncio.sleep(0.1)
+
+    assert db_path.exists()
+    assert db_path.with_suffix('.db.1').exists()
+    assert db_path.with_suffix('.db.2').exists()
+    assert backend.last_id - backend.first_id + 1 == low_size
+
+    db_path.with_suffix('.db.1').unlink()
+    for i in range(high_size + 1 - low_size):
+        await backend.register(timestamp, create_msg())
+
+    await asyncio.sleep(0.1)
+
+    assert db_path.exists()
+    assert not db_path.with_suffix('.db.1').exists()
+    assert db_path.with_suffix('.db.2').exists()
+    assert db_path.with_suffix('.db.3').exists()
+    assert backend.last_id - backend.first_id + 1 == low_size
+
+    await backend.async_close()

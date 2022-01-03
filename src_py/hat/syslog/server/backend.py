@@ -3,6 +3,7 @@
 from pathlib import Path
 import asyncio
 import contextlib
+import itertools
 import logging
 import typing
 
@@ -84,7 +85,7 @@ class Backend(aio.Resource):
                            ) -> util.RegisterCallbackHandle:
         """Register change callback
 
-        Callback is called if `first_id` changes and/or `lats_id` changes
+        Callback is called if `first_id` changes and/or `last_id` changes
         and/or new entries are available (passed as argument to registered
         callback).
 
@@ -118,11 +119,13 @@ class Backend(aio.Resource):
             while True:
                 msgs = await self._get_msgs()
                 await self._process_msgs(msgs)
+
         except Exception as e:
             mlog.warn("backend loop error: %s", e, exc_info=e)
+
         finally:
+            self.close()
             self._msg_queue.close()
-            self._async_group.close()
             mlog.debug('backend loop closed')
 
     async def _get_msgs(self):
@@ -214,10 +217,16 @@ class Backend(aio.Resource):
 
 
 def _ext_get_new_archive_path(db_path):
-    counter = 1
+    last_index = 0
+
     for i in db_path.parent.glob(db_path.name + '.*'):
         with contextlib.suppress(ValueError):
             index = int(i.name.split('.')[-1])
-            if index > counter:
-                counter = index
-    return db_path.parent / f"{db_path.name}.{counter}"
+            if index > last_index:
+                last_index = index
+
+    for i in itertools.count(last_index + 1):
+        new_path = db_path.parent / f"{db_path.name}.{i}"
+        if new_path.exists():
+            continue
+        return new_path

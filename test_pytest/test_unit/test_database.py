@@ -88,3 +88,50 @@ async def test_add_msgs(db_path, timestamp, create_msg):
     assert last_id == entries[-1].id
 
     await db.async_close()
+
+
+async def test_delete(db_path, timestamp, create_msg):
+    db = await hat.syslog.server.database.create_database(db_path, False)
+
+    msgs = [create_msg() for i in range(10)]
+    entries = await db.add_msgs([(timestamp, msg) for msg in msgs])
+
+    await db.delete(entries[0].id)
+
+    first_id = await db.get_first_id()
+    last_id = await db.get_last_id()
+    assert first_id == entries[0].id
+    assert last_id == entries[-1].id
+
+    await db.delete(entries[-1].id)
+
+    first_id = await db.get_first_id()
+    last_id = await db.get_last_id()
+    assert first_id == entries[-1].id
+    assert last_id == entries[-1].id
+
+    msgs = [create_msg() for i in range(10)]
+    new_entries = await db.add_msgs([(timestamp, msg) for msg in msgs])
+    entries = [entries[-1], *new_entries]
+
+    first_id = await db.get_first_id()
+    last_id = await db.get_last_id()
+    assert first_id == entries[0].id
+    assert last_id == entries[-1].id
+
+    await db.delete(entries[-1].id + 1)
+
+    first_id = await db.get_first_id()
+    last_id = await db.get_last_id()
+    assert first_id is None
+    assert last_id is None
+
+    msgs = [create_msg() for i in range(10)]
+    entries = await db.add_msgs([(timestamp, msg) for msg in msgs])
+
+    first_id = await db.get_first_id()
+    last_id = await db.get_last_id()
+    assert first_id == entries[0].id
+    assert last_id == entries[-1].id
+
+    await db.async_close()

@@ -110,15 +110,18 @@ async def test_simple_log(ui_port, server, logger):
 
 async def test_archive(conf, db_path, server, logger):
     assert db_path.exists()
-    assert len(list(db_path.parent.glob(f'{db_path.name}.*'))) == 0
+    assert len([i for i in db_path.parent.glob(f'{db_path.name}.*')
+                if not i.name.endswith('.db-journal')]) == 0
 
     for i in range(conf['db_high_size']):
         logger.debug(f'msg{i}')
         await asyncio.sleep(0.01)
 
     await asyncio.sleep(1)
-    assert len(list(db_path.parent.glob(f'{db_path.name}.*'))) == 0
+    assert len([i for i in db_path.parent.glob(f'{db_path.name}.*')
+                if not i.name.endswith('.db-journal')]) == 0
 
     logger.debug('last message')
     await asyncio.sleep(1)
-    assert len(list(db_path.parent.glob(f'{db_path.name}.*'))) == 1
+    assert len([i for i in db_path.parent.glob(f'{db_path.name}.*')
+                if not i.name.endswith('.db-journal')]) == 1
