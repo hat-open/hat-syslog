@@ -1,5 +1,6 @@
 -r requirements.pip.runtime.txt
 
+build ~= 0.7.0
 cryptography >= 3.4.7
 doit >= 0.33.1
 flake8 >= 3.9.2
