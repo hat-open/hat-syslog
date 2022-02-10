@@ -8,9 +8,6 @@ from hat.syslog.server import common
 import hat.syslog.server.database
 
 
-pytestmark = pytest.mark.asyncio
-
-
 @pytest.fixture
 def db_path(tmp_path):
     return tmp_path / 'syslog.db'

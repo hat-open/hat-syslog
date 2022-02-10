@@ -11,9 +11,6 @@ from hat.syslog.server import common
 import hat.syslog.server.backend
 
 
-pytestmark = pytest.mark.asyncio
-
-
 @pytest.fixture
 def short_register_delay(monkeypatch):
     monkeypatch.setattr(hat.syslog.server.backend, "register_delay", 0.0)

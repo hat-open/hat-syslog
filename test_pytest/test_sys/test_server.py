@@ -10,9 +10,6 @@ import hat.syslog.handler
 from test_sys.process import Process
 
 
-pytestmark = pytest.mark.asyncio
-
-
 async def create_ui(port):
     ui = await juggler.connect(f'ws://127.0.0.1:{port}/ws')
     ui.set_local_data({'max_results': None,

@@ -21,9 +21,6 @@ import hat.syslog.server.syslog
 import pem
 
 
-pytestmark = pytest.mark.asyncio
-
-
 @pytest.fixture
 def syslog_port():
     return util.get_unused_tcp_port()
