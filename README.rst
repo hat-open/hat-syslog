@@ -7,8 +7,7 @@ management of intelligent electronic devices such as IoT devices, PLCs,
 industrial automation or home automation systems.
 
 Development of Hat Open and associated repositories is sponsored by
-Končar - Power Plant and Electric Traction Engineering Inc.
-(Končar KET - `<https://www.koncar-ket.hr>`_).
+`Končar Digital <https://www.koncar.hr>`_.
 
 For more information see:
 
@@ -33,7 +32,7 @@ Install
 License
 -------
 
-Copyright 2020-2021 Hat Open AUTHORS
+Copyright 2020-2022 Hat Open AUTHORS
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
