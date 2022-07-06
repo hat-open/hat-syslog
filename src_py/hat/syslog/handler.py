@@ -111,8 +111,8 @@ def _logging_handler_thread(state):
     while not state.closed.is_set():
         try:
             if state.comm_type == CommType.UDP:
-                s = socket.create_connection((state.host, state.port),
-                                             socket.SOCK_DGRAM)
+                s = socket.socket(type=socket.SOCK_DGRAM)
+                s.connect((state.host, state.port))
             elif state.comm_type == CommType.TCP:
                 s = socket.create_connection((state.host, state.port))
                 s.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
