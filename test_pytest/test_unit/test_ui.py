@@ -7,6 +7,7 @@ from hat import aio
 from hat import juggler
 from hat import util
 from hat.syslog.server import common
+from hat.syslog.server import encoder
 import hat.syslog.server.backend
 import hat.syslog.server.ui
 
@@ -129,7 +130,7 @@ class Client(aio.Resource):
             'filter': (common.Filter(
                 **self._conn.remote_data['filter'])
                        if self._conn.remote_data['filter'] else None),
-            'entries': [common.entry_from_json(e)
+            'entries': [encoder.entry_from_json(e)
                         for e in self._conn.remote_data['entries']],
             'first_id': self._conn.remote_data['first_id'],
             'last_id': self._conn.remote_data['last_id']}
@@ -139,7 +140,7 @@ class Client(aio.Resource):
 
     def set_filter(self, filter):
         self._conn.set_local_data(
-            common.filter_to_json(filter))
+            encoder.filter_to_json(filter))
 
 
 async def test_backend_to_frontend(backend, web_server, client, create_msg):

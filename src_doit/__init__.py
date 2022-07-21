@@ -4,21 +4,20 @@ import tempfile
 
 from hat import json
 from hat.doit import common
+from hat.doit.docs import (build_sphinx,
+                           build_pdoc)
 from hat.doit.py import (build_wheel,
                          run_pytest,
                          run_flake8)
-from hat.doit.docs import (SphinxOutputType,
-                           build_sphinx,
-                           build_pdoc)
 
 
 __all__ = ['task_clean_all',
+           'task_node_modules',
            'task_build',
            'task_check',
            'task_test',
            'task_docs',
            'task_ui',
-           'task_deps',
            'task_json_schema_repo']
 
 
@@ -35,7 +34,7 @@ build_py_dir = build_dir / 'py'
 build_docs_dir = build_dir / 'docs'
 
 ui_dir = src_py_dir / 'hat/syslog/server/ui'
-json_schema_repo_path = src_py_dir / 'hat/syslog/json_schema_repo.json'
+json_schema_repo_path = src_py_dir / 'hat/syslog/server/json_schema_repo.json'
 
 
 def task_clean_all():
@@ -43,6 +42,11 @@ def task_clean_all():
     return {'actions': [(common.rm_rf, [build_dir,
                                         ui_dir,
                                         json_schema_repo_path])]}
+
+
+def task_node_modules():
+    """Install node_modules"""
+    return {'actions': ['yarn install --silent']}
 
 
 def task_build():
@@ -56,8 +60,9 @@ def task_build():
             description='Hat Syslog',
             url='https://github.com/hat-open/hat-syslog',
             license=common.License.APACHE2,
-            packages=['hat'],
-            console_scripts=['hat-syslog = hat.syslog.server.main:main'])
+            console_scripts=[
+                'hat-syslog = hat.syslog.server.main:main',
+                'hat-syslog-generator = hat.syslog.generator:main'])
 
     return {'actions': [build],
             'task_dep': ['ui',
@@ -80,18 +85,19 @@ def task_test():
 
 def task_docs():
     """Docs"""
-    return {'actions': [(build_sphinx, [SphinxOutputType.HTML,
-                                        docs_dir,
-                                        build_docs_dir]),
-                        (build_pdoc, ['hat.syslog',
-                                      build_docs_dir / 'py_api'])],
+
+    def build():
+        build_sphinx(src_dir=docs_dir,
+                     dst_dir=build_docs_dir,
+                     project='hat-syslog',
+                     extensions=['sphinxcontrib.plantuml',
+                                 'sphinxcontrib.programoutput'])
+        build_pdoc(module='hat.syslog',
+                   dst_dir=build_docs_dir / 'py_api')
+
+    return {'actions': [build],
             'task_dep': ['ui',
                          'json_schema_repo']}
-
-
-def task_deps():
-    """Install dependencies"""
-    return {'actions': ['yarn install --silent']}
 
 
 def task_ui():
@@ -114,7 +120,7 @@ def task_ui():
 
     return {'actions': [build],
             'pos_arg': 'args',
-            'task_dep': ['deps']}
+            'task_dep': ['node_modules']}
 
 
 def task_json_schema_repo():

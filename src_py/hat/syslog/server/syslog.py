@@ -11,7 +11,7 @@ import typing
 import urllib.parse
 
 from hat import aio
-from hat.syslog.server import common
+from hat.syslog.server import encoder
 import hat.syslog.server.backend
 
 
@@ -64,7 +64,7 @@ async def _client_loop(backend, reader, writer):
             size = await reader.readuntil(b' ')
             buff = await reader.readexactly(int(size[:-1]))
             t = datetime.datetime.now(tz=datetime.timezone.utc).timestamp()
-            msg = common.msg_from_str(buff.decode())
+            msg = encoder.msg_from_str(buff.decode())
             mlog.debug("received new syslog message")
             await backend.register(t, msg)
     except asyncio.IncompleteReadError:

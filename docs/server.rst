@@ -1,68 +1,7 @@
-Syslog
-======
-
-Real time reporting of execution state is mandatory functionality for most of
-Hat's components implementing continuously running service. Primary way
-of logging is based on Syslog logging protocol as defined by:
-
-    * `RFC 5425 <https://tools.ietf.org/html/rfc5425>`_
-    * `RFC 5426 <https://tools.ietf.org/html/rfc5426>`_
-    * `RFC 6587 <https://tools.ietf.org/html/rfc6587>`_
-
-Each component which reports log messages should implement Syslog TCP client.
-In this way, all logging messages can be aggregated in a single Syslog
-concentrator which can provide archiving, searching and real time monitoring
-functionalities.
-
-Care must be taken for Syslog TCP client logging facility implementation not to
-interfere with other component's functionalities. Logging should be considered
-best effort and not critical activity of each component.
-
-
-.. _syslog-handler:
-
-SysLogHandler
--------------
-
-SysLogHandler provides implementation of Python's standard library
-`logging.Handler` interface. This implementation is part of `hat-syslog`
-python package.
-
-Each instance of `hat.syslog.handler.SysLogHandler` starts new
-background thread responsible for sending syslog messages over TCP, UDP or
-TCP+SSL socket. If connection with remote syslog server could not be
-established or current connection is closed, new connect is called after 5
-second timeout.
-
-All log messages provided to SysLogHandler by
-`hat.syslog.handler.SysLogHandler.emit` are queued in queue with
-maximum size limited by configuration parameter. During new log message
-registration, if queue is full, oldest messages are discarded and counter
-of discarded messages is incremented. Once new log messages can be sent
-to server, new log message containing information about number of discarded
-messages will be sent.
-
-
-.. _syslog-generator:
-
-Syslog Generator
-----------------
-
-Syslog generator is application used as simple testing tool responsible
-for generating syslog messages that can be sent to Syslog Server.
-
-Implemented as python `hat.syslog.generator` module which can be run with
-``hat-syslog-generator`` script with additional command line arguments:
-
-    .. program-output:: python -m hat.syslog.generator --help
-
-This application is part of `hat-syslog` python package.
-
-
 .. _syslog-server:
 
-Syslog server
--------------
+Syslog Server
+=============
 
 Syslog server is central concentration for syslog messages. Additionally, it
 provides web interface for real time monitoring and filtering of log messages.
@@ -123,7 +62,7 @@ received, server stores message in predefined database.
 
 
 Running
-'''''''
+-------
 
 Syslog Server is implemented as python `hat.syslog.server` package which
 can be run with ``hat-syslog`` script with additional command line
@@ -135,7 +74,7 @@ This application is part of `hat-syslog` python package.
 
 
 Configuration
-'''''''''''''
+-------------
 
 Syslog Server configuration written in form of single YAML or JSON file with
 structure defined by JSON Schema ``hat://syslog/server.yaml#``. Path to
@@ -160,7 +99,7 @@ Example of configuration::
 
 
 Data backend
-''''''''''''
+------------
 
 All incoming syslog messages are stored in single sqlite database. Maximum
 number of syslog messages stored in this database can be configured by
@@ -177,7 +116,7 @@ of original database for accessing archived syslog messages.
 
 
 Web UI
-''''''
+------
 
 Together with acquiring and storing syslog messages, Syslog Server provides
 web-based user interface for querying messages from database and observing
@@ -387,4 +326,4 @@ Implementation
 
 Documentation is available as part of generated API reference:
 
-    * `Python hat.syslog module <py_api/hat/syslog/index.html>`_
+    * `Python hat.syslog.server module <py_api/hat/syslog/server.html>`_

@@ -36,11 +36,6 @@ def syslog_address(syslog_port, comm_type):
     return f"{comm_type}://127.0.0.1:{syslog_port}"
 
 
-@pytest.fixture
-def short_reconnect_delay(monkeypatch):
-    monkeypatch.setattr(hat.syslog.handler, 'reconnect_delay', 0.001)
-
-
 @pytest.fixture(scope="session")
 def pem_path(tmp_path_factory):
     path = tmp_path_factory.mktemp('syslog') / 'pem'
@@ -73,7 +68,8 @@ def logger(syslog_port, comm_type):
     handler = hat.syslog.handler.SysLogHandler(host='127.0.0.1',
                                                port=syslog_port,
                                                comm_type=comm_type.upper(),
-                                               queue_size=10)
+                                               queue_size=10,
+                                               reconnect_delay=0.001)
     handler.setLevel('DEBUG')
     logger = logging.getLogger('test_syslog.syslog')
     logger.propagate = False
@@ -155,7 +151,7 @@ async def test_msg(message_queue, logger):
     assert not msg_data['hat@1']['exc_info']
 
 
-async def test_dropped(logger, create_syslog_server, short_reconnect_delay):
+async def test_dropped(logger, create_syslog_server):
     for i in range(20):
         logger.info('%s', i)
     backend = create_backend(logger.name)

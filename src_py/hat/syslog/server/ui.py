@@ -10,6 +10,7 @@ from hat import aio
 from hat import juggler
 
 from hat.syslog.server import common
+from hat.syslog.server import encoder
 import hat.syslog.server.backend
 
 
@@ -81,11 +82,11 @@ async def _change_loop(backend, conn, change_queue):
 
         while True:
             if filter_changed:
-                filter = common.filter_from_json(filter_json)
+                filter = encoder.filter_from_json(filter_json)
                 while not change_queue.empty():
                     change_queue.get_nowait()
                 entries = await backend.query(filter)
-                entries_json = [common.entry_to_json(entry)
+                entries_json = [encoder.entry_to_json(entry)
                                 for entry in entries]
             elif new_entries_json:
                 previous_id = entries_json[0]['id'] if entries_json else 0
@@ -100,7 +101,7 @@ async def _change_loop(backend, conn, change_queue):
                                  'last_id': last_id})
 
             new_entries = await change_queue.get()
-            new_entries_json = [common.entry_to_json(entry)
+            new_entries_json = [encoder.entry_to_json(entry)
                                 for entry in new_entries]
 
             first_id = backend.first_id
@@ -115,7 +116,7 @@ async def _change_loop(backend, conn, change_queue):
 
 def _sanitize_filter(filter_json):
     if not filter_json:
-        filter_json = common.filter_to_json(
+        filter_json = encoder.filter_to_json(
             common.Filter(max_results=max_results_limit))
     if (filter_json['max_results'] is None or
             filter_json['max_results'] > max_results_limit):

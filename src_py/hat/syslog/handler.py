@@ -7,7 +7,6 @@ Implementation of `logging.Handler` for syslog logging protocol.
 import collections
 import contextlib
 import datetime
-import enum
 import logging
 import os
 import socket
@@ -20,36 +19,38 @@ import typing
 
 from hat import json
 from hat.syslog import common
-
-
-reconnect_delay: float = 5
-"""Delay in seconds before retrying connection with remote syslog server"""
-
-
-class CommType(enum.Enum):
-    """Syslog communication type"""
-    UDP = 0
-    TCP = 1
-    SSL = 2
+from hat.syslog import encoder
 
 
 class SysLogHandler(logging.Handler):
-    """Syslog handler"""
+    """Syslog handler
+
+    Args:
+        host: remote host name
+        port: remote TCP/UDP port
+        comm_type: communication type
+        queue_size: message queue size
+        reconnect_delay: delay in seconds before retrying connection with
+            remote syslog server
+
+    """
 
     def __init__(self,
                  host: str,
                  port: int,
-                 comm_type: typing.Union[CommType, str],
-                 queue_size: int = 1024):
+                 comm_type: typing.Union[common.CommType, str],
+                 queue_size: int = 1024,
+                 reconnect_delay: float = 5):
         super().__init__()
         self.__state = _ThreadState(
             host=host,
             port=port,
-            comm_type=(CommType[comm_type]
-                       if not isinstance(comm_type, CommType)
+            comm_type=(common.CommType[comm_type]
+                       if not isinstance(comm_type, common.CommType)
                        else comm_type),
             queue=collections.deque(),
             queue_size=queue_size,
+            reconnect_delay=reconnect_delay,
             cv=threading.Condition(),
             closed=threading.Event(),
             dropped=[0])
@@ -92,12 +93,14 @@ class _ThreadState(typing.NamedTuple):
     """Hostname"""
     port: int
     """TCP port"""
-    comm_type: typing.Union[CommType, str]
+    comm_type: typing.Union[common.CommType, str]
     """Communication type"""
     queue: collections.deque
     """Message queue"""
     queue_size: int
     """Message queue size"""
+    reconnect_delay: float
+    """Reconnect delay"""
     cv: threading.Condition
     """Conditional variable"""
     closed: threading.Event
@@ -110,20 +113,20 @@ def _logging_handler_thread(state):
     msg = None
     while not state.closed.is_set():
         try:
-            if state.comm_type == CommType.UDP:
+            if state.comm_type == common.CommType.UDP:
                 s = socket.socket(type=socket.SOCK_DGRAM)
                 s.connect((state.host, state.port))
-            elif state.comm_type == CommType.TCP:
+            elif state.comm_type == common.CommType.TCP:
                 s = socket.create_connection((state.host, state.port))
                 s.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
-            elif state.comm_type == CommType.SSL:
+            elif state.comm_type == common.CommType.SSL:
                 s = ssl.wrap_socket(socket.create_connection(
                     (state.host, state.port)))
                 s.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
             else:
                 raise NotImplementedError()
         except Exception:
-            time.sleep(reconnect_delay)
+            time.sleep(state.reconnect_delay)
             continue
         try:
             while True:
@@ -140,7 +143,7 @@ def _logging_handler_thread(state):
                             state.dropped[0] = 0
                         else:
                             msg = state.queue.popleft()
-                msg_bytes = common.msg_to_str(msg).encode()
+                msg_bytes = encoder.msg_to_str(msg).encode()
                 s.send(f'{len(msg_bytes)} '.encode() + msg_bytes)
                 msg = None
         except Exception:

@@ -4,6 +4,7 @@ import pytest
 
 from hat import json
 from hat.syslog.server import common
+from hat.syslog.server import encoder
 
 
 valid_msgs = [
@@ -106,37 +107,37 @@ entries = [
 
 @pytest.mark.parametrize("msg", valid_msgs)
 def test_valid_msg_str_serialization(msg):
-    msg_str = common.msg_to_str(msg)
-    assert msg == common.msg_from_str(msg_str)
+    msg_str = encoder.msg_to_str(msg)
+    assert msg == encoder.msg_from_str(msg_str)
 
 
 @pytest.mark.parametrize("msg", valid_msgs)
 def test_valid_msg_json_serialization(msg):
-    msg_json = common.msg_to_json(msg)
-    assert msg == common.msg_from_json(msg_json)
+    msg_json = encoder.msg_to_json(msg)
+    assert msg == encoder.msg_from_json(msg_json)
 
 
 @pytest.mark.parametrize("msg", invalid_msgs)
 def test_invalid_msg_str_serialization(msg):
     with pytest.raises(Exception):
-        msg_str = common.msg_to_str(msg)
-        assert msg == common.msg_from_str(msg_str)
+        msg_str = encoder.msg_to_str(msg)
+        assert msg == encoder.msg_from_str(msg_str)
 
 
 @pytest.mark.parametrize("msg", invalid_msgs)
 def test_invalid_msg_json_serialization(msg):
     with pytest.raises(Exception):
-        msg_json = common.msg_to_json(msg)
-        assert msg == common.msg_from_json(msg_json)
+        msg_json = encoder.msg_to_json(msg)
+        assert msg == encoder.msg_from_json(msg_json)
 
 
 @pytest.mark.parametrize("filter", filters)
 def test_filter_json_serialization(filter):
-    filter_json = common.filter_to_json(filter)
-    assert filter == common.filter_from_json(filter_json)
+    filter_json = encoder.filter_to_json(filter)
+    assert filter == encoder.filter_from_json(filter_json)
 
 
 @pytest.mark.parametrize("entry", entries)
 def test_entry_json_serialization(entry):
-    entry_json = common.entry_to_json(entry)
-    assert entry == common.entry_from_json(entry_json)
+    entry_json = encoder.entry_to_json(entry)
+    assert entry == encoder.entry_from_json(entry_json)

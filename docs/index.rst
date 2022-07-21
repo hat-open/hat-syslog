@@ -7,4 +7,6 @@ Content
 .. toctree::
     :maxdepth: 1
 
-    syslog
+    server
+    handler
+    generator
