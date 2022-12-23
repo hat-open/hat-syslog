@@ -11,6 +11,7 @@ import typing
 import urllib.parse
 
 from hat import aio
+
 from hat.syslog.server import encoder
 import hat.syslog.server.backend
 

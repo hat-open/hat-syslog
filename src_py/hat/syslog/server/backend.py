@@ -9,6 +9,7 @@ import typing
 
 from hat import aio
 from hat import util
+
 from hat.syslog.server import common
 from hat.syslog.server import database
 

@@ -1,6 +1,7 @@
 """Syslog Server main module"""
 
 from pathlib import Path
+import argparse
 import asyncio
 import contextlib
 import logging.config
@@ -8,10 +9,10 @@ import sys
 import typing
 
 import appdirs
-import click
 
 from hat import aio
 from hat import json
+
 from hat.syslog.server import common
 from hat.syslog.server.backend import create_backend
 from hat.syslog.server.syslog import create_syslog_server
@@ -46,130 +47,114 @@ default_db_high_size: int = int(1e7)
 """Default DB high size count"""
 
 
-@click.command()
-@click.option('--conf', metavar='PATH', type=Path,
-              help="configuration defined by hat-syslog://syslog.yaml# "
-                   "(default $XDG_CONFIG_HOME/hat/syslog.{yaml|yml|json})")
-@click.option('--log', metavar='LEVEL',
-              type=click.Choice(['DEBUG', 'INFO', 'WARNING', 'ERROR']),
-              help="console log level")
-@click.option('--syslog-addr', metavar='ADDR',
-              help=f"syslog listening address (default {default_syslog_addr})")
-@click.option('--syslog-pem', metavar='PATH', type=Path,
-              help="pem file path - mandatory for ssl communication")
-@click.option('--ui-addr', metavar='ADDR',
-              help=f"UI listening address (default {default_ui_addr})")
-@click.option('--ui-pem', metavar='PATH', type=Path,
-              help="pem file path - mandatory for https communication")
-@click.option('--db-path', metavar='PATH', type=Path,
-              help="sqlite database file path "
-                   "(default $XDG_DATA_HOME/hat/syslog.db)")
-@click.option('--db-low-size', metavar='N', type=int,
-              help=f"number of messages kept in database after database "
-                   f"cleanup (default {default_db_low_size})")
-@click.option('--db-high-size', metavar='N', type=int,
-              help=f"number of messages that will trigger database cleanup "
-                   f"(default {default_db_high_size})")
-@click.option('--db-enable-archive', default=False, is_flag=True,
-              help="should messages, deleted during database cleanup, be kept "
-                   "in archive files")
-@click.option('--db-disable-journal', default=False, is_flag=True,
-              help="disable sqlite jurnaling")
-def main(conf: typing.Optional[Path],
-         log: typing.Optional[str],
-         syslog_addr: typing.Optional[str],
-         syslog_pem: typing.Optional[Path],
-         ui_addr: typing.Optional[str],
-         ui_pem: typing.Optional[Path],
-         db_path: typing.Optional[Path],
-         db_low_size: typing.Optional[int],
-         db_high_size: typing.Optional[int],
-         db_enable_archive: bool,
-         db_disable_journal: bool):
+def create_argument_parser() -> argparse.ArgumentParser:
+    """Create argument parser"""
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--conf', metavar='PATH', type=Path,
+        help="configuration defined by hat-syslog://server.yaml# "
+             "(default $XDG_CONFIG_HOME/hat/syslog.{yaml|yml|json})")
+    parser.add_argument(
+        '--log', metavar='LEVEL', type=str,
+        choices=['DEBUG', 'INFO', 'WARNING', 'ERROR'],
+        help="console log level")
+    parser.add_argument(
+        '--syslog-addr', metavar='ADDR', type=str,
+        help=f"syslog listening address (default {default_syslog_addr})")
+    parser.add_argument(
+        '--syslog-pem', metavar='PATH', type=Path,
+        help="pem file path - mandatory for ssl communication")
+    parser.add_argument(
+        '--ui-addr', metavar='ADDR', type=str,
+        help=f"UI listening address (default {default_ui_addr})")
+    parser.add_argument(
+        '--db-path', metavar='PATH', type=Path,
+        help="sqlite database file path "
+             "(default $XDG_DATA_HOME/hat/syslog.db)")
+    parser.add_argument(
+        '--db-low-size', metavar='N', type=int,
+        help=f"number of messages kept in database after database "
+             f"cleanup (default {default_db_low_size})")
+    parser.add_argument(
+        '--db-high-size', metavar='N', type=int,
+        help=f"number of messages that will trigger database cleanup "
+             f"(default {default_db_high_size})")
+    parser.add_argument(
+        '--db-enable-archive', action='store_true',
+        help="should messages, deleted during database cleanup, be kept "
+             "in archive files")
+    parser.add_argument(
+        '--db-disable-journal', action='store_true',
+        help="disable sqlite jurnaling")
+    return parser
+
+
+def main():
     """Syslog Server"""
-    if not conf:
+    parser = create_argument_parser()
+    args = parser.parse_args()
+
+    conf_path = args.conf
+    if not conf_path:
         for suffix in ('.yaml', '.yml', '.json'):
-            conf = (user_conf_dir / 'syslog').with_suffix(suffix)
-            if conf.exists():
+            conf_path = (user_conf_dir / 'syslog').with_suffix(suffix)
+            if conf_path.exists():
                 break
-        else:
-            conf = None
 
-    if conf == Path('-'):
+    if conf_path == Path('-'):
         conf = json.decode_stream(sys.stdin)
-    elif conf:
-        conf = json.decode_file(conf)
-
-    sync_main(conf=conf,
-              log=log,
-              syslog_addr=syslog_addr,
-              syslog_pem=syslog_pem,
-              ui_addr=ui_addr,
-              ui_pem=ui_pem,
-              db_path=db_path,
-              db_low_size=db_low_size,
-              db_high_size=db_high_size,
-              db_enable_archive=db_enable_archive,
-              db_disable_journal=db_disable_journal)
-
-
-def sync_main(conf: typing.Optional[json.Data],
-              log: typing.Optional[str],
-              syslog_addr: typing.Optional[str],
-              syslog_pem: typing.Optional[Path],
-              ui_addr: typing.Optional[str],
-              ui_pem: typing.Optional[Path],
-              db_path: typing.Optional[Path],
-              db_low_size: typing.Optional[int],
-              db_high_size: typing.Optional[int],
-              db_enable_archive: bool,
-              db_disable_journal: bool):
-    """Syslog Server sync main"""
-    aio.init_asyncio()
+    else:
+        conf = json.decode_file(conf_path)
 
     if conf:
-        common.json_schema_repo.validate('hat-syslog://syslog.yaml#', conf)
+        common.json_schema_repo.validate('hat-syslog://server.yaml#', conf)
 
-    if log:
-        log_conf = _get_console_log_conf(log)
+    if args.log:
+        log_conf = _get_console_log_conf(args.log)
     elif conf:
         log_conf = conf['log']
     else:
         log_conf = {'version': 1}
 
-    if not syslog_addr:
-        syslog_addr = conf['syslog_addr'] if conf else default_syslog_addr
-
-    if not syslog_pem and conf and 'syslog_pem' in conf:
-        syslog_pem = Path(conf['syslog_pem'])
-
-    if not ui_addr:
-        ui_addr = conf['ui_addr'] if conf else default_ui_addr
-
-    if not ui_pem and conf and 'ui_pem' in conf:
-        ui_pem = Path(conf['ui_pem'])
-
-    if not db_path:
-        db_path = Path(conf['db_path']) if conf else default_db_path
-
-    if db_low_size is None:
-        db_low_size = conf['db_low_size'] if conf else default_db_low_size
-
-    if db_high_size is None:
-        db_high_size = conf['db_high_size'] if conf else default_db_high_size
-
-    if not db_enable_archive and conf:
-        db_enable_archive = conf['db_enable_archive']
-
-    if not db_disable_journal and conf:
-        db_disable_journal = conf['db_disable_journal']
-
     logging.config.dictConfig(log_conf)
+
+    syslog_addr = (args.syslog_addr if args.syslog_addr else
+                   conf['syslog_addr'] if conf else
+                   default_syslog_addr)
+
+    syslog_pem = (args.syslog_pem if args.syslog_pem else
+                  Path(conf['syslog_pem']) if conf and 'syslog_pem' in conf else  # NOQA
+                  None)
+
+    ui_addr = (args.ui_addr if args.ui_addr else
+               conf['ui_addr'] if conf else
+               default_ui_addr)
+
+    db_path = (args.db_path if args.db_path else
+               Path(conf['db_path']) if conf else
+               default_db_path)
+
+    db_low_size = (args.db_low_size if args.db_low_size is not None else
+                   conf['db_low_size'] if conf else
+                   default_db_low_size)
+
+    db_high_size = (args.db_high_size if args.db_high_size is not None else
+                    conf['db_high_size'] if conf else
+                    default_db_high_size)
+
+    db_enable_archive = (True if args.db_enable_archive else
+                         conf['db_enable_archive'] if conf else
+                         False)
+
+    db_disable_journal = (True if args.db_disable_journal else
+                          conf['db_disable_journal'] if conf else
+                          False)
+
+    aio.init_asyncio()
     with contextlib.suppress(asyncio.CancelledError):
         aio.run_asyncio(async_main(syslog_addr=syslog_addr,
                                    syslog_pem=syslog_pem,
                                    ui_addr=ui_addr,
-                                   ui_pem=ui_pem,
                                    db_path=db_path,
                                    db_low_size=db_low_size,
                                    db_high_size=db_high_size,
@@ -180,7 +165,6 @@ def sync_main(conf: typing.Optional[json.Data],
 async def async_main(syslog_addr: str,
                      syslog_pem: typing.Optional[Path],
                      ui_addr: str,
-                     ui_pem: typing.Optional[Path],
                      db_path: Path,
                      db_low_size: int,
                      db_high_size: int,
@@ -188,7 +172,10 @@ async def async_main(syslog_addr: str,
                      db_disable_journal: bool):
     """Syslog Server async main"""
     async_group = aio.Group()
-    async_group.spawn(aio.call_on_cancel, asyncio.sleep, 0.1)
+
+    async def async_close():
+        await async_group.async_close()
+        await asyncio.sleep(0.1)
 
     try:
         mlog.debug("creating backend...")
@@ -197,7 +184,7 @@ async def async_main(syslog_addr: str,
                                          db_enable_archive, db_disable_journal)
 
         mlog.debug("creating web server...")
-        await _create_resource(async_group, create_web_server, ui_addr, ui_pem,
+        await _create_resource(async_group, create_web_server, ui_addr,
                                backend)
 
         mlog.debug("creating syslog server...")
@@ -209,7 +196,7 @@ async def async_main(syslog_addr: str,
 
     finally:
         mlog.debug("closing...")
-        await aio.uncancellable(async_group.async_close())
+        await aio.uncancellable(async_close())
 
 
 def _get_console_log_conf(level):

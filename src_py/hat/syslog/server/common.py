@@ -4,6 +4,7 @@ import importlib.resources
 import typing
 
 from hat import json
+
 from hat.syslog.common import (Facility,
                                Msg,
                                Severity)

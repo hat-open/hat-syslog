@@ -3,6 +3,7 @@ import datetime
 import pytest
 
 from hat import json
+
 from hat.syslog.server import common
 from hat.syslog.server import encoder
 

@@ -1,10 +1,13 @@
 """Data structures encoder/decoder"""
 
 from hat import json
-from hat.syslog.server import common
+
 from hat.syslog.encoder import (msg_from_json,
                                 msg_to_json)
 from hat.syslog.encoder import *  # NOQA
+
+# common imported after base encoder to replace base encoder's common'
+from hat.syslog.server import common
 
 
 def filter_to_json(filter: common.Filter) -> json.Data:

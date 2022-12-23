@@ -6,6 +6,7 @@ import sqlite3
 import typing
 
 from hat import aio
+
 from hat.syslog.server import common
 
 

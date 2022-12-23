@@ -4,12 +4,6 @@ import enum
 import typing
 
 
-__all__ = ['CommType',
-           'Facility',
-           'Severity',
-           'Msg']
-
-
 class CommType(enum.Enum):
     """Syslog communication type"""
     UDP = 0

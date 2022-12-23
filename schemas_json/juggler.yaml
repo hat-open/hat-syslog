@@ -1,0 +1,190 @@
+---
+"$schema": "http://json-schema.org/schema#"
+id: "hat-syslog://juggler.yaml#"
+definitions:
+    state:
+        type: object
+        required:
+            - filter
+            - entries
+            - first_id
+            - last_id
+        properties:
+            filter:
+                "$ref": "hat-syslog://juggler.yaml#/definitions/filter"
+            entries:
+                type: array
+                items:
+                    "$ref": "hat-syslog://juggler.yaml#/definitions/entry"
+            first_id:
+                type:
+                    - 'null'
+                    - integer
+            last_id:
+                type:
+                    - 'null'
+                    - integer
+    request:
+        filter:
+            "$ref": "hat-syslog://juggler.yaml#/definitions/filter"
+    filter:
+        type: object
+        required:
+            - max_results
+            - last_id
+            - entry_timestamp_from
+            - entry_timestamp_to
+            - facility
+            - severity
+            - hostname
+            - app_name
+            - procid
+            - msgid
+            - msg
+        properties:
+            max_results:
+                type:
+                    - 'null'
+                    - integer
+            last_id:
+                type:
+                    - 'null'
+                    - integer
+            entry_timestamp_from:
+                type:
+                    - 'null'
+                    - number
+            entry_timestamp_to:
+                type:
+                    - 'null'
+                    - number
+            facility:
+                oneOf:
+                    - type: 'null'
+                    - "$ref": "hat-syslog://juggler.yaml#/definitions/facility"
+            severity:
+                oneOf:
+                    - type: 'null'
+                    - "$ref": "hat-syslog://juggler.yaml#/definitions/severity"
+            hostname:
+                type:
+                    - 'null'
+                    - string
+            app_name:
+                type:
+                    - 'null'
+                    - string
+            procid:
+                type:
+                    - 'null'
+                    - string
+            msgid:
+                type:
+                    - 'null'
+                    - string
+            msg:
+                type:
+                    - 'null'
+                    - string
+    entry:
+        type: object
+        required:
+            - id
+            - timestamp
+            - msg
+        properties:
+            id:
+                type: integer
+            timestamp:
+                type: number
+            msg:
+                "$ref": "hat-syslog://juggler.yaml#/definitions/msg"
+    msg:
+        type: object
+        required:
+            - facility
+            - severity
+            - version
+            - timestamp
+            - hostname
+            - app_name
+            - procid
+            - msgid
+            - data
+            - msg
+        properties:
+            facility:
+                oneOf:
+                    - type: 'null'
+                    - "$ref": "hat-syslog://juggler.yaml#/definitions/facility"
+            severity:
+                oneOf:
+                    - type: 'null'
+                    - "$ref": "hat-syslog://juggler.yaml#/definitions/severity"
+            version:
+                type: integer
+            timestamp:
+                type:
+                    - 'null'
+                    - number
+            hostname:
+                type:
+                    - 'null'
+                    - string
+            app_name:
+                type:
+                    - 'null'
+                    - string
+            procid:
+                type:
+                    - 'null'
+                    - string
+            msgid:
+                type:
+                    - 'null'
+                    - string
+            data:
+                type:
+                    - 'null'
+                    - string
+            msg:
+                type:
+                    - 'null'
+                    - string
+    facility:
+        enum:
+            - KERNEL
+            - USER
+            - MAIL
+            - SYSTEM
+            - AUTHORIZATION1
+            - INTERNAL
+            - PRINTER
+            - NETWORK
+            - UUCP
+            - CLOCK1
+            - AUTHORIZATION2
+            - FTP
+            - NTP
+            - AUDIT
+            - ALERT
+            - CLOCK2
+            - LOCAL0
+            - LOCAL1
+            - LOCAL2
+            - LOCAL3
+            - LOCAL4
+            - LOCAL5
+            - LOCAL6
+            - LOCAL7
+    severity:
+        enum:
+            - EMERGENCY
+            - ALERT
+            - CRITICAL
+            - ERROR
+            - WARNING
+            - NOTICE
+            - INFORMATIONAL
+            - DEBUG
+...

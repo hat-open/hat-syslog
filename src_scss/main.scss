@@ -1,15 +1,14 @@
 @import 'color';
 @import 'shadow';
 @import 'datetimepicker';
-@import 'fonts/roboto';
 @import 'fonts/robotomono';
+@import 'fonts/inter';
 @import 'fonts/fontawesome';
 
 
 html, body {
-    font-size: 9pt;
-    margin: 0px;
-    font-family: 'Roboto';
+    margin: 0;
+    font-family: 'Inter';
     height: 100%;
     overflow: hidden;
     user-select: none;

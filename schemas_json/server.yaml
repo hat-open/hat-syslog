@@ -1,6 +1,6 @@
 ---
 "$schema": "http://json-schema.org/schema#"
-id: "hat-syslog://syslog.yaml#"
+id: "hat-syslog://server.yaml#"
 title: Syslog server
 description: Syslog server configuration
 type: object
@@ -16,8 +16,7 @@ required:
     - db_disable_journal
 properties:
     type:
-        enum:
-            - syslog
+        const: syslog
         description: configuration type identification
     version:
         type: string
@@ -36,12 +35,7 @@ properties:
     ui_addr:
         type: string
         description: |
-            web server listening address in form `<protocol>://<host>:<port>`
-            where `<protocol>` can be `http` or `https`
-    ui_pem:
-        type: string
-        description: |
-            path to PEM file is mandatory if ui address is https
+            web server listening address in form `http://<host>:<port>`
     db_path:
         type: string
         description: |

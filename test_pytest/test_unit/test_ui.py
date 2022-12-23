@@ -1,4 +1,5 @@
 import asyncio
+import itertools
 import datetime
 
 import pytest
@@ -6,30 +7,20 @@ import pytest
 from hat import aio
 from hat import juggler
 from hat import util
+
 from hat.syslog.server import common
 from hat.syslog.server import encoder
 import hat.syslog.server.backend
 import hat.syslog.server.ui
 
 
-@pytest.fixture
-def short_register_delay(monkeypatch):
-    monkeypatch.setattr(hat.syslog.server.backend, "register_delay", 0.0)
+default_filter_json = encoder.filter_to_json(
+    hat.syslog.server.ui.default_filter)
 
 
 @pytest.fixture
-def small_max_results(monkeypatch):
-    monkeypatch.setattr(hat.syslog.server.ui, "max_results_limit", 20)
-
-
-@pytest.fixture
-def ui_port():
+def port():
     return util.get_unused_tcp_port()
-
-
-@pytest.fixture
-def ui_address(ui_port):
-    return f"http://127.0.0.1:{ui_port}"
 
 
 @pytest.fixture
@@ -38,53 +29,58 @@ def db_path(tmp_path):
 
 
 @pytest.fixture
-async def backend(db_path):
+async def backend(monkeypatch, db_path):
+    monkeypatch.setattr(hat.syslog.server.backend, "register_delay", 0)
+    monkeypatch.setattr(hat.syslog.server.backend, "register_queue_treshold",
+                        1)
+    monkeypatch.setattr(hat.syslog.server.backend, "register_queue_size", 1)
+
     backend = await hat.syslog.server.backend.create_backend(
-            path=db_path,
-            low_size=1000,
-            high_size=10000,
-            enable_archive=False,
-            disable_journal=False)
+        path=db_path,
+        low_size=1000,
+        high_size=0,
+        enable_archive=False,
+        disable_journal=False)
+
     try:
         yield backend
+
     finally:
         await backend.async_close()
 
 
 @pytest.fixture
-async def web_server(ui_address, backend):
-    web_server = await hat.syslog.server.ui.create_web_server(
-        ui_address, None, backend)
-    try:
-        yield web_server
-    finally:
-        await web_server.async_close()
+async def create_server(monkeypatch, port, backend):
+    monkeypatch.setattr(hat.syslog.server.ui, "autoflush_delay", 0)
+
+    async def create_server():
+        return await hat.syslog.server.ui.create_web_server(
+            f'http://127.0.0.1:{port}', backend)
+
+    return create_server
 
 
 @pytest.fixture
-async def client(ui_port):
-    client = await create_client(ui_port)
-    try:
-        yield client
-    finally:
-        await client.async_close()
+async def create_client(port):
+
+    async def create_client():
+        return await juggler.connect(f'ws://127.0.0.1:{port}/ws')
+
+    return create_client
 
 
 @pytest.fixture
 def create_msg():
-    counter = 0
+    next_counters = itertools.count(1)
     severities = ['DEBUG', 'INFORMATIONAL', 'WARNING', 'ERROR', 'CRITICAL']
 
     def create_msg():
-        nonlocal counter
-        counter += 1
-        ts = ts_now()
+        counter = next(next_counters)
         return common.Msg(
             facility=common.Facility.USER,
-            severity=common.Severity[
-                severities[counter % len(severities)]],
+            severity=common.Severity[severities[counter % len(severities)]],
             version=1,
-            timestamp=ts,
+            timestamp=now(),
             hostname=None,
             app_name=None,
             procid=None,
@@ -95,174 +91,160 @@ def create_msg():
     return create_msg
 
 
-def ts_now():
+@pytest.fixture
+async def register_entry(backend):
+
+    async def register_entry(msg):
+        await backend.register(now(), msg)
+
+    return register_entry
+
+
+def now():
     return datetime.datetime.now(tz=datetime.timezone.utc).timestamp()
 
 
-def assert_client_vs_server_state(client):
-    assert client.server_state['filter'] == client.state._replace(
-        max_results=hat.syslog.server.ui.max_results_limit)
+async def test_create_server(create_server):
+    server = await create_server()
+    assert server.is_open
+
+    await server.async_close()
+    assert server.is_closed
 
 
-async def create_client(port):
-    client = Client()
-    client._conn = await juggler.connect(f'ws://127.0.0.1:{port}/ws',
-                                         autoflush_delay=0)
-    client._conn.set_local_data(common.Filter()._asdict())
-    return client
+@pytest.mark.parametrize("client_count", [1, 2, 5])
+async def test_create_client(create_server, create_client, client_count):
+    server = await create_server()
 
+    clients = []
+    for _ in range(client_count):
+        client = await create_client()
+        clients.append(client)
 
-class Client(aio.Resource):
-
-    @property
-    def async_group(self):
-        return self._conn.async_group
-
-    @property
-    def state(self):
-        return common.Filter(**self._conn.local_data)
-
-    @property
-    def server_state(self):
-        if not self._conn.remote_data:
-            return
-        return {
-            'filter': (common.Filter(
-                **self._conn.remote_data['filter'])
-                       if self._conn.remote_data['filter'] else None),
-            'entries': [encoder.entry_from_json(e)
-                        for e in self._conn.remote_data['entries']],
-            'first_id': self._conn.remote_data['first_id'],
-            'last_id': self._conn.remote_data['last_id']}
-
-    def register_change_cb(self, cb):
-        return self._conn.register_change_cb(cb)
-
-    def set_filter(self, filter):
-        self._conn.set_local_data(
-            encoder.filter_to_json(filter))
-
-
-async def test_backend_to_frontend(backend, web_server, client, create_msg):
-    client_change_queue = aio.Queue()
-    client.register_change_cb(lambda: client_change_queue.put_nowait(None))
-
-    entry_queue = aio.Queue()
-    backend.register_change_cb(entry_queue.put_nowait)
-
-    await client_change_queue.get()
-    assert_client_vs_server_state(client)
-
-    entries = []
-    for _ in range(10):
-        msg = create_msg()
-        await backend.register(ts_now(), msg)
-        reg_entries = await entry_queue.get()
-        entry = reg_entries[0]
-        entries.insert(0, entry)
-        await client_change_queue.get()
-        assert entry in client.server_state['entries']
-        assert util.first(client.server_state['entries'],
-                          lambda i: i.msg == msg)
-    assert entries == client.server_state['entries']
-    assert client.server_state['first_id'] == 1
-    assert client.server_state['last_id'] == len(entries)
-    assert_client_vs_server_state(client)
-
-
-@pytest.mark.skip("WIP")
-async def test_backend_to_frontend_timeout(backend, web_server, client,
-                                           create_msg):
-    client_change_queue = aio.Queue()
-    client.register_change_cb(lambda: client_change_queue.put_nowait(None))
-    await client_change_queue.get()
-
-    async with aio.Group() as group:
-        for _ in range(50):
-            group.spawn(backend.register, ts_now(), create_msg())
-    await asyncio.wait_for(client_change_queue.get(), 0.1)
-    assert len(client.server_state['entries']) == 50
-
-
-async def test_frontend_to_backend(backend, web_server, client, create_msg):
-    client_change_queue = aio.Queue()
-    client.register_change_cb(lambda: client_change_queue.put_nowait(None))
-    client.set_filter(common.Filter(msg='message no 1'))
-
-    await client_change_queue.get()
-    assert_client_vs_server_state(client)
-
-    for _ in range(10):
-        await backend.register(ts_now(), create_msg())
-        await client_change_queue.get()
-
-    assert len(client.server_state['entries']) == 2
-    assert all('message no 1' in e.msg.msg
-               for e in client.server_state['entries'])
-
-    client.set_filter(common.Filter())
-    await client_change_queue.get()
-    assert len(client.server_state['entries']) == 10
-    assert client_change_queue.empty()
-
-    client.set_filter(common.Filter(msg='bla bla'))
-    await client_change_queue.get()
-    assert len(client.server_state['entries']) == 0
-    assert client_change_queue.empty()
-
-    client.set_filter(common.Filter(
-        severity=common.Severity.ERROR))
-    await client_change_queue.get()
-    assert len(client.server_state['entries']) == 2
-    assert all(e.msg.severity == common.Severity.ERROR
-               for e in client.server_state['entries'])
-
-
-async def test_max_size(backend, web_server, client, create_msg,
-                        small_max_results):
-    client_change_queue = aio.Queue()
-    client.register_change_cb(lambda: client_change_queue.put_nowait(None))
-
-    await client_change_queue.get()
-    assert_client_vs_server_state(client)
-
-    for _ in range(40):
-        await backend.register(ts_now(), create_msg())
-        await client_change_queue.get()
-
-    assert len(client.server_state['entries']) == 20
-    entry_ids_exp = list(reversed(range(21, 41)))
-    assert [e.id for e in client.server_state['entries']] == entry_ids_exp
-
-    client.set_filter(common.Filter(max_results=35))
-    with pytest.raises(asyncio.TimeoutError):
-        await asyncio.wait_for(client_change_queue.get(), 0.1)
-    assert_client_vs_server_state(client)
-    assert len(client.server_state['entries']) == 20
-    assert [e.id for e in client.server_state['entries']] == entry_ids_exp
-
-
-@pytest.mark.skip("WIP")
-@pytest.mark.parametrize("client_cont", [1])
-async def test_connect_disconnect(backend, web_server, create_msg, ui_port,
-                                  client_cont):
-    message_count = 3
-    async with aio.Group() as group:
-        for _ in range(message_count):
-            group.spawn(backend.register, ts_now(), create_msg())
-
-    clients = set()
-    for _ in range(client_cont):
-        client = await create_client(ui_port)
-        client_change_queue = aio.Queue()
-        client.register_change_cb(lambda: client_change_queue.put_nowait(None))
-        assert not client.is_closed
-        await client_change_queue.get()
-        await asyncio.sleep(0.1)
-        assert len(client.server_state['entries']) == message_count
-        clients.add(client)
-
-    while clients:
-        client = clients.pop()
+    for client in clients:
+        assert client.is_open
         await client.async_close()
-        assert client.is_closed
+
+    await server.async_close()
+
+
+async def test_initial_state(create_server, create_client):
+    server = await create_server()
+    client = await create_client()
+
+    change_queue = aio.Queue()
+    client.state.register_change_cb(change_queue.put_nowait)
+
+    while not client.state.data:
+        await change_queue.get()
+
+    assert client.state.data == {'filter': default_filter_json,
+                                 'entries': [],
+                                 'first_id': None,
+                                 'last_id': None}
+
+    await client.async_close()
+    await server.async_close()
+
+
+async def test_register_entry(create_server, create_client, create_msg,
+                              register_entry):
+    server = await create_server()
+    client = await create_client()
+
+    change_queue = aio.Queue()
+    client.state.register_change_cb(change_queue.put_nowait)
+
+    while not client.state.data:
+        await change_queue.get()
+
+    assert client.state.data == {'filter': default_filter_json,
+                                 'entries': [],
+                                 'first_id': None,
+                                 'last_id': None}
+
+    for i in range(10):
+        msg = create_msg()
+        msg_json = encoder.msg_to_json(msg)
+        await register_entry(msg)
+
+        state = await change_queue.get()
+
+        assert state['filter'] == default_filter_json
+        assert len(state['entries']) == i + 1
+        assert state['entries'][0]['msg'] == msg_json
+        assert state['first_id'] == state['entries'][-1]['id']
+        assert state['last_id'] == state['entries'][0]['id']
+
+    await client.async_close()
+    await server.async_close()
+
+
+@pytest.mark.parametrize("entries_count", [1, 5, 100, 1000])
+async def test_preregistered_entries(create_server, create_client, create_msg,
+                                     register_entry, entries_count):
+    server = await create_server()
+
+    for i in range(entries_count):
+        msg = create_msg()
+        await register_entry(msg)
+
+    await asyncio.sleep(0.01)
+
+    client = await create_client()
+
+    change_queue = aio.Queue()
+    client.state.register_change_cb(change_queue.put_nowait)
+
+    while not client.state.data:
+        await change_queue.get()
+
+    state = client.state.data
+    count = min(entries_count, hat.syslog.server.ui.max_results_limit)
+
+    assert state['filter'] == default_filter_json
+    assert len(state['entries']) == count
+    assert state['first_id'] <= state['entries'][-1]['id']
+    assert state['last_id'] == state['entries'][0]['id']
+
+    await client.async_close()
+    await server.async_close()
+
+
+async def test_change_filter(create_server, create_client):
+    server = await create_server()
+    client = await create_client()
+
+    change_queue = aio.Queue()
+    client.state.register_change_cb(change_queue.put_nowait)
+
+    while not client.state.data:
+        await change_queue.get()
+
+    assert client.state.data == {'filter': default_filter_json,
+                                 'entries': [],
+                                 'first_id': None,
+                                 'last_id': None}
+
+    new_filter = common.Filter(
+        max_results=hat.syslog.server.ui.max_results_limit * 2,
+        hostname='hostname abc',
+        msg='msg abc')
+    new_filter_json = encoder.filter_to_json(new_filter)
+
+    await client.send('filter', new_filter_json)
+
+    state = await change_queue.get()
+
+    assert state == {
+        'filter': dict(new_filter_json,
+                       max_results=hat.syslog.server.ui.max_results_limit),
+        'entries': [],
+        'first_id': None,
+        'last_id': None}
+
+    await client.async_close()
+    await server.async_close()
+
+
+# TODO test filter

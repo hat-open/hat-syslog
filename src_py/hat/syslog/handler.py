@@ -18,6 +18,7 @@ import traceback
 import typing
 
 from hat import json
+
 from hat.syslog import common
 from hat.syslog import encoder
 
@@ -111,6 +112,10 @@ class _ThreadState(typing.NamedTuple):
 
 def _logging_handler_thread(state):
     msg = None
+    if state.comm_type == common.CommType.SSL:
+        ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.VerifyMode.CERT_NONE
     while not state.closed.is_set():
         try:
             if state.comm_type == common.CommType.UDP:
@@ -120,7 +125,7 @@ def _logging_handler_thread(state):
                 s = socket.create_connection((state.host, state.port))
                 s.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
             elif state.comm_type == common.CommType.SSL:
-                s = ssl.wrap_socket(socket.create_connection(
+                s = ctx.wrap_socket(socket.create_connection(
                     (state.host, state.port)))
                 s.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
             else:

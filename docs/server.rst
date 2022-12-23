@@ -76,16 +76,17 @@ This application is part of `hat-syslog` python package.
 Configuration
 -------------
 
-Syslog Server configuration written in form of single YAML or JSON file with
-structure defined by JSON Schema ``hat://syslog/server.yaml#``. Path to
-configuration file is provided as command line argument during process startup.
-Additionally, configuration parameters provided in configuration file can be
-overridden by command line arguments. If configuration file could not be found,
-default values of configuration parameters are used.
+Syslog Server configuration written in form of single YAML or JSON file
+with structure defined by JSON Schema ``hat-syslog://server.yaml#``.
+Path to configuration file is provided as command line argument during process
+startup. Additionally, configuration parameters provided in configuration file
+can be overridden by command line arguments. If configuration file could not be
+found, default values of configuration parameters are used.
 
 Example of configuration::
 
     ---
+    type: syslog
     log:
         version: 1
     syslog_addr: 'tcp://0.0.0.0:6514'
@@ -123,207 +124,41 @@ web-based user interface for querying messages from database and observing
 changes in real time. Communication between web server and browser is
 based on juggler communication.
 
-Once juggler connection is established, server and client should change
-initial `null` local state to theirs current valid value. Server's local state
-is defined by ``#/definitions/server`` and client's local state is defined by
-``#/definitions/client`` from JSON schema::
 
-    "$schema": "http://json-schema.org/schema#"
-    definitions:
-        client:
-            "$ref": "#/definitions/filter"
-        server:
-            type: object
-            required:
-                - filter
-                - entries
-                - first_id
-                - last_id
-            properties:
-                filter:
-                    "$ref": "#/definitions/filter"
-                entries:
-                    type: array
-                    items:
-                        "$ref": "#/definitions/entry"
-                first_id:
-                    type:
-                        - 'null'
-                        - integer
-                last_id:
-                    type:
-                        - 'null'
-                        - integer
-        filter:
-            type: object
-            required:
-                - max_results
-                - last_id
-                - entry_timestamp_from
-                - entry_timestamp_to
-                - facility
-                - severity
-                - hostname
-                - app_name
-                - procid
-                - msgid
-                - msg
-            properties:
-                max_results:
-                    type:
-                        - 'null'
-                        - integer
-                last_id:
-                    type:
-                        - 'null'
-                        - integer
-                entry_timestamp_from:
-                    type:
-                        - 'null'
-                        - number
-                entry_timestamp_to:
-                    type:
-                        - 'null'
-                        - number
-                facility:
-                    oneOf:
-                        - type: 'null'
-                        - "$ref": "#/definitions/facility"
-                severity:
-                    oneOf:
-                        - type: 'null'
-                        - "$ref": "#/definitions/severity"
-                hostname:
-                    type:
-                        - 'null'
-                        - string
-                app_name:
-                    type:
-                        - 'null'
-                        - string
-                procid:
-                    type:
-                        - 'null'
-                        - string
-                msgid:
-                    type:
-                        - 'null'
-                        - string
-                msg:
-                    type:
-                        - 'null'
-                        - string
-        entry:
-            type: object
-            required:
-                - id
-                - timestamp
-                - msg
-            properties:
-                id:
-                    type: integer
-                timestamp:
-                    type: number
-                msg:
-                    "$ref": "#/definitions/msg"
-        msg:
-            type: object
-            required:
-                - facility
-                - severity
-                - version
-                - timestamp
-                - hostname
-                - app_name
-                - procid
-                - msgid
-                - data
-                - msg
-            properties:
-                facility:
-                    oneOf:
-                        - type: 'null'
-                        - "$ref": "#/definitions/facility"
-                severity:
-                    oneOf:
-                        - type: 'null'
-                        - "$ref": "#/definitions/severity"
-                version:
-                    type: integer
-                timestamp:
-                    type:
-                        - 'null'
-                        - number
-                hostname:
-                    type:
-                        - 'null'
-                        - string
-                app_name:
-                    type:
-                        - 'null'
-                        - string
-                procid:
-                    type:
-                        - 'null'
-                        - string
-                msgid:
-                    type:
-                        - 'null'
-                        - string
-                data:
-                    type:
-                        - 'null'
-                        - string
-                msg:
-                    type:
-                        - 'null'
-                        - string
-        facility:
-            enum:
-                - KERNEL
-                - USER
-                - MAIL
-                - SYSTEM
-                - AUTHORIZATION1
-                - INTERNAL
-                - PRINTER
-                - NETWORK
-                - UUCP
-                - CLOCK1
-                - AUTHORIZATION2
-                - FTP
-                - NTP
-                - AUDIT
-                - ALERT
-                - CLOCK2
-                - LOCAL0
-                - LOCAL1
-                - LOCAL2
-                - LOCAL3
-                - LOCAL4
-                - LOCAL5
-                - LOCAL6
-                - LOCAL7
-        severity:
-            enum:
-                - EMERGENCY
-                - ALERT
-                - CRITICAL
-                - ERROR
-                - WARNING
-                - NOTICE
-                - INFORMATIONAL
-                - DEBUG
+Server state
+''''''''''''
 
-Juggler MESSAGE messages are not used in communication.
+Server state is used for providing continuously updated list of log entries
+to clients, based on applied filters.
 
-When server detected change of client's local data, it should update its
-local data to match filter from client's local data.
+State structure is defined by JSON schema
+``hat-syslog://juggler.yaml#/definitions/state``.
 
 
-Implementation
---------------
+Request/response
+''''''''''''''''
 
-Documentation is available as part of generated API reference:
+Juggler request/response communication is used for changing filter parameters.
 
-    * `Python hat.syslog.server module <py_api/hat/syslog/server.html>`_
+Request data structures are defined by JSON schema
+``hat-syslog://juggler.yaml#/definitions/request``.
+
+In case of successful request execution, response data is ``null``.
+
+
+
+JSON Schemas
+------------
+
+Configuration
+'''''''''''''
+
+.. literalinclude:: ../schemas_json/server.yaml
+    :language: yaml
+
+
+Juggler
+'''''''
+
+.. literalinclude:: ../schemas_json/juggler.yaml
+    :language: yaml
