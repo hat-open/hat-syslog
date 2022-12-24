@@ -6,6 +6,8 @@ from hat import json
 from hat.doit import common
 from hat.doit.docs import (build_sphinx,
                            build_pdoc)
+from hat.doit.js import (ESLintConf,
+                         run_eslint)
 from hat.doit.py import (build_wheel,
                          run_pytest,
                          run_flake8)
@@ -72,7 +74,9 @@ def task_build():
 def task_check():
     """Check with flake8"""
     return {'actions': [(run_flake8, [src_py_dir]),
-                        (run_flake8, [pytest_dir])]}
+                        (run_flake8, [pytest_dir]),
+                        (run_eslint, [src_js_dir, ESLintConf.TS])],
+            'task_dep': ['node_modules']}
 
 
 def task_test():
@@ -111,7 +115,7 @@ def task_ui():
             tmpdir = Path(tmpdir)
             config_path = tmpdir / 'webpack.config.js'
             config_path.write_text(_webpack_conf.format(
-                src_path=(src_js_dir / 'main.js').resolve(),
+                src_path=(src_js_dir / 'main.ts').resolve(),
                 dst_dir=ui_dir.resolve()))
             subprocess.run([str(node_modules_dir / '.bin/webpack'),
                             '--config', str(config_path),
@@ -160,8 +164,15 @@ module.exports = {{
                         options: {{sourceMap: true}}
                     }}
                 ]
+            }},
+            {{
+                test: /\.ts$/,
+                use: 'ts-loader'
             }}
         ]
+    }},
+    resolve: {{
+        extensions: ['.ts', '.js']
     }},
     watchOptions: {{
         ignored: /node_modules/
