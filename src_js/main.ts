@@ -8,7 +8,6 @@ import { headerVt } from './header';
 import { menuVt } from './menu';
 import { tableVt } from './table';
 import { detailsVt } from './details';
-import { snackbarsVt } from './snackbars';
 
 
 import '../src_scss/main.scss';
@@ -29,8 +28,7 @@ function mainVt(): u.VNode {
         headerVt(),
         menuVt(),
         tableVt(),
-        detailsVt(),
-        snackbarsVt()
+        detailsVt()
     ];
 }
 

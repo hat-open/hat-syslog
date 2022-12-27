@@ -1,39 +1,65 @@
 import * as u from '@hat-open/util';
 
 
-export type Facility = 'KERNEL' |
-                       'USER' |
-                       'MAIL' |
-                       'SYSTEM' |
-                       'AUTHORIZATION1' |
-                       'INTERNAL' |
-                       'PRINTER' |
-                       'NETWORK' |
-                       'UUCP' |
-                       'CLOCK1' |
-                       'AUTHORIZATION2' |
-                       'FTP' |
-                       'NTP' |
-                       'AUDIT' |
-                       'ALERT' |
-                       'CLOCK2' |
-                       'LOCAL0' |
-                       'LOCAL1' |
-                       'LOCAL2' |
-                       'LOCAL3' |
-                       'LOCAL4' |
-                       'LOCAL5' |
-                       'LOCAL6' |
-                       'LOCAL7';
+export const facilities = [
+    'KERNEL',
+    'USER',
+    'MAIL',
+    'SYSTEM',
+    'AUTHORIZATION1',
+    'INTERNAL',
+    'PRINTER',
+    'NETWORK',
+    'UUCP',
+    'CLOCK1',
+    'AUTHORIZATION2',
+    'FTP',
+    'NTP',
+    'AUDIT',
+    'ALERT',
+    'CLOCK2',
+    'LOCAL0',
+    'LOCAL1',
+    'LOCAL2',
+    'LOCAL3',
+    'LOCAL4',
+    'LOCAL5',
+    'LOCAL6',
+    'LOCAL7'
+] as const;
 
-export type Severity = 'EMERGENCY' |
-                       'ALERT' |
-                       'CRITICAL' |
-                       'ERROR' |
-                       'WARNING' |
-                       'NOTICE' |
-                       'INFORMATIONAL' |
-                       'DEBUG';
+export const severities = [
+    'EMERGENCY',
+    'ALERT',
+    'CRITICAL',
+    'ERROR',
+    'WARNING',
+    'NOTICE',
+    'INFORMATIONAL',
+    'DEBUG'
+] as const;
+
+export const columnNames = [
+    'id',
+    'timestamp',
+    'facility',
+    'severity',
+    'version',
+    'msg_timestamp',
+    'hostname',
+    'app_name',
+    'procid',
+    'msgid',
+    'data',
+    'msg',
+] as const;
+
+
+export type Facility = (typeof facilities)[number];
+
+export type Severity = (typeof severities)[number];
+
+export type ColumnName = (typeof columnNames)[number];
 
 export type Filter = {
     max_results: number | null;
@@ -69,26 +95,27 @@ export type Entry = {
 };
 
 export type Menu = {
-    collapsed: boolean;
+    visible: boolean;
 };
 
 export type Column = {
+    name: ColumnName;
     label: string;
     path: u.JPath;
+    filter: (keyof Filter) | null;
     visible: boolean;
-    position: number;
     minWidth: number;
     width: number;
 };
 
 export type Table = {
-    columns: Record<string, Column>;
+    columns: Column[];
 };
 
 export type Details = {
+    visible: boolean;
     selected: Entry | null;
-    collapsed: boolean;
-    rawDataCollapsed: boolean;
+    rawDataVisible: boolean;
 };
 
 export type LocalState = {
@@ -113,44 +140,6 @@ export type State = {
 }
 
 
-export const facilities: Facility[] = [
-    'KERNEL',
-    'USER',
-    'MAIL',
-    'SYSTEM',
-    'AUTHORIZATION1',
-    'INTERNAL',
-    'PRINTER',
-    'NETWORK',
-    'UUCP',
-    'CLOCK1',
-    'AUTHORIZATION2',
-    'FTP',
-    'NTP',
-    'AUDIT',
-    'ALERT',
-    'CLOCK2',
-    'LOCAL0',
-    'LOCAL1',
-    'LOCAL2',
-    'LOCAL3',
-    'LOCAL4',
-    'LOCAL5',
-    'LOCAL6',
-    'LOCAL7'
-];
-
-export const severities: Severity[] = [
-    'EMERGENCY',
-    'ALERT',
-    'CRITICAL',
-    'ERROR',
-    'WARNING',
-    'NOTICE',
-    'INFORMATIONAL',
-    'DEBUG'
-];
-
 export const defaultFilter: Filter = {
     max_results: 50,
     last_id: null,
@@ -166,114 +155,126 @@ export const defaultFilter: Filter = {
 };
 
 export const defaultMenu: Menu = {
-    collapsed: true
+    visible: false
 };
 
 export const defaultTable: Table = {
-    columns: {
-        id: {
+    columns: [
+        {
+            name: 'id',
             label: 'ID',
             path: 'id',
+            filter: null,
             visible: true,
-            position: 0,
             minWidth: 10,
             width: 40
         },
-        timestamp: {
+        {
+            name: 'timestamp',
             label: 'Timestamp',
             path: 'timestamp',
+            filter: null,
             visible: true,
-            position: 1,
             minWidth: 65,
             width: 200
         },
-        facility: {
+        {
+            name: 'facility',
             label: 'Facility',
             path: ['msg', 'facility'],
+            filter: 'facility',
             visible: false,
-            position: 2,
             minWidth: 50,
             width: 100
         },
-        severity: {
+        {
+            name: 'severity',
             label: 'Severity',
             path: ['msg', 'severity'],
+            filter: 'severity',
             visible: true,
-            position: 3,
             minWidth: 50,
             width: 100
         },
-        version: {
+        {
+            name: 'version',
             label: 'Version',
             path: ['msg', 'version'],
+            filter: null,
             visible: false,
-            position: 4,
             minWidth: 40,
             width: 50
         },
-        msg_timestamp: {
+        {
+            name: 'msg_timestamp',
             label: 'Message timestamp',
             path: ['msg', 'timestamp'],
+            filter: null,
             visible: false,
-            position: 5,
             minWidth: 65,
             width: 200
         },
-        hostname: {
+        {
+            name: 'hostname',
             label: 'Hostname',
             path: ['msg', 'hostname'],
+            filter: 'hostname',
             visible: false,
-            position: 6,
             minWidth: 60,
             width: 70
         },
-        app_name: {
+        {
+            name: 'app_name',
             label: 'App name',
             path: ['msg', 'app_name'],
+            filter: 'app_name',
             visible: false,
-            position: 7,
             minWidth: 30,
             width: 70
         },
-        procid: {
+        {
+            name: 'procid',
             label: 'Proc ID',
             path: ['msg', 'procid'],
+            filter: 'procid',
             visible: false,
-            position: 8,
             minWidth: 30,
             width: 70
         },
-        msgid: {
+        {
+            name: 'msgid',
             label: 'Message ID',
             path: ['msg', 'msgid'],
+            filter: 'msgid',
             visible: true,
-            position: 9,
             minWidth: 50,
             width: 100
         },
-        data: {
+        {
+            name: 'data',
             label: 'Data',
             path: ['msg', 'data'],
+            filter: null,
             visible: false,
-            position: 10,
             minWidth: 50,
             width: 390
         },
-        msg: {
+        {
+            name: 'msg',
             label: 'Message',
             path: ['msg', 'msg'],
+            filter: 'msg',
             visible: true,
-            position: 11,
             minWidth: 50,
             width: 120
         }
-    }
+    ]
 };
 
 export const defaultDetails: Details = {
+    visible: false,
     selected: null,
-    collapsed: true,
-    rawDataCollapsed: true
+    rawDataVisible: false
 };
 
 export const defaultLocalState: LocalState = {

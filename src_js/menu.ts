@@ -1,136 +1,94 @@
 import r from '@hat-open/renderer';
 import * as u from '@hat-open/util';
 
+import * as app from './app';
+import * as table from './table';
+
+
+export function isVisible(): boolean {
+    return Boolean(r.get('local', 'menu', 'visible'));
+}
+
+
+export function setVisible(visible: boolean) {
+    r.set(['local', 'menu', 'visible'], visible);
+}
+
 
 export function menuVt(): u.VNodeChild {
     if (r.get('local', 'menu', 'collapsed'))
         return [];
 
+    const filter = app.getLocalFilter();
+    const columns = table.getColumns();
 
-    return [];
-}
-
-
-
-
-
-function _menuVt() {
-    return [
-        ['div.menu-header',
-            ['div.title',
-                'Settings'
-            ],
-            ['div.control-button', {
+    return ['div.menu',
+        ['div.header',
+            ['label', 'Columns'],
+            ['button', {
                 on: {
-                    click: () => menu.setCollapsed(true)
+                    click: () => setVisible(false)
                 }},
-                closeSvg(15)
-            ],
+                ['span.fa-fa-times']
+            ]
         ],
-        ['div.menu', {
-            props: {
-                style: `width: ${menu.getWidth()}px;`
-            }},
-            ['div.group',
-                ['div.title', 'Columns'],
-                ['div.column-options',
-                    table.columnsSorted().map(({name, label, filterKey}) => ['div.item', {
+        ['div.columns', columns.map((column, index) => {
+            const activeFilter = (column.filter ?
+                filter[column.filter] != null :
+                false
+            );
+            const title = (activeFilter && !column.visible ?
+                'Column not visible but is used as filter' :
+                ''
+            );
+
+            return ['div.column',
+                 ['label', {
+                    class: {
+                        warning: activeFilter && !column.visible
+                    },
+                    props: {
+                        title: title
+                    }},
+                    ['input', {
                         props: {
-                            draggable: true,
-                            title: (menu.invisibleColumnHasFilter(name, filterKey) ?
-                                'Column not visible but is used as filter' : '')
-                        },
-                        class: {
-                            dropzone: table.getDraggedColumnName() && !u.equals(table.getDraggedColumnName(), name),
-                            'not-visible-has-filter': menu.invisibleColumnHasFilter(name, filterKey)
+                            type: 'checkbox',
+                            checked: column.visible
                         },
                         on: {
-                            click: () => table.setColumnVisible(name, !table.isColumnVisible(name)),
-                            dragstart: () => table.columnDragstart(name),
-                            dragend: () => table.stopColumnDrag(),
-                            dragover: (ev) => ev.preventDefault(),
-                            drop: () => table.columnDrop(name)
-                        }},
-                        ['input', {
-                            props: {
-                                type: 'checkbox',
-                                checked: table.isColumnVisible(name)
-                            },
-                        }],
-                        ['label', label]
-                    ])
+                            change: (evt: Event) => table.setColumnVisible(
+                                column.name, (evt.target as HTMLInputElement).checked
+                            )
+                        }
+                    }],
+                    ` ${column.label}`
                 ],
-                ['button.reset-button', {
+                ['button', {
+                    props : {
+                        disabled: index >= columns.length - 1
+                    },
                     on: {
-                        click: () => r.change(u.pipe(
-                            menu.changeDefaultLayout,
-                            table.changeDefaultLayout,
-                            details.changeDefaultLayout
-                        ))
+                        click: () => table.moveColumn(column.name, 1)
                     }},
-                    ['span.fa.fa-undo'],
-                    ['label', ' Reset layout']
+                    ['span.fa.fa-arrow-down']
                 ],
-            ],
+                ['button', {
+                    props : {
+                        disabled: index < 1
+                    },
+                    on: {
+                        click: () => table.moveColumn(column.name, -1)
+                    }},
+                    ['span.fa.fa-arrow-up']
+                ]
+            ];
+        })],
+        ['button', {
+            on: {
+                click: table.resetLayout
+            }},
+            ['span.fa.fa-undo'],
+            ' Reset layout'
         ]
     ];
-}
-
-
-
-const path = ['local', 'menu'];
-export const changeDefaultLayout = u.identity;
-
-
-export function isCollapsed() {
-    return r.get(path, 'collapsed');
-}
-
-
-export function setCollapsed(value) {
-    r.set([path, 'collapsed'], value);
-}
-
-
-export function getWidth() {
-    return r.get(path, 'width');
-}
-
-
-export function startResize(x) {
-    r.set([path, 'resize'], u.pipe(
-        u.set('xInitial', x),
-        u.set('widthInitial', r.get(path, 'width')),
-    )(state.defaultMenuResize));
-}
-
-
-export function stopResize() {
-    r.set([path, 'resize'], state.defaultMenuResize);
-}
-
-
-export function getResize() {
-    return r.get(path, 'resize');
-}
-
-
-export function updateWidth(x) {
-    const menuResize = getResize();
-    if (u.equals(menuResize, state.defaultMenuResize)) {
-        return;
-    }
-    const dx = menuResize.xInitial - x;
-    r.set([path, 'width'], Math.max(menuResize.widthInitial + dx, 120));
-}
-
-
-export function invisibleColumnHasFilter(columnName, filterKey) {
-    let filterValue = null;
-    if (columnName == 'timestamp') {
-        filterValue = filter.getValue('entry_timestamp_from') || filter.getValue('entry_timestamp_to');
-    } else {
-        filterValue = filter.getValue(filterKey);
-    }
-    return !table.isColumnVisible(columnName) && filterValue !== null && filterValue !== undefined;
 }

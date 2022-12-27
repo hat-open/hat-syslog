@@ -1,6 +1,35 @@
 import r from '@hat-open/renderer';
 import * as u from '@hat-open/util';
 
+import * as app from './app';
+import * as common from './common';
+import * as menu from './menu';
+
+
+export function getColumns(): common.Column[] {
+    return r.get('local', 'table', 'columns') as common.Column[];
+}
+
+
+export function setColumnVisible(name: common.ColumnName, visible: boolean) {
+    r.change(['local', 'table', 'columns'], u.map((column: common.Column) =>
+        (column.name == name ?
+            u.set('visible', visible, column) :
+            column
+        )
+    ) as any);
+}
+
+
+export function moveColumn(name: common.ColumnName, direction: number) {
+
+}
+
+
+export function resetLayout() {
+
+}
+
 
 export function tableVt(): u.VNodeChild {
     return [];
@@ -289,14 +318,9 @@ export function columnsVisibleSorted() {
 }
 
 
-export function isColumnVisible(name) {
-    return r.get(path, 'columns', name, 'visible');
-}
 
 
-export function setColumnVisible(name, value) {
-    r.set([path, 'columns', name, 'visible'], value);
-}
+
 
 
 export function startColumnResize(columnName, x) {
