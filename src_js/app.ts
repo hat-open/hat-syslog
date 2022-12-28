@@ -55,7 +55,7 @@ function _setFilterValue<Key extends keyof common.Filter>(
         filter = u.set(name, value as u.JData, filter);
         setRemoteFilter(filter as common.Filter);
         return filter;
-    })
+    });
 }
 
 
@@ -73,6 +73,38 @@ export function getLocalFilter(): common.Filter {
 
 export function getRemoteFilter(): common.Filter {
     return r.get('remote', 'filter') as common.Filter;
+}
+
+
+export function getNextEntry(entry: common.Entry): common.Entry | null {
+    const entries = r.get('remote', 'entries');
+    if (!u.isArray(entries))
+        return null;
+
+    const index = entries.findIndex(u.pipe(
+        u.get('id'),
+        u.equals(entry.id)
+    ));
+    if (index < 0)
+        return null;
+
+    return r.get('remote', 'entries', index + 1) as common.Entry | null;
+}
+
+
+export function getPreviousEntry(entry: common.Entry): common.Entry | null {
+    const entries = r.get('remote', 'entries');
+    if (!u.isArray(entries))
+        return null;
+
+    const index = entries.findIndex(u.pipe(
+        u.get('id'),
+        u.equals(entry.id)
+    ));
+    if (index < 1)
+        return null;
+
+    return r.get('remote', 'entries', index - 1) as common.Entry | null;
 }
 
 

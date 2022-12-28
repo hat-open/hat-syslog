@@ -38,6 +38,19 @@ export function tableVt(): u.VNodeChild {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
 function _tableVt() {
     const columns = table.columnsVisibleSorted();
     const entries = table.getEntries();

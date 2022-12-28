@@ -16,7 +16,7 @@ export function setVisible(visible: boolean) {
 
 
 export function menuVt(): u.VNodeChild {
-    if (r.get('local', 'menu', 'collapsed'))
+    if (!isVisible())
         return [];
 
     const filter = app.getLocalFilter();
@@ -43,7 +43,7 @@ export function menuVt(): u.VNodeChild {
             );
 
             return ['div.column',
-                 ['label', {
+                ['label', {
                     class: {
                         warning: activeFilter && !column.visible
                     },

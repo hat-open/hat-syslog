@@ -23,7 +23,7 @@ function menuButtonVt(): u.VNodeChild {
     if (menu.isVisible())
         return [];
 
-    return ['div.control-button', {
+    return ['button', {
         on: {
             click: () => menu.setVisible(true)
         }},
@@ -36,19 +36,17 @@ function datetimePickersVt(): u.VNode {
     const filter = app.getLocalFilter();
 
     return ['div.datetime-pickers',
-        ['div.title', 'Timestamp filters'],
-        ['div.timestamps',
-            datetimePickerVt(
-                'From',
-                filter.entry_timestamp_from,
-                app.setFilterValue('entry_timestamp_from')
-            ),
-            datetimePickerVt(
-                'To',
-                filter.entry_timestamp_to,
-                app.setFilterValue('entry_timestamp_to')
-            )
-        ]
+        ['label', 'Timestamp filters'],
+        datetimePickerVt(
+            'From',
+            filter.entry_timestamp_from,
+            app.setFilterValue('entry_timestamp_from')
+        ),
+        datetimePickerVt(
+            'To',
+            filter.entry_timestamp_to,
+            app.setFilterValue('entry_timestamp_to')
+        )
     ];
 }
 
@@ -56,7 +54,7 @@ function datetimePickersVt(): u.VNode {
 function datetimePickerVt(
     label: string, timestamp: number | null, cb: (timestamp: number | null) => void
 ): u.VNode {
-    return ['div',
+    return ['div.datetime-picker',
         ['label', label],
         ['input', {
             props: {
@@ -79,7 +77,7 @@ function activeFiltersVt(): u.VNodeChild {
         return [];
 
     return ['div.filters',
-        ['div.title', 'Active filters:'],
+        ['label', 'Active filters:'],
         activeFilters.map(({name, label, value}) => ['div.chip.filter-item',
             ['label', {
                 props: {
