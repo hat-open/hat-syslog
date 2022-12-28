@@ -29,7 +29,7 @@ export function menuVt(): u.VNodeChild {
                 on: {
                     click: () => setVisible(false)
                 }},
-                ['span.fa-fa-times']
+                ['span.fa.fa-times']
             ]
         ],
         ['div.columns', columns.map((column, index) => {
@@ -42,7 +42,7 @@ export function menuVt(): u.VNodeChild {
                 ''
             );
 
-            return ['div.column',
+            return ['div',
                 ['label', {
                     class: {
                         warning: activeFilter && !column.visible
@@ -61,26 +61,30 @@ export function menuVt(): u.VNodeChild {
                             )
                         }
                     }],
-                    ` ${column.label}`
+                    column.label
                 ],
-                ['button', {
-                    props : {
+                ['span.fa.fa-arrow-down', {
+                    class : {
                         disabled: index >= columns.length - 1
                     },
                     on: {
-                        click: () => table.moveColumn(column.name, 1)
-                    }},
-                    ['span.fa.fa-arrow-down']
-                ],
-                ['button', {
-                    props : {
+                        click: () => (index >= columns.length - 1 ?
+                            table.moveColumn(column.name, 1) :
+                            null
+                        )
+                    }
+                }],
+                ['span.fa.fa-arrow-up', {
+                    class : {
                         disabled: index < 1
                     },
                     on: {
-                        click: () => table.moveColumn(column.name, -1)
-                    }},
-                    ['span.fa.fa-arrow-up']
-                ]
+                        click: () => (index < 1 ?
+                            table.moveColumn(column.name, -1) :
+                            null
+                        )
+                    }
+                }]
             ];
         })],
         ['button', {

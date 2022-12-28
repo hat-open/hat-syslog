@@ -207,7 +207,7 @@ export const defaultTable: Table = {
         },
         {
             name: 'msg_timestamp',
-            label: 'Message timestamp',
+            label: 'Msg timestamp',
             path: ['msg', 'timestamp'],
             filter: null,
             visible: false,

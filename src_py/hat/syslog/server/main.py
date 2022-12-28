@@ -100,11 +100,15 @@ def main():
             conf_path = (user_conf_dir / 'syslog').with_suffix(suffix)
             if conf_path.exists():
                 break
+        else:
+            conf_path = None
 
     if conf_path == Path('-'):
         conf = json.decode_stream(sys.stdin)
-    else:
+    elif conf_path:
         conf = json.decode_file(conf_path)
+    else:
+        conf = None
 
     if conf:
         common.json_schema_repo.validate('hat-syslog://server.yaml#', conf)

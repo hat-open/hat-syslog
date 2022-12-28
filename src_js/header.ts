@@ -6,55 +6,46 @@ import * as menu from './menu';
 
 
 export function headerVt(): u.VNode {
+    const localFilter = app.getLocalFilter();
+    const remoteFilter = app.getRemoteFilter();
+
     return ['div.header', {
         class: {
-            frozen: isFrozen(app.getRemoteFilter())
+            frozen: isFrozen(remoteFilter)
         }},
-        menuButtonVt(),
-        datetimePickersVt(),
+        ['button', {
+            props: {
+                disabled: menu.isVisible()
+            },
+            on: {
+                click: () => menu.setVisible(true)
+            }},
+            ['span.fa.fa-cog']
+        ],
+        ['div.timestamps',
+            ['label.title', 'Timestamp filters'],
+            datetimePickerVt(
+                'From',
+                localFilter.entry_timestamp_from,
+                app.setFilterValue('entry_timestamp_from')
+            ),
+            datetimePickerVt(
+                'To',
+                localFilter.entry_timestamp_to,
+                app.setFilterValue('entry_timestamp_to')
+            )
+        ],
         activeFiltersVt(),
-        ['div.stretch'],
+        ['div.spacer'],
         navigationVt()
-    ];
-}
-
-
-function menuButtonVt(): u.VNodeChild {
-    if (menu.isVisible())
-        return [];
-
-    return ['button', {
-        on: {
-            click: () => menu.setVisible(true)
-        }},
-        ['span.fa.fa-cog']
-    ];
-}
-
-
-function datetimePickersVt(): u.VNode {
-    const filter = app.getLocalFilter();
-
-    return ['div.datetime-pickers',
-        ['label', 'Timestamp filters'],
-        datetimePickerVt(
-            'From',
-            filter.entry_timestamp_from,
-            app.setFilterValue('entry_timestamp_from')
-        ),
-        datetimePickerVt(
-            'To',
-            filter.entry_timestamp_to,
-            app.setFilterValue('entry_timestamp_to')
-        )
     ];
 }
 
 
 function datetimePickerVt(
     label: string, timestamp: number | null, cb: (timestamp: number | null) => void
-): u.VNode {
-    return ['div.datetime-picker',
+): u.VNodeChild {
+    return [
         ['label', label],
         ['input', {
             props: {
@@ -77,26 +68,27 @@ function activeFiltersVt(): u.VNodeChild {
         return [];
 
     return ['div.filters',
-        ['label', 'Active filters:'],
-        activeFilters.map(({name, label, value}) => ['div.chip.filter-item',
-            ['label', {
+        ['div',
+            ['label.title', 'Active filters'],
+            ['button.clear', {
+                on: {
+                    click: () => app.clearFilter()
+                }},
+                ['span.fa.fa-trash']
+            ]
+        ],
+        ['div',
+            activeFilters.map(({name, label, value}) => ['label.chip', {
                 props: {
                     title: `${label}: ${value}`,
                 }},
-                label
-            ],
-            ['div.icon', {
-                on: {
-                    click: () => app.setFilterValue(name, null)
-                }},
-                ['span.fa-fa-times']
-            ]
-        ]),
-        ['div.chip.clear-all', {
-            on: {
-                click: () => app.clearFilter()
-            }},
-            'Clear all'
+                label,
+                ['span.fa.fa-times', {
+                    on: {
+                        click: () => app.setFilterValue(name, null)
+                    }
+                }]
+            ])
         ]
     ];
 }
@@ -106,7 +98,7 @@ function navigationVt(): u.VNode {
     const filter = app.getLocalFilter();
 
     return ['div.navigation',
-        ['label.freeze',
+        ['label',
             ['input', {
                 props: {
                     type: 'checkbox',
@@ -118,9 +110,9 @@ function navigationVt(): u.VNode {
                     )
                 }
             }],
-            ' Live update',
+            'Live update',
         ],
-        ['div.size',
+        ['div.group',
             ['label', 'Page size'],
             ['select', {
                 on: {
@@ -138,20 +130,25 @@ function navigationVt(): u.VNode {
                 }])
             ]
         ],
-        ['div.current', `Page ${app.getCurrentPage()}`],
-        ([
-            ['first', 'fa-angle-double-left'],
-            ['previous', 'fa-angle-left'],
-            ['next', 'fa-angle-right']
-        ] as const).map(([direction, icon]) => ['button', {
-            props: {
-                disabled: !app.canNavigate(direction),
-            },
-            on: {
-                click: () => app.navigate(direction)
-            }},
-            [`span.fa.${icon}`]
-        ])
+        ['div.group',
+            ['label', `Page ${app.getCurrentPage()}`],
+            ['div.buttons',
+                ([
+                    ['first', 'fa-angle-double-left'],
+                    ['previous', 'fa-angle-left'],
+                    ['next', 'fa-angle-right']
+                ] as const).map(([direction, icon]) => ['button', {
+                    props: {
+                        disabled: !app.canNavigate(direction),
+                        title: direction
+                    },
+                    on: {
+                        click: () => app.navigate(direction)
+                    }},
+                    [`span.fa.${icon}`]
+                ])
+            ]
+        ]
     ];
 }
 
