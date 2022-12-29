@@ -1,5 +1,5 @@
-import r from '@hat-open/renderer';
 import * as u from '@hat-open/util';
+import r from '@hat-open/renderer';
 
 import * as app from './app';
 import * as table from './table';
@@ -41,6 +41,8 @@ export function menuVt(): u.VNodeChild {
                 'Column not visible but is used as filter' :
                 ''
             );
+            const canMoveDown = index < columns.length - 1;
+            const canMoveUp = index > 0;
 
             return ['div',
                 ['label', {
@@ -65,22 +67,28 @@ export function menuVt(): u.VNodeChild {
                 ],
                 ['span.fa.fa-arrow-down', {
                     class : {
-                        disabled: index >= columns.length - 1
+                        disabled: !canMoveDown
+                    },
+                    props: {
+                        title: 'Move down'
                     },
                     on: {
-                        click: () => (index >= columns.length - 1 ?
-                            table.moveColumn(column.name, 1) :
+                        click: () => (canMoveDown ?
+                            table.moveColumn(column.name, index + 1) :
                             null
                         )
                     }
                 }],
                 ['span.fa.fa-arrow-up', {
                     class : {
-                        disabled: index < 1
+                        disabled: !canMoveUp
+                    },
+                    props: {
+                        title: 'Move up'
                     },
                     on: {
-                        click: () => (index < 1 ?
-                            table.moveColumn(column.name, -1) :
+                        click: () => (canMoveUp ?
+                            table.moveColumn(column.name, index - 1) :
                             null
                         )
                     }
@@ -88,6 +96,9 @@ export function menuVt(): u.VNodeChild {
             ];
         })],
         ['button', {
+            props: {
+                title: 'Clear layout'
+            },
             on: {
                 click: table.resetLayout
             }},

@@ -1,8 +1,9 @@
-import r from '@hat-open/renderer';
 import * as u from '@hat-open/util';
+import r from '@hat-open/renderer';
 
 import * as common from './common';
 import * as notification from './notification';
+import * as dragger from './dragger';
 
 
 export function isVisible(): boolean {
@@ -15,6 +16,11 @@ export function setVisible(visible: boolean) {
 }
 
 
+export function getSelectedEntry(): common.Entry | null {
+    return r.get('local', 'details', 'selected') as common.Entry | null;
+}
+
+
 export function selectEntry(entry: common.Entry | null) {
     r.set(['local', 'details', 'selected'], entry);
 }
@@ -24,13 +30,37 @@ export function detailsVt(): u.VNodeChild {
     if (!isVisible())
         return [];
 
-    const entry = r.get('local', 'details', 'selected') as common.Entry | null;
+    const entry = getSelectedEntry();
     if (!entry)
         return [];
 
-    return ['div.details',
-        headerVt(entry),
-        contentVt(entry)
+    return [
+        ['div.details-resizer', {
+            on: {
+                mousedown: dragger.mouseDownHandler(evt => {
+                    const parent = (evt.target as HTMLElement).parentNode;
+                    if (!parent)
+                        return null;
+
+                    const el = parent.querySelector('.details') as HTMLElement | null;
+                    if (!el)
+                        return null;
+
+                    const width = el.clientWidth;
+                    return (_, dx) => {
+                        // TODO: flex grow/shrink - grid grow/shrink
+                        setWidth(width - dx);
+                    };
+                })
+            }
+        }],
+        ['div.details', {
+            props: {
+                style: `width: ${getWidth()}px`
+            }},
+            headerVt(entry),
+            contentVt(entry)
+        ]
     ];
 }
 
@@ -63,7 +93,7 @@ function headerVt(entry: common.Entry): u.VNode {
             on: {
                 click: () => setVisible(false)
             }},
-            ['span.fa-fa-times']
+            ['span.fa.fa-times']
         ]
     ];
 }
@@ -210,4 +240,14 @@ function getHatLocation(hatData: u.JData): string | null {
     const lineno = u.get('lineno', hatData);
 
     return `${name}.${funcName}:${lineno}`;
+}
+
+
+function getWidth(): number {
+    return r.get('local', 'details', 'width') as number;
+}
+
+
+function setWidth(width: number) {
+    r.set(['local', 'details', 'width'], width);
 }

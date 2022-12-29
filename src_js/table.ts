@@ -1,9 +1,9 @@
-import r from '@hat-open/renderer';
 import * as u from '@hat-open/util';
+import r from '@hat-open/renderer';
 
-// import * as app from './app';
+import * as app from './app';
 import * as common from './common';
-// import * as menu from './menu';
+import * as details from './details';
 
 
 export function getColumns(): common.Column[] {
@@ -21,30 +21,176 @@ export function setColumnVisible(name: common.ColumnName, visible: boolean) {
 }
 
 
-export function moveColumn(name: common.ColumnName, direction: number) {
+export function moveColumn(name: common.ColumnName, index: number) {
+    return r.change(['local', 'table', 'columns'], columns => {
+        if (!u.isArray(columns))
+            return columns;
 
+        if (index < 0 || index > columns.length - 1)
+            return columns;
+
+        const oldIndex = columns.findIndex(u.pipe(
+            u.get('name'),
+            u.equals(name)
+        ));
+        if (oldIndex == null || oldIndex == index)
+            return columns;
+
+        const column = u.get(oldIndex, columns);
+        return u.pipe(
+            u.omit(oldIndex) as any,
+            u.insert<u.JData>(index, column)
+        )(columns);
+    });
 }
 
 
 export function resetLayout() {
-
+    r.set(['local', 'table'], common.defaultTable);
 }
 
 
 export function tableVt(): u.VNode {
-    return ['div.table',
+    const columns = getColumns();
+    const entries = app.getEntries();
+    const selectEntry = details.getSelectedEntry();
 
+    return ['div.table',
+        ['table',
+            ['thead',
+                ['tr',
+                    columns.map(headerCellVt)
+                ]
+            ],
+            ['tbody', {
+                props: {
+                    tabIndex: '0',
+                },
+                on: {
+                    keydown: (evt: KeyboardEvent) => {
+                        if (evt.key == 'ArrowDown') {
+                            selectRelativeEntry(1);
+
+                        } else if (evt.key == 'ArrowUp') {
+                            selectRelativeEntry(-1);
+
+                        } else if (evt.key == 'ArrowLeft') {
+                            navigate('previous');
+
+                        } else if (evt.key == 'ArrowRight') {
+                            navigate('next');
+
+                        } else if (evt.key == 'Enter') {
+                            details.setVisible(true);
+
+                        } else if (evt.key == 'Escape') {
+                            details.setVisible(false);
+                        }
+                    }
+                }},
+                entries.map(entry => ['tr', {
+                    class: {
+                        error: entry.msg.severity == 'ERROR',
+                        warning: entry.msg.severity == 'WARNING',
+                        selected: (selectEntry != null && selectEntry.id == entry.id)
+                    },
+                    on: {
+                        click: () => details.selectEntry(entry),
+                        dblclick: () => details.setVisible(true)
+                    }},
+                    columns.map(column => bodyCellVt(entry, column))
+                ])
+            ]
+        ]
     ];
 }
 
 
+function headerCellVt(column: common.Column): u.VNodeChild {
+    if (!column.visible)
+        return [];
+
+    return [`th.col-${column.name}`,
+        column.label
+    ];
+}
 
 
+function bodyCellVt(entry: common.Entry, column: common.Column): u.VNodeChild {
+    if (!column.visible)
+        return [];
+
+    const value = u.get(column.path, entry);
+
+    return [`td.col-${column.name}`,
+        valueToString(column.type, value),
+        (column.name == 'timestamp' ? ['div.filter',
+            ['span.fa.fa-arrow-up', {
+                props: {
+                    title: 'Set as timestamp from'
+                },
+                on: {
+                    click: (evt: Event) => {
+                        evt.stopPropagation();
+                        app.setFilterValue('entry_timestamp_from', entry.timestamp);
+                    }
+                }
+            }],
+            ['span.fa.fa-arrow-down', {
+                props: {
+                    title: 'Set as timestamp to'
+                },
+                on: {
+                    click: (evt: Event) => {
+                        evt.stopPropagation();
+                        app.setFilterValue('entry_timestamp_to', entry.timestamp);
+                    }
+                }
+            }]
+        ] : [])
+    ];
+}
 
 
+function valueToString(type: common.ColumnType, value: u.JData): string {
+    if (type == 'string' && u.isString(value)) {
+        return value;
+
+    } else if (type == 'number' && u.isNumber(value)) {
+        return String(value);
+
+    } else if (type == 'timestamp' && u.isNumber(value)) {
+        return u.timestampToLocalString(value);
+    }
+
+    return '';
+}
 
 
+function selectRelativeEntry(offset: number) {
+    const selectEntry = details.getSelectedEntry();
+    if (selectEntry == null)
+        return;
 
+    const entries = app.getEntries();
+    const index = entries.findIndex(i => i.id == selectEntry.id);
+    if (index == null)
+        return;
+
+    const newIndex = index + offset;
+    if (newIndex < 0 || newIndex > entries.length - 1)
+        return;
+
+    details.selectEntry(entries[newIndex]);
+}
+
+
+function navigate(direction: app.Direction) {
+    if (!app.canNavigate(direction))
+        return;
+
+    app.navigate(direction);
+}
 
 
 
@@ -54,16 +200,7 @@ export function tableVt(): u.VNode {
 
 
 // function _tableVt() {
-//     const columns = table.columnsVisibleSorted();
-//     const entries = table.getEntries();
-//     const tableWidth = (window.innerWidth
-//         - (menu.isCollapsed() ? 0 : menu.getWidth())
-//         - (details.getSelectedEntry() && !details.isCollapsed() ? details.getWidth() : 0));
 //     return ['div.table', {
-//         props: {
-//             style: `width: ${tableWidth}px;`,
-//         }},
-//         // TABLE APPROACH
 //         ['table',
 //             ['thead', ['tr',
 //                 columns.map((column, columnIndex) => [
@@ -127,62 +264,9 @@ export function tableVt(): u.VNode {
 //                     tableBorderVt('th', column.name)
 //                 ])
 //             ]],
-//             ['tbody', {
-//                 props: {
-//                     tabIndex: '0',
-//                 },
-//                 on: {
-//                     keydown: ev => {
-//                         const currentSelected = details.getSelectedEntry();
-//                         const tableRows = ev.target.children;
-//                         const selectedRowIndex = table.getEntries().findIndex(e => e == currentSelected);
-//                         if (currentSelected !== null) {
-//                             if (ev.key == 'ArrowDown') {
-//                                 const rowElement = tableRows[selectedRowIndex + 1];
-//                                 if (rowElement)
-//                                     rowElement.scrollIntoView({block: 'nearest'});
-//                                 details.selectPreviousEntry();
-//                                 ev.preventDefault();
-//                             } else if (ev.key == 'ArrowUp') {
-//                                 const rowElement = tableRows[selectedRowIndex - 3];
-//                                 if (rowElement)
-//                                     rowElement.scrollIntoView({block: 'nearest'});
-
-//                                 // hack for first two rows and sticky table header
-//                                 if (selectedRowIndex < 3)
-//                                     ev.target.parentElement.parentElement.scroll(0, 0);
-//                                 details.selectNextEntry();
-//                                 ev.preventDefault();
-//                             } else if (ev.key == 'Enter') {
-//                                 details.setCollapsed(false);
-//                             } else if (ev.key == 'Escape') {
-//                                 if (!details.isCollapsed())
-//                                     details.setCollapsed(true);
-//                             }
-//                         }
-//                         if (ev.key == 'ArrowLeft') {
-//                             filter.navigatePrevious();
-//                         } else if (ev.key == 'ArrowRight') {
-//                             filter.navigateNext();
-//                         }
-//                     }
-//                 }},
-//                 entries.map((entry, index) => ['tr', {
-//                     props: {
-//                         style: `background-color: ${table.getRowColors(entry, index).background};
-//                                 filter: brightness(${table.getRowColors(entry, index).brightness}%);`
-//                     },
-//                     on: {
-//                         click: () => details.selectEntry(entry.id),
-//                         dblclick: () => details.setCollapsed(false)
-//                     }},
-//                     columns.map(column => [cellVt(entry, column), tableBorderVt('td', column.name)])
-//                 ])
-//             ]
 //         ],
 //     ];
 // }
-
 
 
 // function tableBorderVt(tag, name) {
@@ -198,144 +282,6 @@ export function tableVt(): u.VNode {
 //         ['div.line']
 //     ];
 // }
-
-
-// function columnResizeOverlay() {
-//     return (!u.equals(table.getColumnResize(), state.defaultColumnResize) ? ['div.mouseevent-overlay', {
-//         on: {
-//             mousemove: ev => table.updateColumnWidth(ev.x),
-//             mouseup: () => table.stopColumnResize()
-//         },
-//         props: {
-//             style: 'cursor: ew-resize'
-//         }}] : []);
-// }
-
-
-// function menuResizeOverlay() {
-//     return (!u.equals(menu.getResize(), state.defaultMenuResize) ? ['div.mouseevent-overlay', {
-//         on: {
-//             mousemove: ev => menu.updateWidth(ev.x),
-//             mouseup: () => menu.stopResize()
-//         },
-//         props: {
-//             style: 'cursor: ew-resize'
-//         }}] : []);
-// }
-
-
-// function entryDetailsResizeOverlay() {
-//     return (!u.equals(details.getResize(), state.defaultDetailsResize) ? ['div.mouseevent-overlay', {
-//         on: {
-//             mousemove: ev => details.updateWidth(ev.x),
-//             mouseup: () => details.stopResize()
-//         },
-//         props: {
-//             style: 'cursor: ew-resize'
-//         }}] : []);
-// }
-
-
-// function cellVt(entry, column) {
-//     const value = u.get(column.path, entry);
-
-//     let vt = [];
-
-//     if (column.name == 'timestamp') {
-//         vt = ['td.timestamp',
-//             datetime.utcTimestampToLocalString(value),
-//             ['div.cell-icons',
-//                 ['span.icon', {
-//                     props: {
-//                         title: 'Set as timestamp from'
-//                     },
-//                     on: {
-//                         click: ev => {
-//                             ev.stopPropagation();
-//                             filter.setTimestampFrom(value);
-//                         }
-//                     }},
-//                     arrowSvg()
-//                 ],
-//                 ['span.icon', {
-//                     props: {
-//                         title: 'Set as timestamp to'
-//                     },
-//                     on: {
-//                         click: ev => {
-//                             ev.stopPropagation();
-//                             filter.setTimestampTo(value);
-//                         }
-//                     }},
-//                     arrowSvg(180)
-//                 ],
-//             ]
-//         ];
-//     } else if (column.name == 'msg_timestamp') {
-//         vt = ['td', datetime.utcTimestampToLocalString(value)];
-//     } else if (column.name == 'data'){
-//         vt = ['td.json', `${value}`];
-//     } else if (['msg', 'app_name'].includes(column.name)) {
-//         vt = ['td.text-noncentered', `${value}`];
-//     } else {
-//         vt = ['td', `${value}`];
-//     }
-
-//     return vt;
-// }
-
-
-// function arrowSvg(angle) {
-//     return ['svg', {
-//         attrs: { width: 10, height: 12 }},
-//         ['g', {
-//             attrs: {
-//                 transform: `rotate(${angle || 0} 5 6)`
-//             }},
-//             ['line', { attrs: { x1: 0, y1: 11, x2: 10, y2: 11, } }],
-//             ['line', { attrs: { x1: 5, y1: 0, x2: 5, y2: 10, } }],
-//             ['line', { attrs: { x1: 0, y1: 4, x2: 5, y2: 9, } }],
-//             ['line', { attrs: { x1: 10, y1: 4, x2: 5, y2: 9, } }],
-//         ]
-//     ];
-// }
-
-
-// function closeSvg(size) {
-//     return ['svg', { attrs: { width: size, height: size } },
-//         ['line', { attrs: { x1: 0, y1: 0, x2: size, y2: size, stroke: 'black' } }],
-//         ['line', { attrs: { x1: size, y1: 0, x2: 0, y2: size, stroke: 'black' } }]
-//     ];
-// }
-
-
-
-// const path = ['local', 'table'];
-// export const changeDefaultLayout = u.set(path, state.defaultTable);
-
-
-// export function getEntries() {
-//     return r.get('remote', 'entries');
-// }
-
-
-// export function columnsSorted() {
-//     return u.pipe(
-//         u.toPairs,
-//         u.sortBy(([_, column]) => column.position),
-//         u.map(([name, column]) => u.set('name', name, column)),
-//     )(r.get(path, 'columns'));
-// }
-
-
-// export function columnsVisibleSorted() {
-//     return u.filter(column => column.visible, columnsSorted());
-// }
-
-
-
-
-
 
 
 // export function startColumnResize(columnName, x) {
@@ -445,47 +391,4 @@ export function tableVt(): u.VNode {
 //             )(columns);
 //         }),
 //     ));
-// }
-
-
-// export function stopColumnDrag() {
-//     r.set([path, 'columnDrag'], state.defaultColumnDrag);
-// }
-
-
-// export function getRowColors(entry) {
-//     const maxBrightness = 100;
-//     const brightness = entry == details.getSelectedEntry() ? 85 : maxBrightness;
-//     switch (entry.msg.severity) {
-//         case 'ERROR':
-//             return {
-//                 background: '#FFCCCC',
-//                 brightness: brightness
-//             };
-//         case 'WARNING':
-//             return {
-//                 background: '#FFE6CC',
-//                 brightness: brightness
-//             };
-//         default:
-//             return {
-//                 background: 'white',
-//                 brightness: brightness
-//             };
-//     }
-// }
-
-
-// export function getBorderHover() {
-//     return r.get(path, 'borderHover');
-// }
-
-
-// export function borderHoverStart(columnName) {
-//     r.set([path, 'borderHover'], columnName);
-// }
-
-
-// export function borderHoverStop() {
-//     r.set([path, 'borderHover'], null);
 // }

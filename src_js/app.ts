@@ -1,6 +1,6 @@
-import r from '@hat-open/renderer';
-import * as u from '@hat-open/util';
 import * as juggler from '@hat-open/juggler';
+import * as u from '@hat-open/util';
+import r from '@hat-open/renderer';
 
 import * as common from './common';
 
@@ -73,6 +73,11 @@ export function getLocalFilter(): common.Filter {
 
 export function getRemoteFilter(): common.Filter {
     return r.get('remote', 'filter') as common.Filter;
+}
+
+
+export function getEntries(): common.Entry[] {
+    return r.get('remote', 'entries') as common.Entry[];
 }
 
 

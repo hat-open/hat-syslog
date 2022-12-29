@@ -1,17 +1,19 @@
-import * as u from '@hat-open/util';
-
 
 export function notify(text: string) {
-    let root = document.getElementById('notifications');
+    let root = document.querySelector('body > .notifications');
     if (!root) {
         root = document.createElement('div');
-        root.id = 'notifications';
+        root.className = 'notifications';
         document.body.appendChild(root);
     }
 
     const el = document.createElement('div');
     el.innerText = text;
+    root.appendChild(el);
 
-    root.insertBefore(el, root.firstElementChild);
-    u.delay(root.removeChild, 1000, el);
+    setTimeout(() => {
+        if (!root)
+            return;
+        root.removeChild(el);
+    }, 1000);
 }

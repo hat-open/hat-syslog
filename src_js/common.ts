@@ -98,8 +98,11 @@ export type Menu = {
     visible: boolean;
 };
 
+export type ColumnType = 'string' | 'number' | 'timestamp';
+
 export type Column = {
     name: ColumnName;
+    type: ColumnType;
     label: string;
     path: u.JPath;
     filter: (keyof Filter) | null;
@@ -116,6 +119,7 @@ export type Details = {
     visible: boolean;
     selected: Entry | null;
     rawDataVisible: boolean;
+    width: number;
 };
 
 export type LocalState = {
@@ -162,6 +166,7 @@ export const defaultTable: Table = {
     columns: [
         {
             name: 'id',
+            type: 'number',
             label: 'ID',
             path: 'id',
             filter: null,
@@ -171,6 +176,7 @@ export const defaultTable: Table = {
         },
         {
             name: 'timestamp',
+            type: 'timestamp',
             label: 'Timestamp',
             path: 'timestamp',
             filter: null,
@@ -180,6 +186,7 @@ export const defaultTable: Table = {
         },
         {
             name: 'facility',
+            type: 'string',
             label: 'Facility',
             path: ['msg', 'facility'],
             filter: 'facility',
@@ -189,6 +196,7 @@ export const defaultTable: Table = {
         },
         {
             name: 'severity',
+            type: 'string',
             label: 'Severity',
             path: ['msg', 'severity'],
             filter: 'severity',
@@ -198,6 +206,7 @@ export const defaultTable: Table = {
         },
         {
             name: 'version',
+            type: 'number',
             label: 'Version',
             path: ['msg', 'version'],
             filter: null,
@@ -207,6 +216,7 @@ export const defaultTable: Table = {
         },
         {
             name: 'msg_timestamp',
+            type: 'timestamp',
             label: 'Msg timestamp',
             path: ['msg', 'timestamp'],
             filter: null,
@@ -216,6 +226,7 @@ export const defaultTable: Table = {
         },
         {
             name: 'hostname',
+            type: 'string',
             label: 'Hostname',
             path: ['msg', 'hostname'],
             filter: 'hostname',
@@ -225,6 +236,7 @@ export const defaultTable: Table = {
         },
         {
             name: 'app_name',
+            type: 'string',
             label: 'App name',
             path: ['msg', 'app_name'],
             filter: 'app_name',
@@ -234,6 +246,7 @@ export const defaultTable: Table = {
         },
         {
             name: 'procid',
+            type: 'string',
             label: 'Proc ID',
             path: ['msg', 'procid'],
             filter: 'procid',
@@ -243,6 +256,7 @@ export const defaultTable: Table = {
         },
         {
             name: 'msgid',
+            type: 'string',
             label: 'Message ID',
             path: ['msg', 'msgid'],
             filter: 'msgid',
@@ -252,6 +266,7 @@ export const defaultTable: Table = {
         },
         {
             name: 'data',
+            type: 'string',
             label: 'Data',
             path: ['msg', 'data'],
             filter: null,
@@ -261,6 +276,7 @@ export const defaultTable: Table = {
         },
         {
             name: 'msg',
+            type: 'string',
             label: 'Message',
             path: ['msg', 'msg'],
             filter: 'msg',
@@ -274,7 +290,8 @@ export const defaultTable: Table = {
 export const defaultDetails: Details = {
     visible: false,
     selected: null,
-    rawDataVisible: false
+    rawDataVisible: false,
+    width: 400
 };
 
 export const defaultLocalState: LocalState = {

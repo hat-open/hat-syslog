@@ -15,7 +15,8 @@ export function headerVt(): u.VNode {
         }},
         ['button', {
             props: {
-                disabled: menu.isVisible()
+                disabled: menu.isVisible(),
+                title: 'Show setting'
             },
             on: {
                 click: () => menu.setVisible(true)
@@ -71,6 +72,9 @@ function activeFiltersVt(): u.VNodeChild {
         ['div',
             ['label.title', 'Active filters'],
             ['button.clear', {
+                props: {
+                    title: 'Clear filters'
+                },
                 on: {
                     click: () => app.clearFilter()
                 }},

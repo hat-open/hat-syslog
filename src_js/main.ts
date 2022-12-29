@@ -1,5 +1,5 @@
-import r from '@hat-open/renderer';
 import * as u from '@hat-open/util';
+import r from '@hat-open/renderer';
 
 import * as app from './app';
 import * as common from './common';
