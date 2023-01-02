@@ -107,17 +107,17 @@ function contentVt(entry: common.Entry): u.VNode {
     const hatExcInfo = u.get(['hat@1', 'exc_info'], data);
 
     return ['div.content',
-        ['label.large', 'Message:'],
-        ['div.large', entry.msg.msg || ''],
+        ['label.wide', 'Message:'],
+        ['div.wide', entry.msg.msg || ''],
         (hatExcInfo  ? [
-            ['label.large', 'Exception:'],
-            ['pre.large', String(hatExcInfo)],
+            ['label.wide', 'Exception:'],
+            ['pre.wide', String(hatExcInfo)],
         ] : []),
         [
             ['Timestamp', u.timestampToLocalString(entry.timestamp)],
             ['Severity', entry.msg.severity],
             ['Location', hatLocation],
-            ['Message timestamp', (entry.msg.timestamp != null ?
+            ['Msg time', (entry.msg.timestamp != null ?
                 u.timestampToLocalString(entry.msg.timestamp) :
                 null
             )],
@@ -136,18 +136,18 @@ function contentVt(entry: common.Entry): u.VNode {
                 value
             ]
         ] : [])),
-        ['label.large.collapsible', {
+        ['label.wide.collapsible', {
             on: {
                 click: () => r.change(['local', 'details', 'rawDataVisible'], u.not)
             }},
             (rawDataVisible ?
-                ['span.fa.fa-angle-down'] :
-                ['span.fa.fa-angle-right']
+                ['span.fa.fa-minus-square-o'] :
+                ['span.fa.fa-plus-square-o']
             ),
             ' Raw data:'
         ],
         (rawDataVisible ?
-            ['pre.large', encodeJson(data).replace(/\\n/g, '\n')] :
+            ['pre.wide', encodeJson(data).replace(/\\n/g, '\n')] :
             []
         )
     ];

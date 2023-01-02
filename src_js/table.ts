@@ -4,6 +4,7 @@ import r from '@hat-open/renderer';
 import * as app from './app';
 import * as common from './common';
 import * as details from './details';
+import * as dragger from './dragger';
 
 
 export function getColumns(): common.Column[] {
@@ -110,8 +111,16 @@ function headerCellVt(column: common.Column): u.VNodeChild {
     if (!column.visible)
         return [];
 
-    return [`th.col-${column.name}`,
-        column.label
+    // TODO width in %
+
+    return [`th.col-${column.name}`, {
+        props: {
+            style: `width: ${column.width}rem;`
+        }},
+        ['div',
+            ['div.content', column.label],
+            resizerVt(column)
+        ]
     ];
 }
 
@@ -123,32 +132,63 @@ function bodyCellVt(entry: common.Entry, column: common.Column): u.VNodeChild {
     const value = u.get(column.path, entry);
 
     return [`td.col-${column.name}`,
-        valueToString(column.type, value),
-        (column.name == 'timestamp' ? ['div.filter',
-            ['span.fa.fa-arrow-up', {
-                props: {
-                    title: 'Set as timestamp from'
-                },
-                on: {
-                    click: (evt: Event) => {
-                        evt.stopPropagation();
-                        app.setFilterValue('entry_timestamp_from', entry.timestamp);
+        ['div',
+            ['div.content', valueToString(column.type, value)],
+            (column.name == 'timestamp' ? [
+                ['span.filter.fa.fa-chevron-up', {
+                    props: {
+                        title: 'Set as timestamp from'
+                    },
+                    on: {
+                        click: (evt: Event) => {
+                            evt.stopPropagation();
+                            app.setFilterValue('entry_timestamp_from', entry.timestamp);
+                        }
                     }
-                }
-            }],
-            ['span.fa.fa-arrow-down', {
-                props: {
-                    title: 'Set as timestamp to'
-                },
-                on: {
-                    click: (evt: Event) => {
-                        evt.stopPropagation();
-                        app.setFilterValue('entry_timestamp_to', entry.timestamp);
+                }],
+                ['span.filter.fa.fa-chevron-down', {
+                    props: {
+                        title: 'Set as timestamp to'
+                    },
+                    on: {
+                        click: (evt: Event) => {
+                            evt.stopPropagation();
+                            app.setFilterValue('entry_timestamp_to', entry.timestamp);
+                        }
                     }
-                }
-            }]
-        ] : [])
+                }]
+            ] : []),
+            resizerVt(column)
+        ]
     ];
+}
+
+
+function resizerVt(column: common.Column): u.VNode {
+    return ['div.resizer', {
+        on: {
+            mousedown: dragger.mouseDownHandler(evt => {
+                let el = evt.target as HTMLElement | null;
+                while (el && el.tagName != 'TH' && el.tagName != 'TD')
+                    el = el.parentNode as HTMLElement | null;
+                if (!el)
+                    return null;
+
+                const initElWidth = el.clientWidth;
+                const initColWidth = column.width;
+
+                return (_, dx) => {
+                    const newElWidth = initElWidth + dx;
+                    const newColWidth = Math.max(
+                        initColWidth * newElWidth / initElWidth,
+                        column.minWidth
+                    );
+
+                    setColumnWidth(column.name, newColWidth);
+                };
+            })
+        }
+    }];
 }
 
 
@@ -193,9 +233,14 @@ function navigate(direction: app.Direction) {
 }
 
 
-
-
-
+export function setColumnWidth(name: common.ColumnName, width: number) {
+    r.change(['local', 'table', 'columns'], u.map((column: common.Column) =>
+        (column.name == name ?
+            u.set('width', width, column) :
+            column
+        )
+    ) as any);
+}
 
 
 
@@ -205,11 +250,6 @@ function navigate(direction: app.Direction) {
 //             ['thead', ['tr',
 //                 columns.map((column, columnIndex) => [
 //                     ['th', {
-//                         props: {
-//                             style: (columnIndex != columns.length - 1 ?
-//                                 `width: ${column.width}px` :
-//                                 table.lastColumnExpanded() ? null : `width: ${column.minWidth}px`)
-//                         }},
 //                         ['div.column-header', {
 //                             class: {
 //                                 dropzone: (table.getDraggedColumnName()
@@ -261,7 +301,6 @@ function navigate(direction: app.Direction) {
 //                             )
 //                         ]
 //                     ],
-//                     tableBorderVt('th', column.name)
 //                 ])
 //             ]],
 //         ],
@@ -269,65 +308,6 @@ function navigate(direction: app.Direction) {
 // }
 
 
-// function tableBorderVt(tag, name) {
-//     return [`${tag}.border`, {
-//         class: {
-//             hover: [table.getBorderHover(), table.getColumnResize().columnName].includes(name)
-//         },
-//         on: {
-//             mousedown: (ev) => table.startColumnResize(name, ev.x),
-//             mouseenter: () => table.borderHoverStart(name),
-//             mouseleave: () => table.borderHoverStop(),
-//         }},
-//         ['div.line']
-//     ];
-// }
-
-
-// export function startColumnResize(columnName, x) {
-//     r.set([path, 'columnResize'], u.pipe(
-//         u.set('columnName', columnName),
-//         u.set('xInitial', x),
-//         u.set('widthInitial', r.get([path, 'columns'], columnName, 'width'))
-//     )(state.defaultColumnResize));
-// }
-
-
-// export function stopColumnResize() {
-//     r.set([path, 'columnResize'], state.defaultColumnResize);
-// }
-
-
-// export function getColumnResize() {
-//     return r.get(path, 'columnResize');
-// }
-
-
-// function fixedColumnsWidth() {
-//     return columnsVisibleSorted().slice(0, -1).reduce((sum, column) => sum + column.width + 4, 0);
-// }
-
-
-// export function lastColumnExpanded() {
-//     const windowWidth = window.innerWidth;
-//     const menuWidth = menu.isCollapsed() ? 0 : menu.getWidth();
-//     const detailsWidth = details.getSelectedEntry() && !details.isCollapsed() ? details.getWidth() : 0;
-//     const tableWidth = fixedColumnsWidth();
-//     const relevantColumns = columnsVisibleSorted();
-//     const columnMinWidth = relevantColumns.slice(-1)[0].minWidth;
-//     return (tableWidth + columnMinWidth) < (windowWidth - menuWidth - detailsWidth);
-// }
-
-
-// export function updateColumnWidth(x) {
-//     const columnResize = getColumnResize();
-//     if (u.equals(columnResize, state.defaultColumnResize)) {
-//         return;
-//     }
-//     const dx = columnResize.xInitial - x;
-//     const columnPath = [[path, 'columns'], columnResize.columnName];
-//     r.set([columnPath, 'width'], Math.max(columnResize.widthInitial - dx, r.get(columnPath, 'minWidth')));
-// }
 
 
 // export function columnDragstart(columnName) {

@@ -171,8 +171,8 @@ export const defaultTable: Table = {
             path: 'id',
             filter: null,
             visible: true,
-            minWidth: 10,
-            width: 40
+            minWidth: 2,
+            width: 4
         },
         {
             name: 'timestamp',
@@ -181,8 +181,8 @@ export const defaultTable: Table = {
             path: 'timestamp',
             filter: null,
             visible: true,
-            minWidth: 65,
-            width: 200
+            minWidth: 10,
+            width: 15
         },
         {
             name: 'facility',
@@ -191,8 +191,8 @@ export const defaultTable: Table = {
             path: ['msg', 'facility'],
             filter: 'facility',
             visible: false,
-            minWidth: 50,
-            width: 100
+            minWidth: 5,
+            width: 10
         },
         {
             name: 'severity',
@@ -201,8 +201,8 @@ export const defaultTable: Table = {
             path: ['msg', 'severity'],
             filter: 'severity',
             visible: true,
-            minWidth: 50,
-            width: 100
+            minWidth: 5,
+            width: 10
         },
         {
             name: 'version',
@@ -211,8 +211,8 @@ export const defaultTable: Table = {
             path: ['msg', 'version'],
             filter: null,
             visible: false,
-            minWidth: 40,
-            width: 50
+            minWidth: 4,
+            width: 5
         },
         {
             name: 'msg_timestamp',
@@ -221,8 +221,8 @@ export const defaultTable: Table = {
             path: ['msg', 'timestamp'],
             filter: null,
             visible: false,
-            minWidth: 65,
-            width: 200
+            minWidth: 10,
+            width: 15
         },
         {
             name: 'hostname',
@@ -231,8 +231,8 @@ export const defaultTable: Table = {
             path: ['msg', 'hostname'],
             filter: 'hostname',
             visible: false,
-            minWidth: 60,
-            width: 70
+            minWidth: 7,
+            width: 10
         },
         {
             name: 'app_name',
@@ -241,8 +241,8 @@ export const defaultTable: Table = {
             path: ['msg', 'app_name'],
             filter: 'app_name',
             visible: false,
-            minWidth: 30,
-            width: 70
+            minWidth: 7,
+            width: 10
         },
         {
             name: 'procid',
@@ -251,8 +251,8 @@ export const defaultTable: Table = {
             path: ['msg', 'procid'],
             filter: 'procid',
             visible: false,
-            minWidth: 30,
-            width: 70
+            minWidth: 4,
+            width: 6
         },
         {
             name: 'msgid',
@@ -261,8 +261,8 @@ export const defaultTable: Table = {
             path: ['msg', 'msgid'],
             filter: 'msgid',
             visible: true,
-            minWidth: 50,
-            width: 100
+            minWidth: 10,
+            width: 15
         },
         {
             name: 'data',
@@ -271,8 +271,8 @@ export const defaultTable: Table = {
             path: ['msg', 'data'],
             filter: null,
             visible: false,
-            minWidth: 50,
-            width: 390
+            minWidth: 10,
+            width: 15
         },
         {
             name: 'msg',
@@ -281,8 +281,8 @@ export const defaultTable: Table = {
             path: ['msg', 'msg'],
             filter: 'msg',
             visible: true,
-            minWidth: 50,
-            width: 120
+            minWidth: 10,
+            width: 30
         }
     ]
 };
