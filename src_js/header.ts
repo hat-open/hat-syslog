@@ -15,11 +15,10 @@ export function headerVt(): u.VNode {
         }},
         ['button', {
             props: {
-                disabled: menu.isVisible(),
-                title: 'Show setting'
+                title: (menu.isVisible() ? 'Hide settings' : 'Show setting')
             },
             on: {
-                click: () => menu.setVisible(true)
+                click: () => menu.setVisible(!menu.isVisible())
             }},
             ['span.fa.fa-cog']
         ],

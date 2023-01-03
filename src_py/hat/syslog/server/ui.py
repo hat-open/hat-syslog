@@ -146,9 +146,10 @@ class WebServer(aio.Resource):
             mlog.debug('setting new filter: %s', new_filter)
             new_filter_json = encoder.filter_to_json(new_filter)
 
-            entries = await self._backend.query(prev_filter)
+            entries = await self._backend.query(new_filter)
             entries_json = [encoder.entry_to_json(entry) for entry in entries]
 
+            self._filters[conn] = new_filter
             conn.state.set([], {'filter': new_filter_json,
                                 'entries': entries_json,
                                 'first_id': self._backend.first_id,

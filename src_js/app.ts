@@ -158,8 +158,8 @@ export function navigate(direction: Direction) {
 
         } else if (direction == 'next') {
             if (pageLastIds.length < 1) {
-                const first_id = u.get(['remote', 'first_id'], state) as number | null;
-                pageLastIds = [first_id || 0];
+                const last_id = u.get(['remote', 'last_id'], state) as number | null;
+                pageLastIds = [last_id || 0];
             }
             const entries = u.get(['remote', 'entries'], state) as common.Entry[];
             if (entries.length > 0) {
