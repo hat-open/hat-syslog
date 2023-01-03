@@ -56,11 +56,18 @@ export function tableVt(): u.VNode {
     const entries = app.getEntries();
     const selectEntry = details.getSelectedEntry();
 
+    const tableWidth = columns.reduce<number>(
+        (acc, i) => acc + (i.visible ? i.width : 0),
+        0
+    );
+
     return ['div.table',
         ['table',
             ['thead',
                 ['tr',
-                    columns.map(headerCellVt)
+                    columns.map((column, index) =>
+                        headerCellVt(tableWidth, column, index)
+                    )
                 ]
             ],
             ['tbody', {
@@ -107,18 +114,51 @@ export function tableVt(): u.VNode {
 }
 
 
-function headerCellVt(column: common.Column): u.VNodeChild {
+function headerCellVt(tableWidth: number, column: common.Column, index: number): u.VNodeChild {
     if (!column.visible)
         return [];
 
-    // TODO width in %
+    const width = Math.max(100 * column.width / tableWidth, 1);
 
     return [`th.col-${column.name}`, {
         props: {
-            style: `width: ${column.width}rem;`
+            style: `width: ${width}%;`
+        },
+        on: {
+            dragover: (evt: DragEvent) => {
+                evt.preventDefault();
+                if (evt.dataTransfer == null)
+                    return;
+                evt.dataTransfer.dropEffect = 'move';
+            },
+            drop: (evt: DragEvent) => {
+                evt.preventDefault();
+                if (evt.dataTransfer == null)
+                    return;
+                const name = evt.dataTransfer.getData('text/plain');
+                if (!common.isColumnName(name))
+                    return;
+                moveColumn(name, index);
+            }
         }},
         ['div',
-            ['div.content', column.label],
+            ['div.content',
+                ['label', {
+                    props: {
+                        draggable: true
+                    },
+                    on: {
+                        dragstart: (evt: DragEvent) => {
+                            if (evt.dataTransfer == null)
+                                return;
+                            evt.dataTransfer.setData('text/plain', column.name);
+                            evt.dataTransfer.dropEffect = 'move';
+                        }
+                    }},
+                    column.label
+                ],
+                filterVt(column)
+            ],
             resizerVt(column)
         ]
     ];
@@ -181,7 +221,7 @@ function resizerVt(column: common.Column): u.VNode {
                     const newElWidth = initElWidth + dx;
                     const newColWidth = Math.max(
                         initColWidth * newElWidth / initElWidth,
-                        column.minWidth
+                        1
                     );
 
                     setColumnWidth(column.name, newColWidth);
@@ -189,6 +229,53 @@ function resizerVt(column: common.Column): u.VNode {
             })
         }
     }];
+}
+
+
+function filterVt(column: common.Column): u.VNodeChild {
+    if (column.filter == null)
+        return [];
+
+    const localFilter = app.getLocalFilter();
+    const value = localFilter[column.filter] || '';
+
+    let options: string[] | null = null;
+    if (column.name == 'facility') {
+        options = ['', ...common.facilities];
+    } else if (column.name == 'severity') {
+        options = ['', ...common.severities];
+    }
+
+    const changeCb = (evt: Event) => {
+        if (column.filter == null)
+            return;
+        const value = (evt.target as HTMLInputElement | HTMLSelectElement).value;
+        app.setFilterValue(column.filter, (value.length > 0 ? value : null));
+    };
+
+    if (options == null)
+        return ['input', {
+            props: {
+                type: 'text',
+                value: value
+            },
+            on: {
+                change: changeCb
+            }
+        }];
+
+    return ['select', {
+        on: {
+            change: changeCb
+        }},
+        options.map(option => ['option', {
+            props: {
+                value: option,
+                selected: option == value
+            }},
+            option
+        ])
+    ];
 }
 
 
@@ -241,134 +328,3 @@ export function setColumnWidth(name: common.ColumnName, width: number) {
         )
     ) as any);
 }
-
-
-
-// function _tableVt() {
-//     return ['div.table', {
-//         ['table',
-//             ['thead', ['tr',
-//                 columns.map((column, columnIndex) => [
-//                     ['th', {
-//                         ['div.column-header', {
-//                             class: {
-//                                 dropzone: (table.getDraggedColumnName()
-//                                     && !u.equals(table.getDraggedColumnName(), column.name))
-//                             },
-//                             on: {
-//                                 dragend: () => table.stopColumnDrag(),
-//                                 dragover: (ev) => ev.preventDefault(),
-//                                 drop: () => table.columnDrop(column.name)
-//                             }},
-//                             ['div.label-container', {
-//                                 props: {
-//                                     draggable: true
-//                                 },
-//                                 on: {
-//                                     dragstart: ev => {
-//                                         ev.dataTransfer.setDragImage(ev.target.parentElement, 0, 0);
-//                                         table.columnDragstart(column.name);
-//                                     },
-//                                 }},
-//                                 ['label', column.label]
-//                             ],
-//                             (column.filterKey ?
-//                                 (column.filterOptions ? ['select', {
-//                                     on: {
-//                                         change: ev => filter.setValue(
-//                                             column.filterKey, JSON.parse(ev.target.value))
-//                                     }},
-//                                     u.concat([null], column.filterOptions).map(value => ['option', {
-//                                         props: {
-//                                             value: JSON.stringify(value),
-//                                             label: value || '',
-//                                             selected: value == `${filter.getValue(column.filterKey)}`
-//                                         },
-//                                     }])
-//                                 ] : ['input', {
-//                                     props: {
-//                                         value: filter.getValue(column.filterKey) || '',
-//                                     },
-//                                     on: {
-//                                         change: ev => filter.setValue(column.filterKey, ev.target.value),
-//                                         mousedown: ev => {
-//                                             ev.stopPropagation();
-//                                             ev.target.blur();
-//                                             ev.target.focus();
-//                                         }
-//                                     }
-//                                 }]) : []
-//                             )
-//                         ]
-//                     ],
-//                 ])
-//             ]],
-//         ],
-//     ];
-// }
-
-
-
-
-// export function columnDragstart(columnName) {
-//     r.set([path, 'columnDrag'], u.pipe(
-//         u.set('columnName', columnName)
-//     )(state.defaultColumnDrag));
-// }
-
-
-// export function getDraggedColumnName() {
-//     return r.get(path, 'columnDrag', 'columnName');
-// }
-
-
-// export function columnDrop(dropColumnName) {
-//     if (u.equals(r.get(path, 'columnDrag'), state.defaultColumnDrag)) {
-//         return;
-//     }
-//     r.change(u.pipe(
-//         u.change([path, 'columns'], columns => {
-//             let movedColumn = u.pipe(
-//                 u.toPairs,
-//                 u.find(([name, _]) => u.equals(name, r.get(path, 'columnDrag', 'columnName')))
-//             )(columns);
-//             if (u.equals(dropColumnName, movedColumn[0])) {
-//                 return columns;
-//             }
-//             columns = u.omit(movedColumn[0], columns);
-
-//             if (movedColumn[0] == columnsVisibleSorted().slice(-1)[0].name) {
-//                 movedColumn = u.set(
-//                     [1, 'width'],
-//                     lastColumnExpanded() ?
-//                         (window.innerWidth
-//                             - (menu.isCollapsed() ? 0 : menu.getWidth())
-//                             - (details.getSelectedEntry() && !details.isCollapsed() ? details.getWidth() : 0)
-//                             - fixedColumnsWidth()) :
-//                         movedColumn[1].minWidth,
-//                     movedColumn);
-//             } else if (dropColumnName == columnsVisibleSorted().slice(-1)[0].name) {
-//                 columns = u.change(dropColumnName, dropColumn => u.set(
-//                     'width',
-//                     lastColumnExpanded() ?
-//                         (window.innerWidth
-//                             - (menu.isCollapsed() ? 0 : menu.getWidth())
-//                             - (details.getSelectedEntry() && !details.isCollapsed() ? details.getWidth() : 0)
-//                             - fixedColumnsWidth()) :
-//                         dropColumn.minWidth,
-//                     dropColumn
-//                 ), columns);
-//             }
-
-//             let newIndex = u.toPairs(columns).findIndex(([name, _]) => u.equals(name, dropColumnName));
-//             newIndex = newIndex + (newIndex >= movedColumn[1].position ? 1 : 0);
-//             return u.pipe(
-//                 u.toPairs,
-//                 u.sortBy(([_, column]) => column.position),
-//                 u.insert(newIndex, movedColumn),
-//                 u.map(([name, column], index) => [name, u.set('position', index, column)]),
-//                 u.fromPairs
-//             )(columns);
-//         }),
-//     ));
-// }

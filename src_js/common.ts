@@ -107,7 +107,6 @@ export type Column = {
     path: u.JPath;
     filter: (keyof Filter) | null;
     visible: boolean;
-    minWidth: number;
     width: number;
 };
 
@@ -171,7 +170,6 @@ export const defaultTable: Table = {
             path: 'id',
             filter: null,
             visible: true,
-            minWidth: 2,
             width: 4
         },
         {
@@ -181,7 +179,6 @@ export const defaultTable: Table = {
             path: 'timestamp',
             filter: null,
             visible: true,
-            minWidth: 10,
             width: 15
         },
         {
@@ -191,7 +188,6 @@ export const defaultTable: Table = {
             path: ['msg', 'facility'],
             filter: 'facility',
             visible: false,
-            minWidth: 5,
             width: 10
         },
         {
@@ -201,7 +197,6 @@ export const defaultTable: Table = {
             path: ['msg', 'severity'],
             filter: 'severity',
             visible: true,
-            minWidth: 5,
             width: 10
         },
         {
@@ -211,7 +206,6 @@ export const defaultTable: Table = {
             path: ['msg', 'version'],
             filter: null,
             visible: false,
-            minWidth: 4,
             width: 5
         },
         {
@@ -221,7 +215,6 @@ export const defaultTable: Table = {
             path: ['msg', 'timestamp'],
             filter: null,
             visible: false,
-            minWidth: 10,
             width: 15
         },
         {
@@ -231,7 +224,6 @@ export const defaultTable: Table = {
             path: ['msg', 'hostname'],
             filter: 'hostname',
             visible: false,
-            minWidth: 7,
             width: 10
         },
         {
@@ -241,7 +233,6 @@ export const defaultTable: Table = {
             path: ['msg', 'app_name'],
             filter: 'app_name',
             visible: false,
-            minWidth: 7,
             width: 10
         },
         {
@@ -251,7 +242,6 @@ export const defaultTable: Table = {
             path: ['msg', 'procid'],
             filter: 'procid',
             visible: false,
-            minWidth: 4,
             width: 6
         },
         {
@@ -261,8 +251,7 @@ export const defaultTable: Table = {
             path: ['msg', 'msgid'],
             filter: 'msgid',
             visible: true,
-            minWidth: 10,
-            width: 15
+            width: 10
         },
         {
             name: 'data',
@@ -271,7 +260,6 @@ export const defaultTable: Table = {
             path: ['msg', 'data'],
             filter: null,
             visible: false,
-            minWidth: 10,
             width: 15
         },
         {
@@ -281,8 +269,7 @@ export const defaultTable: Table = {
             path: ['msg', 'msg'],
             filter: 'msg',
             visible: true,
-            minWidth: 10,
-            width: 30
+            width: 40
         }
     ]
 };
@@ -307,3 +294,8 @@ export const defaultState: State = {
     local: defaultLocalState,
     remote: null
 };
+
+
+export function isColumnName(name: unknown): name is ColumnName {
+    return u.isString(name) && u.contains(name, columnNames as any);
+}

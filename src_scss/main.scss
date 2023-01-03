@@ -53,6 +53,7 @@ body {
                 display: grid;
                 grid-template-columns: auto auto;
                 align-items: center;
+                row-gap: 0.1rem;
                 column-gap: 0.2rem;
                 margin: 0.2rem;
 
@@ -207,6 +208,8 @@ body {
                 }
 
                 tr {
+                    height: 1px;  // HACK expand div to cell height
+
                     &.error {
                         background-color: '#FFCCCC';
                     }
@@ -222,9 +225,11 @@ body {
 
                 th, td {
                     padding: 0;
+                    height: 1px;  // HACK expand div to cell height
 
                     & > div {
                         display: flex;
+                        height: 100%;
 
                         & > .content {
                             flex-grow: 1;
@@ -257,6 +262,20 @@ body {
                 th {
                     background-color: darken($color-blue, 10%);
                     color: $color-grey-100;
+
+                    .content {
+                        display: flex;
+                        flex-direction: column;
+                        gap: 0.2rem;
+
+                        & > label {
+                            overflow: hidden;
+                            white-space: nowrap;
+                            text-overflow: ellipsis;
+
+
+                        }
+                    }
 
                     .resizer {
                         background-color: $color-blue;
@@ -353,147 +372,4 @@ body {
             background-color: lighten($color-blue, 30%);
         }
     }
-}
-
-
-
-
-
-
-
-
-
-#main {
-
-    & > .table {
-        grid-column: 2;
-        grid-row: 2;
-        overflow-x: auto;
-        overflow-y: auto;
-
-        & > table {
-            width: 100%;
-            table-layout: fixed;
-            border-collapse: collapse;
-            user-select: text;
-
-            position:relative;
-            th {
-                position: sticky;
-                top: 0;
-                background-color: darken($color-blue, 10%);
-                color: white;
-                height: 34px;
-                z-index: 1;
-
-                & > .column-header {
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: center;
-                    text-align: start;
-                    padding: 0px 3px;
-                    text-overflow: ellipsis;
-                    height: 100%;
-                    border: 1px solid darken($color-blue, 10%);
-
-                    &.dropzone {
-                        border: 1px dashed yellow;
-                    }
-
-                    & > .label-container {
-                        flex-grow: 1;
-                        display: flex;
-                        align-items: center;
-                    }
-
-                    & > input {
-                        width: calc(100% - 4px);
-                    }
-
-                    & > select {
-                        width: 100%;
-                    }
-                }
-            }
-
-            td {
-                height: 20px;
-                border-top: 1px solid $color-grey-500;
-                border-bottom: 1px solid $color-grey-500;
-                text-align: center;
-                overflow: hidden;
-                text-overflow: ellipsis;
-
-                &.text-noncentered, &.json {
-                    text-align: start;
-                    padding: 0px 5px;
-                    overflow: hidden;
-                    white-space: nowrap;
-                    text-overflow: ellipsis;
-                }
-
-                &.json {
-                    font-family: monospace;
-                    font-size: 8pt;
-                }
-
-                &.timestamp {
-                    position: relative;
-
-                    & > .cell-icons {
-                        position: absolute;
-                        right: 0px;
-                        top: 50%;
-                        transform: translate(0, -42%);
-                        visibility: hidden;
-                        padding: 0px 2px;
-
-                        display: flex;
-                        width: 26px;
-                        justify-content: space-between;
-
-                        & > .icon {
-                            width: 13px;
-                            stroke-width: 2;
-                            stroke: $color-grey-600;
-                            &:hover {
-                                stroke: $color-grey-800;
-                            }
-                        }
-                    }
-
-                    &:hover {
-                        & > .cell-icons {
-                            visibility: visible;
-                        }
-                    }
-                }
-            }
-
-            .border {
-                width: 10px;
-                padding: 0px;
-
-                & > .line {
-                    height: 100%;
-                    width: 1px;
-                    background-color: $color-grey-200;
-                    margin: 0 auto;
-                }
-
-                &.hover {
-                    cursor: ew-resize;
-
-                    & > .line{
-                        background-color: $color-grey-400;
-                    }
-                }
-            }
-
-            .border:last-child {
-                display: none;
-            }
-        }
-    }
-
 }
