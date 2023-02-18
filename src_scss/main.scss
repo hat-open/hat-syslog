@@ -292,6 +292,10 @@ body {
                             text-align: right;
                         };
                     }
+
+                    &.col-id, &.col-timestamp, &.col-msg_timestamp, &.col-procid {
+                        font-family: 'RobotoMono';
+                    }
                 }
             }
         }

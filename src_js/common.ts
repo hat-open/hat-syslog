@@ -188,7 +188,7 @@ export const defaultTable: Table = {
             path: ['msg', 'facility'],
             filter: 'facility',
             visible: false,
-            width: 10
+            width: 5
         },
         {
             name: 'severity',
@@ -197,7 +197,7 @@ export const defaultTable: Table = {
             path: ['msg', 'severity'],
             filter: 'severity',
             visible: true,
-            width: 10
+            width: 5
         },
         {
             name: 'version',
@@ -269,13 +269,13 @@ export const defaultTable: Table = {
             path: ['msg', 'msg'],
             filter: 'msg',
             visible: true,
-            width: 40
+            width: 45
         }
     ]
 };
 
 export const defaultDetails: Details = {
-    visible: false,
+    visible: true,
     selected: null,
     rawDataVisible: false,
     width: 400

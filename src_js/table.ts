@@ -204,7 +204,12 @@ function bodyCellVt(entry: common.Entry, column: common.Column): u.VNodeChild {
 }
 
 
-function resizerVt(column: common.Column): u.VNode {
+function resizerVt(column: common.Column): u.VNodeChild {
+    const nextColumn = getNextVisibleColumn(column);
+
+    if (!nextColumn)
+        return [];
+
     return ['div.resizer', {
         on: {
             mousedown: dragger.mouseDownHandler(evt => {
@@ -216,15 +221,23 @@ function resizerVt(column: common.Column): u.VNode {
 
                 const initElWidth = el.clientWidth;
                 const initColWidth = column.width;
+                const initNextColWidth = nextColumn.width;
 
                 return (_, dx) => {
                     const newElWidth = initElWidth + dx;
-                    const newColWidth = Math.max(
+
+                    let newColWidth = Math.max(
                         initColWidth * newElWidth / initElWidth,
                         1
                     );
+                    let newNextColWidth = initNextColWidth + initColWidth - newColWidth;
+                    if (newNextColWidth <= 1) {
+                        newNextColWidth = 1;
+                        newColWidth = initColWidth + initNextColWidth - newNextColWidth;
+                    }
 
                     setColumnWidth(column.name, newColWidth);
+                    setColumnWidth(nextColumn.name, newNextColWidth);
                 };
             })
         }
@@ -327,4 +340,19 @@ export function setColumnWidth(name: common.ColumnName, width: number) {
             column
         )
     ) as any);
+}
+
+
+function getNextVisibleColumn(column: common.Column): common.Column | null {
+    const columns = getColumns();
+    let index = 0;
+
+    while (index < columns.length && columns[index].name != column.name)
+        index += 1;
+    index += 1;
+
+    while (index < columns.length && !columns[index].visible)
+        index += 1;
+
+    return (index < columns.length ? columns[index] : null);
 }
