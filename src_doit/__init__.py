@@ -64,7 +64,7 @@ def task_build():
             url='https://github.com/hat-open/hat-syslog',
             license=common.License.APACHE2,
             console_scripts=[
-                'hat-syslog = hat.syslog.server.main:main',
+                'hat-syslog-server = hat.syslog.server.main:main',
                 'hat-syslog-generator = hat.syslog.generator:main'])
 
     return {'actions': [build],

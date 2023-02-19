@@ -6,6 +6,7 @@ import asyncio
 import contextlib
 import logging.config
 import sys
+import time
 import typing
 
 import appdirs
@@ -126,9 +127,10 @@ def main():
                    conf['syslog_addr'] if conf else
                    default_syslog_addr)
 
-    syslog_pem = (args.syslog_pem if args.syslog_pem else
-                  Path(conf['syslog_pem']) if conf and 'syslog_pem' in conf else  # NOQA
-                  None)
+    syslog_pem = (
+        args.syslog_pem if args.syslog_pem else
+        Path(conf['syslog_pem']) if conf and 'syslog_pem' in conf else
+        None)
 
     ui_addr = (args.ui_addr if args.ui_addr else
                conf['ui_addr'] if conf else
@@ -177,6 +179,9 @@ async def async_main(syslog_addr: str,
     """Syslog Server async main"""
     async_group = aio.Group()
 
+    async def on_msg(msg):
+        await backend.register(time.time(), msg)
+
     async def async_close():
         await async_group.async_close()
         await asyncio.sleep(0.1)
@@ -193,7 +198,7 @@ async def async_main(syslog_addr: str,
 
         mlog.debug("creating syslog server...")
         await _create_resource(async_group, create_syslog_server, syslog_addr,
-                               syslog_pem, backend)
+                               on_msg, syslog_pem)
 
         mlog.debug("initialization done")
         await async_group.wait_closing()

@@ -19,4 +19,4 @@ jobs:
           - name: doit check
             run: doit check
           - name: doit test
-            run: doit test test_unit
+            run: doit test

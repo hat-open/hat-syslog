@@ -65,7 +65,7 @@ Running
 -------
 
 Syslog Server is implemented as python `hat.syslog.server` package which
-can be run with ``hat-syslog`` script with additional command line
+can be run with ``hat-syslog-server`` script with additional command line
 arguments:
 
     .. program-output:: python -m hat.syslog.server --help

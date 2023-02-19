@@ -43,6 +43,7 @@ class SysLogHandler(logging.Handler):
                  queue_size: int = 1024,
                  reconnect_delay: float = 5):
         super().__init__()
+
         self.__state = _ThreadState(
             host=host,
             port=port,
@@ -55,19 +56,24 @@ class SysLogHandler(logging.Handler):
             cv=threading.Condition(),
             closed=threading.Event(),
             dropped=[0])
+
         self.__thread = threading.Thread(
             target=_logging_handler_thread,
             args=(self.__state, ),
             daemon=True)
+
         self.__thread.start()
 
     def close(self):
         """"See `logging.Handler.close`"""
         state = self.__state
+
         with state.cv:
             if state.closed.is_set():
                 return
+
             state.closed.set()
+
             with contextlib.suppress(Exception):
                 # workaround for errors/0001.txt
                 state.cv.notify_all()
@@ -76,13 +82,16 @@ class SysLogHandler(logging.Handler):
         """"See `logging.Handler.emit`"""
         msg = _record_to_msg(record)
         state = self.__state
+
         with state.cv:
             if state.closed.is_set():
                 return
+
             state.queue.append(msg)
             while len(state.queue) > state.queue_size:
                 state.queue.popleft()
                 state.dropped[0] += 1
+
             with contextlib.suppress(Exception):
                 # workaround for errors/0001.txt
                 state.cv.notify_all()
@@ -111,48 +120,61 @@ class _ThreadState(typing.NamedTuple):
 
 
 def _logging_handler_thread(state):
-    msg = None
     if state.comm_type == common.CommType.SSL:
         ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
         ctx.check_hostname = False
         ctx.verify_mode = ssl.VerifyMode.CERT_NONE
+
     while not state.closed.is_set():
         try:
             if state.comm_type == common.CommType.UDP:
                 s = socket.socket(type=socket.SOCK_DGRAM)
                 s.connect((state.host, state.port))
+
             elif state.comm_type == common.CommType.TCP:
                 s = socket.create_connection((state.host, state.port))
                 s.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+
             elif state.comm_type == common.CommType.SSL:
                 s = ctx.wrap_socket(socket.create_connection(
                     (state.host, state.port)))
                 s.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
+
             else:
                 raise NotImplementedError()
+
         except Exception:
             time.sleep(state.reconnect_delay)
             continue
+
         try:
             while True:
-                if not msg:
-                    with state.cv:
-                        state.cv.wait_for(lambda: (state.closed.is_set() or
-                                                   len(state.queue) or
-                                                   state.dropped[0]))
-                        if state.closed.is_set():
-                            return
-                        if state.dropped[0]:
-                            msg = _create_dropped_msg(
-                                state.dropped[0], '_logging_handler_thread', 0)
-                            state.dropped[0] = 0
-                        else:
-                            msg = state.queue.popleft()
+                with state.cv:
+                    state.cv.wait_for(lambda: (state.closed.is_set() or
+                                               len(state.queue) or
+                                               state.dropped[0]))
+                    if state.closed.is_set():
+                        return
+
+                    if state.dropped[0]:
+                        msg = _create_dropped_msg(
+                            state.dropped[0], '_logging_handler_thread', 0)
+                        state.dropped[0] = 0
+
+                    else:
+                        msg = state.queue.popleft()
+
                 msg_bytes = encoder.msg_to_str(msg).encode()
-                s.send(f'{len(msg_bytes)} '.encode() + msg_bytes)
-                msg = None
+
+                if state.comm_type == common.CommType.UDP:
+                    s.send(msg_bytes)
+
+                else:
+                    s.send(f'{len(msg_bytes)} '.encode() + msg_bytes)
+
         except Exception:
             pass
+
         finally:
             with contextlib.suppress(Exception):
                 s.close()
@@ -164,15 +186,10 @@ def _record_to_msg(record):
         if record.exc_info:
             exc_info = ''.join(
                 traceback.TracebackException(*record.exc_info).format())
+
     return common.Msg(
         facility=common.Facility.USER,
-        severity={
-            logging.NOTSET: common.Severity.INFORMATIONAL,
-            logging.DEBUG: common.Severity.DEBUG,
-            logging.INFO: common.Severity.INFORMATIONAL,
-            logging.WARNING: common.Severity.WARNING,
-            logging.ERROR: common.Severity.ERROR,
-            logging.CRITICAL: common.Severity.CRITICAL}[record.levelno],
+        severity=_logging_severity_dict[record.levelno],
         version=1,
         timestamp=record.created,
         hostname=socket.gethostname(),
@@ -207,3 +224,11 @@ def _create_dropped_msg(dropped, func_name, lineno):
                 'lineno': str(lineno),
                 'exc_info': ''}}),
         msg=f'dropped {dropped} log messages')
+
+
+_logging_severity_dict = {logging.NOTSET: common.Severity.INFORMATIONAL,
+                          logging.DEBUG: common.Severity.DEBUG,
+                          logging.INFO: common.Severity.INFORMATIONAL,
+                          logging.WARNING: common.Severity.WARNING,
+                          logging.ERROR: common.Severity.ERROR,
+                          logging.CRITICAL: common.Severity.CRITICAL}
