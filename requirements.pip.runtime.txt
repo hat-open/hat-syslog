@@ -1,6 +1,6 @@
 appdirs ~= 1.4.4
 click ~= 8.0.4
-hat-aio ~= 0.7.0
-hat-json ~= 0.5.8
-hat-juggler ~= 0.5.9
-hat-util ~= 0.5.8
+hat-aio ~= 0.7.5
+hat-json ~= 0.5.16
+hat-juggler ~= 0.5.13
+hat-util ~= 0.6.8
