@@ -1,6 +1,6 @@
-.. |syslog-server| replace:: `Syslog Server <docs/server>`_
-.. |syslog-handler| replace:: `Syslog Handler <docs/handler>`_
-.. |syslog-generator| replace:: `Syslog Generator <docs/generator>`_
+.. _Syslog Server: docs/server.rst
+.. _Syslog Handler: docs/handler.rst
+.. _Syslog Generator: docs/generator.rst
 
 .. |syslog-server-img| image:: docs/img/syslog_server.png
 
@@ -13,10 +13,6 @@
 .. _RFC 5425: https://tools.ietf.org/html/rfc5425
 .. _RFC 5426: https://tools.ietf.org/html/rfc5426
 .. _RFC 6587: https://tools.ietf.org/html/rfc6587
-
-.. _Syslog Server: docs/server
-.. _Syslog Handler: docs/handler
-.. _Syslog Generator: docs/generator
 
 .. _AUR package: https://aur.archlinux.org/packages/hat-syslog
 .. _GutHub releases: https://github.com/hat-open/hat-syslog/releases
@@ -54,9 +50,9 @@ as defined by `RFC 5425`_, `RFC 5426`_ and `RFC 6587`_.
 
 This project includes implementations of:
 
-    * |syslog-server|
-    * |syslog-handler|
-    * |syslog-generator|
+    * `Syslog Server`_
+    * `Syslog Handler`_
+    * `Syslog Generator`_
 
 
 Syslog Server
@@ -122,7 +118,7 @@ Command `hat-syslog-server` is used for running new Syslog Server instance::
 
     $ hat-syslog-server
 
-For additional details and command line options see |syslog-server|.
+For additional details and command line options see `Syslog Server`_.
 
 
 Syslog Handler
@@ -152,7 +148,7 @@ Example python logging configuration:
             'handlers': ['syslog']},
         'disable_existing_loggers': False})
 
-For additional details see |syslog-handler|.
+For additional details see `Syslog Handler`_.
 
 
 Syslog Generator
@@ -162,7 +158,7 @@ Command `hat-syslog-generator` is used for running Syslog Generator::
 
     $ hat-syslog-generator
 
-For additional details and command line options see |syslog-generator|.
+For additional details and command line options see `Syslog Generator`_.
 
 
 License

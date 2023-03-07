@@ -1,6 +1,6 @@
-.. |syslog-server| replace:: :doc:`Syslog Server <server>`
-.. |syslog-handler| replace:: :doc:`Syslog Handler <handler>`
-.. |syslog-generator| replace:: :doc:`Syslog Generator <generator>`
+.. _Syslog Server: server.html
+.. _Syslog Handler: handler.html
+.. _Syslog Generator: generator.html
 
 .. |syslog-server-img| image:: img/syslog_server.png
 
