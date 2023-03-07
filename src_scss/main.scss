@@ -26,7 +26,6 @@ body {
         height: 100%;
         overflow: hidden;
         display: grid;
-        // TODO size of details area (resize)
         grid-template-columns: max-content 1fr max-content max-content;
         grid-template-rows: max-content 1fr;
         grid-template-areas: "header header header header"
@@ -152,7 +151,7 @@ body {
                 display: flex;
                 border-bottom: 1px solid $color-grey-400;
                 background-color: $color-grey-200;
-                align-items: center;
+                align-items: stretch;
 
                 & > label {
                     flex-grow: 1;
@@ -204,6 +203,10 @@ body {
                 tbody {
                     &:focus {
                         outline: none;
+                    }
+
+                    tr {
+                        border-bottom: 1px solid $color-grey-200;
                     }
                 }
 
@@ -326,7 +329,7 @@ body {
                 display: flex;
                 border-bottom: 1px solid $color-grey-400;
                 background-color: $color-grey-200;
-                align-items: center;
+                align-items: stretch;
 
                 & > label {
                     flex-grow: 1;

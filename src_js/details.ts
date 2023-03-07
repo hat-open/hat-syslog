@@ -31,8 +31,6 @@ export function detailsVt(): u.VNodeChild {
         return [];
 
     const entry = getSelectedEntry();
-    if (!entry)
-        return [];
 
     return [
         ['div.details-resizer', {
@@ -48,7 +46,6 @@ export function detailsVt(): u.VNodeChild {
 
                     const width = el.clientWidth;
                     return (_, dx) => {
-                        // TODO: flex grow/shrink - grid grow/shrink
                         setWidth(width - dx);
                     };
                 })
@@ -65,27 +62,32 @@ export function detailsVt(): u.VNodeChild {
 }
 
 
-function headerVt(entry: common.Entry): u.VNode {
+function headerVt(entry: common.Entry | null): u.VNode {
     return ['div.header',
-        ['label', `Entry ${entry.id}`],
-        ['button', {
-            props: {
-                title: 'Copy JSON entry',
-            },
-            on: {
-                click: () => copy(entry)
-            }},
-            ['span.fa.fa-copy']
-        ],
-        ['button', {
-            props: {
-                title: 'Download JSON entry',
-            },
-            on: {
-                click: () => download(entry)
-            }},
-            ['span.fa.fa-download']
-        ],
+        ['label', (!entry ?
+            'Details' :
+            `Entry ${entry.id}`
+        )],
+        (!entry ? [] : [
+            ['button', {
+                props: {
+                    title: 'Copy JSON entry',
+                },
+                on: {
+                    click: () => copy(entry)
+                }},
+                ['span.fa.fa-copy']
+            ],
+            ['button', {
+                props: {
+                    title: 'Download JSON entry',
+                },
+                on: {
+                    click: () => download(entry)
+                }},
+                ['span.fa.fa-download']
+            ]
+        ]),
         ['button', {
             props: {
                 title: 'Close',
@@ -99,7 +101,10 @@ function headerVt(entry: common.Entry): u.VNode {
 }
 
 
-function contentVt(entry: common.Entry): u.VNode {
+function contentVt(entry: common.Entry | null): u.VNode {
+    if (!entry)
+        return ['div.content'];
+
     const rawDataVisible = r.get('local', 'details', 'rawDataVisible');
 
     const data = (entry.msg.data ? decodeJson(entry.msg.data) : null);

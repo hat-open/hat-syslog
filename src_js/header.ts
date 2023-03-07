@@ -2,6 +2,7 @@ import * as u from '@hat-open/util';
 
 import * as app from './app';
 import * as common from './common';
+import * as details from './details';
 import * as menu from './menu';
 
 
@@ -44,7 +45,16 @@ export function headerVt(): u.VNode {
                 target: '_blank'
             }},
             ['span.fa.fa-question-circle']
-        ]
+        ],
+        ['button', {
+            props: {
+                title: (details.isVisible() ? 'Hide details' : 'Show details')
+            },
+            on: {
+                click: () => details.setVisible(!details.isVisible())
+            }},
+            ['span.fa.fa-bars']
+        ],
     ];
 }
 

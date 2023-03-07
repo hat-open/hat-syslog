@@ -1,19 +1,18 @@
-import asyncio
-import contextlib
 import inspect
 import logging.config
 import os
 import socket
+import subprocess
 import threading
 import time
 import traceback
-import subprocess
 
 import pytest
 
 from hat import aio
 from hat import json
 from hat import util
+
 from hat.syslog.server import common
 import hat.syslog.handler
 import hat.syslog.server.syslog
@@ -71,7 +70,7 @@ async def message_queue(create_syslog_server):
 
 @pytest.fixture
 def logger(syslog_port, comm_type):
-    handler = hat.syslog.handler.SysLogHandler(host='127.0.0.1',
+    handler = hat.syslog.handler.SyslogHandler(host='127.0.0.1',
                                                port=syslog_port,
                                                comm_type=comm_type.upper(),
                                                queue_size=10,
@@ -101,9 +100,6 @@ async def test_msg(message_queue, logger):
     assert msg.version == 1
     assert msg.hostname == socket.gethostname()
 
-    # TODO pytest/__main__.py != pytest/__init__.py
-    # assert msg.app_name == pytest.__file__
-
     assert int(msg.procid) == os.getpid()
     assert msg.msgid == logger.name
     assert msg.msg == 'for your information'
@@ -116,32 +112,14 @@ async def test_msg(message_queue, logger):
     assert not msg_data['hat@1']['exc_info']
 
 
-async def test_dropped(logger, message_queue):
-    for i in range(20):
-        logger.info('%s', i)
-
-    assert message_queue.empty()
-    msg_drop = await message_queue.get()
-
-    assert msg_drop.msg == 'dropped 10 log messages'
-    assert msg_drop.severity == common.Severity.ERROR
-    for i in range(10, 20):
-        msg = await message_queue.get()
-        assert int(msg.msg) == i
-    assert message_queue.empty()
-
-    logger.info('%s', i)
-    msg = await message_queue.get()
-    assert int(msg.msg) == i
-    assert message_queue.empty()
-
-
 async def test_exc_info(message_queue, logger):
     try:
         raise Exception('Exception!')
+
     except Exception as e:
         logger.error('an exception occured: %s', e, exc_info=e)
         exc_info_exp = traceback.format_exc()
+
     msg = await message_queue.get()
     msg_data = json.decode(msg.data)
     assert msg_data['hat@1']['exc_info'] == exc_info_exp

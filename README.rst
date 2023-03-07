@@ -1,3 +1,28 @@
+.. |syslog-server| replace:: `Syslog Server <docs/server>`_
+.. |syslog-handler| replace:: `Syslog Handler <docs/handler>`_
+.. |syslog-generator| replace:: `Syslog Generator <docs/generator>`_
+
+.. |syslog-server-img| image:: docs/img/syslog_server.png
+
+.. _Končar Digital: https://www.koncar.hr
+
+.. _hat-syslog documentation: https://hat-syslog.hat-open.com
+.. _hat-syslog git repository: https://github.com/hat-open/hat-syslog.git
+.. _Hat Open homepage: https://hat-open.com
+
+.. _RFC 5425: https://tools.ietf.org/html/rfc5425
+.. _RFC 5426: https://tools.ietf.org/html/rfc5426
+.. _RFC 6587: https://tools.ietf.org/html/rfc6587
+
+.. _Syslog Server: docs/server
+.. _Syslog Handler: docs/handler
+.. _Syslog Generator: docs/generator
+
+.. _AUR package: https://aur.archlinux.org/packages/hat-syslog
+.. _GutHub releases: https://github.com/hat-open/hat-syslog/releases
+.. _PyPI project: https://pypi.org/project/hat-syslog
+
+
 hat-syslog - Syslog server and logging handler
 ==============================================
 
@@ -7,13 +32,13 @@ management of intelligent electronic devices such as IoT devices, PLCs,
 industrial automation or home automation systems.
 
 Development of Hat Open and associated repositories is sponsored by
-`Končar Digital <https://www.koncar.hr>`_.
+`Končar Digital`_.
 
 For more information see:
 
-    * hat-syslog documentation - `<https://hat-syslog.hat-open.com>`_
-    * hat-syslog git repository - `<https://github.com/hat-open/hat-syslog.git>`_
-    * Hat Open homepage - `<https://hat-open.com>`_
+    * `hat-syslog documentation`_
+    * `hat-syslog git repository`_
+    * `Hat Open homepage`_
 
 .. warning::
 
@@ -24,30 +49,120 @@ For more information see:
 About
 -----
 
-Real time reporting of execution state is mandatory functionality for most of
-Hat's components implementing continuously running service. Primary way
-of logging is based on Syslog logging protocol as defined by:
+`hat-syslog` provides server/client tooling based on Syslog logging protocol
+as defined by `RFC 5425`_, `RFC 5426`_ and `RFC 6587`_.
 
-    * `RFC 5425 <https://tools.ietf.org/html/rfc5425>`_
-    * `RFC 5426 <https://tools.ietf.org/html/rfc5426>`_
-    * `RFC 6587 <https://tools.ietf.org/html/rfc6587>`_
+This project includes implementations of:
 
-Each component which reports log messages should implement Syslog TCP client.
-In this way, all logging messages can be aggregated in a single Syslog
-concentrator which can provide archiving, searching and real time monitoring
-functionalities.
+    * |syslog-server|
+    * |syslog-handler|
+    * |syslog-generator|
 
-Care must be taken for Syslog TCP client logging facility implementation not to
-interfere with other component's functionalities. Logging should be considered
-best effort and not critical activity of each component.
+
+Syslog Server
+'''''''''''''
+
+Central concentrator for syslog messages with web interface for real time
+monitoring and filtering of log messages.
+
+|syslog-server-img|
+
+
+Syslog Handler
+''''''''''''''
+
+Implementation of Python's standard library `logging.Handler` based on
+dedicated background logging thread.
+
+
+Syslog Generator
+''''''''''''''''
+
+Simple testing tool responsible for generating syslog messages.
+
+
+Runtime requirements
+--------------------
+
+* python >=3.8
 
 
 Install
 -------
 
-::
+Archlinux
+'''''''''
+
+`hat-syslog` is available as `AUR package`_::
+
+    $ yay -S hat-syslog
+
+
+Windows
+'''''''
+
+Windows distribution, with embedded python, is available at `GutHub releases`_.
+
+
+Python wheel
+''''''''''''
+
+`hat-syslog` is available as `PyPI project`_::
 
     $ pip install hat-syslog
+
+
+Usage
+-----
+
+Syslog Server
+'''''''''''''
+
+Command `hat-syslog-server` is used for running new Syslog Server instance::
+
+    $ hat-syslog-server
+
+For additional details and command line options see |syslog-server|.
+
+
+Syslog Handler
+''''''''''''''
+
+Example python logging configuration:
+
+.. code:: python
+
+    import logging.conf
+
+    logging.config.dictConfig({
+        'version': 1,
+        'formatters': {
+            'default': {}},
+        'handlers': {
+            'syslog': {
+                'class': 'hat.syslog.handler.SyslogHandler',
+                'host': '127.0.0.1',
+                'port': 6514,
+                'comm_type': 'TCP',
+                'level': 'DEBUG',
+                'formatter': 'default',
+                'queue_size': 50}},
+        'root': {
+            'level': 'INFO',
+            'handlers': ['syslog']},
+        'disable_existing_loggers': False})
+
+For additional details see |syslog-handler|.
+
+
+Syslog Generator
+''''''''''''''''
+
+Command `hat-syslog-generator` is used for running Syslog Generator::
+
+    $ hat-syslog-generator
+
+For additional details and command line options see |syslog-generator|.
 
 
 License

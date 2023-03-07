@@ -1,5 +1,5 @@
 -r requirements.pip.runtime.txt
 
-hat-doit ~= 0.12.2
-sphinxcontrib-plantuml >= 0.24.1
+hat-doit ~= 0.12.5
+sphinxcontrib-plantuml >= 0.25
 sphinxcontrib-programoutput >= 0.17

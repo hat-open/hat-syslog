@@ -23,7 +23,7 @@ from hat.syslog import common
 from hat.syslog import encoder
 
 
-class SysLogHandler(logging.Handler):
+class SyslogHandler(logging.Handler):
     """Syslog handler
 
     Args:
@@ -95,6 +95,10 @@ class SysLogHandler(logging.Handler):
             with contextlib.suppress(Exception):
                 # workaround for errors/0001.txt
                 state.cv.notify_all()
+
+
+# compatibility alias
+SysLogHandler = SyslogHandler
 
 
 class _ThreadState(typing.NamedTuple):

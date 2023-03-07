@@ -1,5 +1,3 @@
-.. _syslog-generator:
-
 Syslog Generator
 ================
 

@@ -59,7 +59,7 @@ def main():
             'default': {}},
         'handlers': {
             'syslog': {
-                'class': 'hat.syslog.handler.SysLogHandler',
+                'class': 'hat.syslog.handler.SyslogHandler',
                 'host': args.host,
                 'port': args.port,
                 'comm_type': 'TCP',

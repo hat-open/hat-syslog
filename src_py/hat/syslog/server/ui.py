@@ -74,6 +74,8 @@ class WebServer(aio.Resource):
 
     async def _on_connection(self, conn):
         try:
+            mlog.debug("new connection")
+
             self._locks[conn] = asyncio.Lock()
             self._filters[conn] = default_filter
 
@@ -127,6 +129,7 @@ class WebServer(aio.Resource):
             mlog.error("connection error: %s", e, exc_info=e)
 
         finally:
+            mlog.debug("closing connection")
             conn.close()
             self._locks.pop(conn)
             self._filters.pop(conn)

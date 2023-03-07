@@ -1,9 +1,24 @@
-.. _syslog-server:
-
 Syslog Server
 =============
 
-Syslog server is central concentration for syslog messages. Additionally, it
+.. Real time reporting of execution state is mandatory functionality for most of
+.. Hat's components implementing continuously running service. Primary way
+.. of logging is based on Syslog logging protocol as defined by:
+
+..     * `RFC 5425 <https://tools.ietf.org/html/rfc5425>`_
+..     * `RFC 5426 <https://tools.ietf.org/html/rfc5426>`_
+..     * `RFC 6587 <https://tools.ietf.org/html/rfc6587>`_
+
+.. Each component which reports log messages should implement Syslog TCP client.
+.. In this way, all logging messages can be aggregated in a single Syslog
+.. concentrator which can provide archiving, searching and real time monitoring
+.. functionalities.
+
+.. Care must be taken for Syslog TCP client logging facility implementation not to
+.. interfere with other component's functionalities. Logging should be considered
+.. best effort and not critical activity of each component.
+
+Syslog server is central concentrator for syslog messages. Additionally, it
 provides web interface for real time monitoring and filtering of log messages.
 
 Syslog listening socket can be configured as TCP, UDP or TCP+SSL socket.

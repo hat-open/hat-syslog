@@ -23,9 +23,6 @@ from hat.syslog.server.ui import create_web_server
 mlog: logging.Logger = logging.getLogger('hat.syslog.server.main')
 """Module logger"""
 
-package_path: Path = Path(__file__).parent
-"""Python package path"""
-
 user_data_dir: Path = Path(appdirs.user_data_dir('hat'))
 """User data directory path"""
 
@@ -237,5 +234,5 @@ async def _create_resource(async_group, fn, *args):
 
 
 if __name__ == '__main__':
-    sys.argv[0] = 'hat-syslog'
+    sys.argv[0] = 'hat-syslog-server'
     sys.exit(main())
