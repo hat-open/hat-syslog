@@ -1,5 +1,6 @@
 /.doit.db
 /build
+/cache
 /node_modules
 /src_py/**/json_schema_repo.json
 /src_py/hat/syslog/server/ui

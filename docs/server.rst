@@ -1,33 +1,12 @@
 Syslog Server
 =============
 
-.. Real time reporting of execution state is mandatory functionality for most of
-.. Hat's components implementing continuously running service. Primary way
-.. of logging is based on Syslog logging protocol as defined by:
-
-..     * `RFC 5425 <https://tools.ietf.org/html/rfc5425>`_
-..     * `RFC 5426 <https://tools.ietf.org/html/rfc5426>`_
-..     * `RFC 6587 <https://tools.ietf.org/html/rfc6587>`_
-
-.. Each component which reports log messages should implement Syslog TCP client.
-.. In this way, all logging messages can be aggregated in a single Syslog
-.. concentrator which can provide archiving, searching and real time monitoring
-.. functionalities.
-
-.. Care must be taken for Syslog TCP client logging facility implementation not to
-.. interfere with other component's functionalities. Logging should be considered
-.. best effort and not critical activity of each component.
-
-Syslog server is central concentrator for syslog messages. Additionally, it
+Syslog Server is central concentrator for syslog messages. Additionally, it
 provides web interface for real time monitoring and filtering of log messages.
 
 Syslog listening socket can be configured as TCP, UDP or TCP+SSL socket.
-Communication is based on RFC 5425, RFC 5426, RFC 6587. Once message is
-received, server stores message in predefined database.
-
-.. warning::
-
-    Current implementation of Syslog server doesn't support UDP communication
+Communication is based on `RFC 5425`_, `RFC 5426`_, `RFC 6587`_. Once message
+is received, server stores message in predefined database.
 
 .. uml::
 
@@ -91,12 +70,13 @@ This application is part of `hat-syslog` python package.
 Configuration
 -------------
 
-Syslog Server configuration written in form of single YAML or JSON file
-with structure defined by JSON Schema ``hat-syslog://server.yaml#``.
-Path to configuration file is provided as command line argument during process
-startup. Additionally, configuration parameters provided in configuration file
-can be overridden by command line arguments. If configuration file could not be
-found, default values of configuration parameters are used.
+Syslog Server configuration written in form of single YAML, JSON or TOML file
+with structure defined by JSON Schema ``hat-syslog://server.yaml#`` (see
+`JSON Schemas`_). Path to configuration file is provided as command line
+argument during process startup. Additionally, configuration parameters
+provided in configuration file can be overridden by command line arguments.
+If configuration file could not be found, default values of configuration
+parameters are used.
 
 Example of configuration::
 
@@ -137,7 +117,9 @@ Web UI
 Together with acquiring and storing syslog messages, Syslog Server provides
 web-based user interface for querying messages from database and observing
 changes in real time. Communication between web server and browser is
-based on juggler communication.
+based on `Juggler communication`_.
+
+.. image:: img/syslog_server.png
 
 
 Server state
@@ -147,7 +129,7 @@ Server state is used for providing continuously updated list of log entries
 to clients, based on applied filters.
 
 State structure is defined by JSON schema
-``hat-syslog://juggler.yaml#/definitions/state``.
+``hat-syslog://juggler.yaml#/definitions/state`` (see `JSON Schemas`_).
 
 
 Request/response
@@ -156,7 +138,7 @@ Request/response
 Juggler request/response communication is used for changing filter parameters.
 
 Request data structures are defined by JSON schema
-``hat-syslog://juggler.yaml#/definitions/request``.
+``hat-syslog://juggler.yaml#/definitions/request`` (see `JSON Schemas`_).
 
 In case of successful request execution, response data is ``null``.
 
@@ -177,3 +159,10 @@ Juggler
 
 .. literalinclude:: ../schemas_json/juggler.yaml
     :language: yaml
+
+
+.. _RFC 5425: https://tools.ietf.org/html/rfc5425
+.. _RFC 5426: https://tools.ietf.org/html/rfc5426
+.. _RFC 6587: https://tools.ietf.org/html/rfc6587
+
+.. _Juggler communication: https://hat-juggler.hat-open.com

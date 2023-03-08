@@ -33,6 +33,13 @@ def create_argument_parser() -> argparse.ArgumentParser:
         '--text', metavar='TEXT', default='syslog generator test',
         help="log message text")
     parser.add_argument(
+        '--level', metavar='LEVEL', default='INFO',
+        choices=('DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'),
+        help="log level")
+    parser.add_argument(
+        '--with-exc', action='store_true',
+        help="include exception")
+    parser.add_argument(
         '--queue-size', metavar='N', type=int, default=1024,
         help="client's log message queue size (default 1024)")
     parser.add_argument(
@@ -63,31 +70,42 @@ def main():
                 'host': args.host,
                 'port': args.port,
                 'comm_type': 'TCP',
-                'level': 'DEBUG',
+                'level': args.level,
                 'formatter': 'default',
                 'queue_size': args.queue_size}},
+        'loggers': {
+            'asyncio': {
+                'level': 'INFO'}},
         'root': {
-            'level': 'INFO',
+            'level': args.level,
             'handlers': ['syslog']},
         'disable_existing_loggers': False})
 
     with contextlib.suppress(asyncio.CancelledError):
         aio.run_asyncio(async_main(count=args.count,
                                    text=args.text,
+                                   level=getattr(logging, args.level),
+                                   with_exc=args.with_exc,
                                    msg_delay=args.msg_delay,
                                    end_delay=args.end_delay))
 
 
 async def async_main(count: int,
                      text: str,
+                     level: int,
+                     with_exc: bool,
                      msg_delay: float,
                      end_delay: float):
     """Async main"""
+    digits_count = _number_of_digits(count)
+
     for i in range(count):
-        mlog.info(
-            ('{} {:0' + str(_number_of_digits(count)) + '}').format(
-                text, i))
+        msg = f'{{}} {{:0{digits_count}}}'.format(text, i)
+        exc_info = Exception(msg) if with_exc else None
+        mlog.log(level, msg, exc_info=exc_info)
+
         await asyncio.sleep(msg_delay)
+
     await asyncio.sleep(end_delay)
 
 

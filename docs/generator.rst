@@ -2,7 +2,8 @@ Syslog Generator
 ================
 
 Syslog generator is application used as simple testing tool responsible
-for generating syslog messages that can be sent to Syslog Server.
+for generating syslog messages that can be sent to
+:doc:`Syslog Server <server>`.
 
 Implemented as python `hat.syslog.generator` module which can be run with
 ``hat-syslog-generator`` script with additional command line arguments:

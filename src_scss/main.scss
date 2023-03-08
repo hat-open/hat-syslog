@@ -41,7 +41,7 @@ body {
             background-color: $color-grey-100;
 
             &.frozen {
-                background-color: rgba(red, 0.1);
+                background-color: $color-red-100;
             }
 
             & > .spacer {
@@ -83,7 +83,7 @@ body {
                         border-radius: 0.2rem;
                         padding: 0.2rem 0.5rem;
                         margin: 0.2rem;
-                        background-color: lighten($color-blue, 30%);
+                        background-color: $color-blue-300;
                         white-space: nowrap;
 
                         & > .fa {
@@ -92,7 +92,7 @@ body {
                             margin-left: 0.2rem;
 
                             &:hover {
-                                background-color: lighten($color-blue, 20%);
+                                background-color: $color-blue-200;
                             }
                         }
                     }
@@ -188,6 +188,10 @@ body {
                     }
                 }
             }
+
+            & > button {
+                padding: 0.2rem;
+            }
         }
 
         & > .table {
@@ -214,15 +218,23 @@ body {
                     height: 1px;  // HACK expand div to cell height
 
                     &.error {
-                        background-color: '#FFCCCC';
+                        background-color: $color-red-100;
                     }
 
                     &.warning {
-                        background-color: '#FFE6CC';
+                        background-color: $color-yellow-100;
                     }
 
                     &.selected {
                         background-color: $color-grey-200;
+
+                        &.error {
+                            background-color: $color-red-200;
+                        }
+
+                        &.warning {
+                            background-color: $color-yellow-200;
+                        }
                     }
                 }
 
@@ -263,8 +275,8 @@ body {
                 }
 
                 th {
-                    background-color: darken($color-blue, 10%);
-                    color: $color-grey-100;
+                    background-color: $color-blue-grey-700;
+                    color: $color-blue-grey-50;
 
                     .content {
                         display: flex;
@@ -281,13 +293,13 @@ body {
                     }
 
                     .resizer {
-                        background-color: $color-blue;
+                        background-color: $color-blue-grey-600;
                     }
                 }
 
                 td {
                     .resizer {
-                        background-color: lighten($color-blue, 50%);
+                        background-color: $color-blue-grey-50;
                     }
 
                     &.col-id, &.col-version, &.col-procid {
@@ -376,7 +388,7 @@ body {
             margin: 0 0.5rem 0.5rem 0;
             padding: 1rem;
             border-radius: 0.2rem;
-            background-color: lighten($color-blue, 30%);
+            background-color: $color-blue-200;
         }
     }
 }

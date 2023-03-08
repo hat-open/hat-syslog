@@ -15,6 +15,10 @@ jobs:
             uses: actions/setup-python@v1
             with:
                 python-version: "3.10"
+          - name: install ubuntu requirements
+            run: |
+                sudo apt update
+                sudo apt install -q -y plantuml
           - name: install requirements.pip.dev.txt
             run: |
                 python -m pip install --upgrade pip

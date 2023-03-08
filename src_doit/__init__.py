@@ -1,3 +1,5 @@
+from .dist import *  # NOQA
+
 from pathlib import Path
 import subprocess
 import tempfile
@@ -12,6 +14,8 @@ from hat.doit.py import (build_wheel,
                          run_pytest,
                          run_flake8)
 
+from . import dist
+
 
 __all__ = ['task_clean_all',
            'task_node_modules',
@@ -20,7 +24,8 @@ __all__ = ['task_clean_all',
            'task_test',
            'task_docs',
            'task_ui',
-           'task_json_schema_repo']
+           'task_json_schema_repo',
+           *dist.__all__]
 
 
 build_dir = Path('build')

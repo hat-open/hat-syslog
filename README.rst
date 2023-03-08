@@ -19,8 +19,8 @@
 .. _PyPI project: https://pypi.org/project/hat-syslog
 
 
-hat-syslog - Syslog server and logging handler
-==============================================
+hat-syslog - Syslog server and clients
+======================================
 
 This component is part of Hat Open project - open-source framework of tools and
 libraries for developing applications used for remote monitoring, control and
@@ -141,8 +141,7 @@ Example python logging configuration:
                 'port': 6514,
                 'comm_type': 'TCP',
                 'level': 'DEBUG',
-                'formatter': 'default',
-                'queue_size': 50}},
+                'formatter': 'default'}},
         'root': {
             'level': 'INFO',
             'handlers': ['syslog']},
