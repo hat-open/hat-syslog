@@ -1,8 +1,8 @@
 .. |syslog-server-img| image:: docs/img/syslog_server.png
 
-.. _Syslog Server: docs/server.rst
-.. _Syslog Handler: docs/handler.rst
-.. _Syslog Generator: docs/generator.rst
+.. _Syslog Server: https://hat-syslog.hat-open.com/server.html
+.. _Syslog Handler: https://hat-syslog.hat-open.com/handler.html
+.. _Syslog Generator: https://hat-syslog.hat-open.com/generator.html
 
 .. _online documentation: https://hat-syslog.hat-open.com
 .. _git repository: https://github.com/hat-open/hat-syslog.git
