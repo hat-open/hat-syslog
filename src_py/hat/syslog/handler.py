@@ -1,4 +1,4 @@
-"""Syslog hadler
+"""Syslog handler
 
 Implementation of `logging.Handler` for syslog logging protocol.
 

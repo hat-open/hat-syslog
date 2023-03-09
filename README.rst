@@ -1,45 +1,28 @@
+.. |syslog-server-img| image:: docs/img/syslog_server.png
+
 .. _Syslog Server: docs/server.rst
 .. _Syslog Handler: docs/handler.rst
 .. _Syslog Generator: docs/generator.rst
 
-.. |syslog-server-img| image:: docs/img/syslog_server.png
-
-.. _Končar Digital: https://www.koncar.hr
-
-.. _hat-syslog documentation: https://hat-syslog.hat-open.com
-.. _hat-syslog git repository: https://github.com/hat-open/hat-syslog.git
-.. _Hat Open homepage: https://hat-open.com
+.. _online documentation: https://hat-syslog.hat-open.com
+.. _git repository: https://github.com/hat-open/hat-syslog.git
 
 .. _RFC 5425: https://tools.ietf.org/html/rfc5425
 .. _RFC 5426: https://tools.ietf.org/html/rfc5426
 .. _RFC 6587: https://tools.ietf.org/html/rfc6587
 
 .. _AUR package: https://aur.archlinux.org/packages/hat-syslog
-.. _GutHub releases: https://github.com/hat-open/hat-syslog/releases
+.. _GitHub releases: https://github.com/hat-open/hat-syslog/releases
 .. _PyPI project: https://pypi.org/project/hat-syslog
 
+.. _Hat Open: https://hat-open.com
+.. _Končar Digital: https://www.koncar.hr/en
 
-hat-syslog - Syslog server and clients
-======================================
 
-This component is part of Hat Open project - open-source framework of tools and
-libraries for developing applications used for remote monitoring, control and
-management of intelligent electronic devices such as IoT devices, PLCs,
-industrial automation or home automation systems.
+hat-syslog - Syslog Server and tools
+====================================
 
-Development of Hat Open and associated repositories is sponsored by
-`Končar Digital`_.
-
-For more information see:
-
-    * `hat-syslog documentation`_
-    * `hat-syslog git repository`_
-    * `Hat Open homepage`_
-
-.. warning::
-
-    This project is currently in state of active development. Features,
-    functionality and API are unstable.
+|syslog-server-img|
 
 
 About
@@ -51,30 +34,23 @@ as defined by `RFC 5425`_, `RFC 5426`_ and `RFC 6587`_.
 This project includes implementations of:
 
     * `Syslog Server`_
+
+        Central concentrator for syslog messages with web interface for real
+        time monitoring and filtering of log messages.
+
     * `Syslog Handler`_
+
+        Implementation of Python's standard library `logging.Handler` based on
+        dedicated background logging thread.
+
     * `Syslog Generator`_
 
+        Simple testing tool responsible for generating syslog messages.
 
-Syslog Server
-'''''''''''''
+For more information see:
 
-Central concentrator for syslog messages with web interface for real time
-monitoring and filtering of log messages.
-
-|syslog-server-img|
-
-
-Syslog Handler
-''''''''''''''
-
-Implementation of Python's standard library `logging.Handler` based on
-dedicated background logging thread.
-
-
-Syslog Generator
-''''''''''''''''
-
-Simple testing tool responsible for generating syslog messages.
+    * `online documentation`_
+    * `git repository`_
 
 
 Runtime requirements
@@ -85,6 +61,14 @@ Runtime requirements
 
 Install
 -------
+
+Debian
+''''''
+
+.. todo::
+
+    WIP
+
 
 Archlinux
 '''''''''
@@ -97,7 +81,7 @@ Archlinux
 Windows
 '''''''
 
-Windows distribution, with embedded python, is available at `GutHub releases`_.
+Windows distribution, with embedded python, is available at `GitHub releases`_.
 
 
 Python wheel
@@ -128,7 +112,7 @@ Example python logging configuration:
 
 .. code:: python
 
-    import logging.conf
+    import logging.config
 
     logging.config.dictConfig({
         'version': 1,
@@ -147,6 +131,9 @@ Example python logging configuration:
             'handlers': ['syslog']},
         'disable_existing_loggers': False})
 
+    logger = logging.getLogger(__name__)
+    logger.info('spam')
+
 For additional details see `Syslog Handler`_.
 
 
@@ -158,6 +145,18 @@ Command `hat-syslog-generator` is used for running Syslog Generator::
     $ hat-syslog-generator
 
 For additional details and command line options see `Syslog Generator`_.
+
+
+Hat Open
+--------
+
+`hat-syslog` is part of `Hat Open`_ project - open-source framework of tools
+and libraries for developing applications used for remote monitoring, control
+and management of intelligent electronic devices such as IoT devices, PLCs,
+industrial automation or home automation systems.
+
+Development of Hat Open and associated repositories is sponsored by
+`Končar Digital`_.
 
 
 License
