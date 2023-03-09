@@ -65,9 +65,7 @@ Install
 Debian
 ''''''
 
-.. todo::
-
-    WIP
+WIP
 
 
 Archlinux
