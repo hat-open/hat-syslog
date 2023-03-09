@@ -48,6 +48,10 @@ body {
                 flex-grow: 1;
             }
 
+            & > button {
+                padding: 0.5rem;
+            }
+
             & > .timestamps {
                 display: grid;
                 grid-template-columns: auto auto;
@@ -83,7 +87,7 @@ body {
                         border-radius: 0.2rem;
                         padding: 0.2rem 0.5rem;
                         margin: 0.2rem;
-                        background-color: $color-blue-300;
+                        background-color: $color-blue-grey-200;
                         white-space: nowrap;
 
                         & > .fa {
@@ -92,7 +96,7 @@ body {
                             margin-left: 0.2rem;
 
                             &:hover {
-                                background-color: $color-blue-200;
+                                background-color: $color-blue-grey-300;
                             }
                         }
                     }
@@ -151,12 +155,16 @@ body {
                 display: flex;
                 border-bottom: 1px solid $color-grey-400;
                 background-color: $color-grey-200;
-                align-items: stretch;
+                align-items: center;
 
                 & > label {
                     flex-grow: 1;
                     font-weight: 600;
                     padding: 0.2rem;
+                }
+
+                & > button {
+                    font-size: 1.2rem;
                 }
             }
 
@@ -222,7 +230,7 @@ body {
                     }
 
                     &.warning {
-                        background-color: $color-yellow-100;
+                        background-color: $color-orange-100;
                     }
 
                     &.selected {
@@ -233,7 +241,7 @@ body {
                         }
 
                         &.warning {
-                            background-color: $color-yellow-200;
+                            background-color: $color-orange-200;
                         }
                     }
                 }
@@ -282,24 +290,31 @@ body {
                         display: flex;
                         flex-direction: column;
                         gap: 0.2rem;
+                        justify-content: center;
 
                         & > label {
                             overflow: hidden;
                             white-space: nowrap;
                             text-overflow: ellipsis;
-
-
                         }
                     }
 
                     .resizer {
-                        background-color: $color-blue-grey-600;
+                        background-image: linear-gradient(
+                            to right,
+                            rgba($color-blue-grey-600, 0),
+                            $color-blue-grey-600,
+                            rgba($color-blue-grey-600, 0));
                     }
                 }
 
                 td {
                     .resizer {
-                        background-color: $color-blue-grey-50;
+                        background-image: linear-gradient(
+                            to right,
+                            rgba($color-blue-grey-50, 0),
+                            $color-blue-grey-50,
+                            rgba($color-blue-grey-50, 0));
                     }
 
                     &.col-id, &.col-version, &.col-procid {
@@ -311,6 +326,22 @@ body {
                     &.col-id, &.col-timestamp, &.col-msg_timestamp, &.col-procid {
                         font-family: 'RobotoMono';
                     }
+
+                    &.col-timestamp {
+                        & > div {
+                            & > span {
+                                display: none;
+                            }
+                        }
+
+                        &:hover {
+                            & > div {
+                                & > span {
+                                    display: inline;
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -321,6 +352,11 @@ body {
             z-index: 1;
             flex-shrink: 0;
             width: 0.4rem;
+
+            background-image: linear-gradient(
+                to right,
+                rgba($color-grey-200, 0),
+                $color-grey-200);
 
             &:hover {
                 background-color: $color-grey-200;
@@ -341,12 +377,16 @@ body {
                 display: flex;
                 border-bottom: 1px solid $color-grey-400;
                 background-color: $color-grey-200;
-                align-items: stretch;
+                align-items: center;
 
                 & > label {
                     flex-grow: 1;
                     font-weight: 600;
                     padding: 0.2rem;
+                }
+
+                & > button {
+                    font-size: 1.2rem;
                 }
             }
 
@@ -388,7 +428,7 @@ body {
             margin: 0 0.5rem 0.5rem 0;
             padding: 1rem;
             border-radius: 0.2rem;
-            background-color: $color-blue-200;
+            background-color: $color-blue-grey-200;
         }
     }
 }
