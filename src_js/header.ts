@@ -39,13 +39,6 @@ export function headerVt(): u.VNode {
         activeFiltersVt(),
         ['div.spacer'],
         navigationVt(),
-        ['a.docs', {
-            props: {
-                href: 'docs/index.html',
-                target: '_blank'
-            }},
-            ['span.fa.fa-question-circle']
-        ],
         ['button', {
             props: {
                 title: (details.isVisible() ? 'Hide details' : 'Show details')

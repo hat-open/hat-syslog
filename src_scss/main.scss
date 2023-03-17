@@ -124,21 +124,6 @@ body {
                     }
                 }
             }
-
-            & > .docs {
-                align-self: center;
-                padding: 0.5rem;
-                font-size: 1.5rem;
-                color: $color-grey-700;
-
-                &:visited {
-                    color: $color-grey-700;
-                }
-
-                &:hover {
-                    color: black;
-                }
-            }
         }
 
         & > .menu {

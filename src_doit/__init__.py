@@ -41,7 +41,6 @@ build_py_dir = build_dir / 'py'
 build_docs_dir = build_dir / 'docs'
 
 ui_dir = src_py_dir / 'hat/syslog/server/ui'
-ui_docs_dir = ui_dir / 'docs'
 json_schema_repo_path = src_py_dir / 'hat/syslog/server/json_schema_repo.json'
 
 
@@ -101,7 +100,8 @@ def task_docs():
                      dst_dir=build_docs_dir,
                      project='hat-syslog',
                      extensions=['sphinxcontrib.plantuml',
-                                 'sphinxcontrib.programoutput'])
+                                 'sphinxcontrib.programoutput'],
+                     static_paths=['video'])
         build_pdoc(module='hat.syslog',
                    dst_dir=build_docs_dir / 'py_api')
 
@@ -117,12 +117,6 @@ def task_ui():
         common.rm_rf(ui_dir)
         common.cp_r(src_static_dir, ui_dir)
 
-        common.mkdir_p(ui_docs_dir)
-        for i in build_docs_dir.glob('*'):
-            if i.name.startswith('.'):
-                continue
-            common.cp_r(i, ui_docs_dir / i.name)
-
         with tempfile.TemporaryDirectory() as tmpdir:
             tmpdir = Path(tmpdir)
             config_path = tmpdir / 'webpack.config.js'
@@ -136,8 +130,7 @@ def task_ui():
 
     return {'actions': [build],
             'pos_arg': 'args',
-            'task_dep': ['docs',
-                         'node_modules']}
+            'task_dep': ['node_modules']}
 
 
 def task_json_schema_repo():

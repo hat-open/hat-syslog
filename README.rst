@@ -1,3 +1,5 @@
+.. |syslog-server-video| replace:: https://user-images.githubusercontent.com/26526989/226031877-cefe2f46-b05c-4c1c-81d0-0614211751bc.mp4
+
 .. _Syslog Server: https://hat-syslog.hat-open.com/server.html
 .. _Syslog Handler: https://hat-syslog.hat-open.com/handler.html
 .. _Syslog Generator: https://hat-syslog.hat-open.com/generator.html
@@ -20,12 +22,7 @@
 hat-syslog - Syslog Server and tools
 ====================================
 
-.. raw:: html
-
-    <div style="padding:62.5% 0 0 0;position:relative;">
-        <iframe src="https://player.vimeo.com/video/809167918?h=aeedc4ed56&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;" title="syslog.mp4"></iframe>
-    </div>
-    <script src="https://player.vimeo.com/api/player.js"></script>
+|syslog-server-video|
 
 
 About
