@@ -1,5 +1,3 @@
-.. |syslog-server-img| image:: docs/img/syslog_server.png
-
 .. _Syslog Server: https://hat-syslog.hat-open.com/server.html
 .. _Syslog Handler: https://hat-syslog.hat-open.com/handler.html
 .. _Syslog Generator: https://hat-syslog.hat-open.com/generator.html
@@ -22,7 +20,12 @@
 hat-syslog - Syslog Server and tools
 ====================================
 
-|syslog-server-img|
+.. raw:: html
+
+    <div style="padding:62.5% 0 0 0;position:relative;">
+        <iframe src="https://player.vimeo.com/video/809167918?h=aeedc4ed56&amp;badge=0&amp;autopause=0&amp;player_id=0&amp;app_id=58479" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;" title="syslog.mp4"></iframe>
+    </div>
+    <script src="https://player.vimeo.com/api/player.js"></script>
 
 
 About
@@ -99,6 +102,8 @@ Syslog Server
 Command `hat-syslog-server` is used for running new Syslog Server instance::
 
     $ hat-syslog-server
+
+Once server is running, web UI is available at `<http://127.0.0.1:23020>`_.
 
 For additional details and command line options see `Syslog Server`_.
 

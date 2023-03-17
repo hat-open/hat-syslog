@@ -24,7 +24,7 @@ export function menuVt(): u.VNodeChild {
 
     return ['div.menu',
         ['div.header',
-            ['label', 'Columns'],
+            ['label', 'Settings'],
             ['button', {
                 on: {
                     click: () => setVisible(false)
@@ -32,78 +32,81 @@ export function menuVt(): u.VNodeChild {
                 ['span.fa.fa-times']
             ]
         ],
-        ['div.columns', columns.map((column, index) => {
-            const activeFilter = (column.filter ?
-                filter[column.filter] != null :
-                false
-            );
-            const title = (activeFilter && !column.visible ?
-                'Column not visible but is used as filter' :
-                ''
-            );
-            const canMoveDown = index < columns.length - 1;
-            const canMoveUp = index > 0;
+        ['div.content',
+            ['label.title', 'Columns'],
+            ['div.columns', columns.map((column, index) => {
+                const activeFilter = (column.filter ?
+                    filter[column.filter] != null :
+                    false
+                );
+                const title = (activeFilter && !column.visible ?
+                    'Column not visible but is used as filter' :
+                    ''
+                );
+                const canMoveDown = index < columns.length - 1;
+                const canMoveUp = index > 0;
 
-            return ['div',
-                ['label', {
-                    class: {
-                        warning: activeFilter && !column.visible
-                    },
-                    props: {
-                        title: title
-                    }},
-                    ['input', {
+                return ['div',
+                    ['label', {
+                        class: {
+                            warning: activeFilter && !column.visible
+                        },
                         props: {
-                            type: 'checkbox',
-                            checked: column.visible
+                            title: title
+                        }},
+                        ['input', {
+                            props: {
+                                type: 'checkbox',
+                                checked: column.visible
+                            },
+                            on: {
+                                change: (evt: Event) => table.setColumnVisible(
+                                    column.name, (evt.target as HTMLInputElement).checked
+                                )
+                            }
+                        }],
+                        column.label
+                    ],
+                    ['span.fa.fa-arrow-down', {
+                        class : {
+                            disabled: !canMoveDown
+                        },
+                        props: {
+                            title: 'Move down'
                         },
                         on: {
-                            change: (evt: Event) => table.setColumnVisible(
-                                column.name, (evt.target as HTMLInputElement).checked
+                            click: () => (canMoveDown ?
+                                table.moveColumn(column.name, index + 1) :
+                                null
                             )
                         }
                     }],
-                    column.label
-                ],
-                ['span.fa.fa-arrow-down', {
-                    class : {
-                        disabled: !canMoveDown
-                    },
-                    props: {
-                        title: 'Move down'
-                    },
-                    on: {
-                        click: () => (canMoveDown ?
-                            table.moveColumn(column.name, index + 1) :
-                            null
-                        )
-                    }
-                }],
-                ['span.fa.fa-arrow-up', {
-                    class : {
-                        disabled: !canMoveUp
-                    },
-                    props: {
-                        title: 'Move up'
-                    },
-                    on: {
-                        click: () => (canMoveUp ?
-                            table.moveColumn(column.name, index - 1) :
-                            null
-                        )
-                    }
-                }]
-            ];
-        })],
-        ['button', {
-            props: {
-                title: 'Clear layout'
-            },
-            on: {
-                click: table.resetLayout
-            }},
-            ['span.fa.fa-undo'],
-            ' Reset layout'
+                    ['span.fa.fa-arrow-up', {
+                        class : {
+                            disabled: !canMoveUp
+                        },
+                        props: {
+                            title: 'Move up'
+                        },
+                        on: {
+                            click: () => (canMoveUp ?
+                                table.moveColumn(column.name, index - 1) :
+                                null
+                            )
+                        }
+                    }]
+                ];
+            })],
+            ['button', {
+                props: {
+                    title: 'Clear layout'
+                },
+                on: {
+                    click: table.resetLayout
+                }},
+                ['span.fa.fa-undo'],
+                ' Reset layout'
+            ]
         ]
     ];
 }

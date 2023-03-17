@@ -1,5 +1,7 @@
 """Common data structures"""
 
+from hat.syslog.common import *  # NOQA
+
 import importlib.resources
 import typing
 
@@ -8,7 +10,6 @@ from hat import json
 from hat.syslog.common import (Facility,
                                Msg,
                                Severity)
-from hat.syslog.common import *  # NOQA
 
 
 with importlib.resources.path(__package__, 'json_schema_repo.json') as _path:

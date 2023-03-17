@@ -13,11 +13,11 @@ is received, server stores message in predefined database.
     skinparam linetype ortho
 
     folder Client {
-        component SysLogHandler
+        component SyslogHandler
     }
 
     folder "Syslog Server" {
-        component SysLogServer
+        component SyslogServer
         component Backend
         component WebServer
 
@@ -37,7 +37,7 @@ is received, server stores message in predefined database.
     interface http
     interface websocket
 
-    syslog - SysLogServer
+    syslog - SyslogServer
     Backend -- Sqlite
     add - Backend
     Backend - query
@@ -45,8 +45,8 @@ is received, server stores message in predefined database.
     http - WebServer
     WebServer -- websocket
 
-    SysLogHandler --> syslog
-    SysLogServer -> add
+    SyslogHandler --> syslog
+    SyslogServer -> add
     query <- WebServer
     notify -> WebServer
 

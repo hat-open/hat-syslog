@@ -168,37 +168,46 @@ body {
                 }
             }
 
-            & > .columns {
-                flex-grow: 1;
+            & > .content {
                 overflow: auto;
+                display: flex;
+                flex-direction: column;
 
-                & > div {
-                    display: flex;
-                    align-items: center;
+                & > .title {
+                    font-weight: 600;
+                    padding: 0.5rem 0.2rem 0.2rem 0.2rem;
+                }
 
-                    & > label {
-                        flex-grow: 1;
-                        margin-right: 0.5rem;
-                    }
+                & > .columns {
+                    & > div {
+                        display: flex;
+                        align-items: center;
 
-                    & > .fa {
-                        padding: 0.4rem;
-                        font-size: 0.8rem;
-                        color: $color-grey-800;
-
-                        &.disabled {
-                            color: $color-grey-400;
+                        & > label {
+                            flex-grow: 1;
+                            margin-right: 0.5rem;
                         }
 
-                        &:hover:not(.disabled) {
-                            background-color: $color-grey-200;
+                        & > .fa {
+                            padding: 0.4rem;
+                            font-size: 0.8rem;
+                            color: $color-grey-800;
+
+                            &.disabled {
+                                color: $color-grey-400;
+                            }
+
+                            &:hover:not(.disabled) {
+                                background-color: $color-grey-200;
+                            }
                         }
                     }
                 }
-            }
 
-            & > button {
-                padding: 0.2rem;
+                & > button {
+                    padding: 0.2rem;
+                    margin: 0.2rem;
+                }
             }
         }
 
