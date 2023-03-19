@@ -124,7 +124,7 @@ class _ThreadState(typing.NamedTuple):
 
 
 def _logging_handler_thread(state):
-    if state.comm_type == common.CommType.SSL:
+    if state.comm_type == common.CommType.TLS:
         ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
         ctx.check_hostname = False
         ctx.verify_mode = ssl.VerifyMode.CERT_NONE
@@ -139,7 +139,7 @@ def _logging_handler_thread(state):
                 s = socket.create_connection((state.host, state.port))
                 s.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
 
-            elif state.comm_type == common.CommType.SSL:
+            elif state.comm_type == common.CommType.TLS:
                 s = ctx.wrap_socket(socket.create_connection(
                     (state.host, state.port)))
                 s.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)

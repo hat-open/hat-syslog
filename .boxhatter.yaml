@@ -15,4 +15,4 @@ command: |
     pip install -q -r requirements.pip.dev.txt
 
     doit check
-    doit test test_unit
+    doit test

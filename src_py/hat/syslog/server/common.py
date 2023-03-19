@@ -2,21 +2,11 @@
 
 from hat.syslog.common import *  # NOQA
 
-import importlib.resources
 import typing
-
-from hat import json
 
 from hat.syslog.common import (Facility,
                                Msg,
                                Severity)
-
-
-with importlib.resources.path(__package__, 'json_schema_repo.json') as _path:
-    json_schema_repo: json.SchemaRepository = json.SchemaRepository(
-        json.json_schema_repo,
-        json.SchemaRepository.from_json(_path))
-    """JSON schema repository"""
 
 
 class Entry(typing.NamedTuple):

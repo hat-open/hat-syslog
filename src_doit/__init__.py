@@ -24,7 +24,6 @@ __all__ = ['task_clean_all',
            'task_test',
            'task_docs',
            'task_ui',
-           'task_json_schema_repo',
            *dist.__all__]
 
 
@@ -72,8 +71,7 @@ def task_build():
                 'hat-syslog-generator = hat.syslog.generator:main'])
 
     return {'actions': [build],
-            'task_dep': ['ui',
-                         'json_schema_repo']}
+            'task_dep': ['ui']}
 
 
 def task_check():
@@ -88,8 +86,7 @@ def task_test():
     """Test"""
     return {'actions': [(common.mkdir_p, [ui_dir]),
                         lambda args: run_pytest(pytest_dir, *(args or []))],
-            'pos_arg': 'args',
-            'task_dep': ['json_schema_repo']}
+            'pos_arg': 'args'}
 
 
 def task_docs():
@@ -105,8 +102,7 @@ def task_docs():
         build_pdoc(module='hat.syslog',
                    dst_dir=build_docs_dir / 'py_api')
 
-    return {'actions': [build],
-            'task_dep': ['json_schema_repo']}
+    return {'actions': [build]}
 
 
 def task_ui():
@@ -131,20 +127,6 @@ def task_ui():
     return {'actions': [build],
             'pos_arg': 'args',
             'task_dep': ['node_modules']}
-
-
-def task_json_schema_repo():
-    """Generate JSON Schema Repository"""
-    src_paths = list(schemas_json_dir.rglob('*.yaml'))
-
-    def generate():
-        repo = json.SchemaRepository(*src_paths)
-        data = repo.to_json()
-        json.encode_file(data, json_schema_repo_path, indent=None)
-
-    return {'actions': [generate],
-            'file_dep': src_paths,
-            'targets': [json_schema_repo_path]}
 
 
 _webpack_conf = r"""

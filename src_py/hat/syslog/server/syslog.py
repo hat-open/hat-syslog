@@ -24,14 +24,14 @@ SyslogServer = typing.Union['TcpSyslogServer', 'UdpSyslogServer']
 
 async def create_syslog_server(addr: str,
                                msg_cb: MsgCb,
-                               pem: typing.Optional[Path]
+                               pem_path: typing.Optional[Path]
                                ) -> SyslogServer:
     """Create syslog server"""
     addr = urllib.parse.urlparse(addr)
 
-    if addr.scheme == 'ssl':
+    if addr.scheme == 'tls':
         ssl_ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-        ssl_ctx.load_cert_chain(pem)
+        ssl_ctx.load_cert_chain(pem_path)
         return await _create_tcp_syslog_server(addr.hostname, addr.port,
                                                msg_cb, ssl_ctx)
 
@@ -103,7 +103,7 @@ class TcpSyslogServer(aio.Resource):
             # BUGFIX
             if isinstance(writer.transport,
                           asyncio.sslproto._SSLProtocolTransport):
-                # TODO for SSL connection Protocol.connection_lost is never
+                # TODO for TLS connection Protocol.connection_lost is never
                 #      called
                 await aio.uncancellable(asyncio.sleep(0.001))
 

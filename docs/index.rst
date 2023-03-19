@@ -21,3 +21,4 @@ Content
     server
     handler
     generator
+    developer

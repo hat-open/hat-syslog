@@ -8,7 +8,7 @@ class CommType(enum.Enum):
     """Syslog communication type"""
     UDP = 0
     TCP = 1
-    SSL = 2
+    TLS = 2
 
 
 class Facility(enum.Enum):

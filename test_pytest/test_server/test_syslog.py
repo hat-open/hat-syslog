@@ -23,7 +23,7 @@ def syslog_port():
     return util.get_unused_tcp_port()
 
 
-@pytest.fixture(params=['tcp', 'ssl', 'udp'])
+@pytest.fixture(params=['tcp', 'tls', 'udp'])
 def comm_type(request):
     return request.param
 
