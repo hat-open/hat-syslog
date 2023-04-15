@@ -3,7 +3,7 @@
   "devDependencies": {
     "@hat-open/juggler": "^0.6.9",
     "@hat-open/renderer": "^0.6.3",
-    "@hat-open/util": "^0.6.7",
+    "@hat-open/util": "^0.6.9",
     "@typescript-eslint/eslint-plugin": "^5.52.0",
     "@typescript-eslint/parser": "^5.52.0",
     "css-loader": "^6.7.3",

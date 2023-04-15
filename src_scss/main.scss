@@ -229,6 +229,7 @@ body {
 
                     &.selected {
                         background-color: $color-grey-200;
+                        outline: 1px solid;
 
                         &.error {
                             background-color: $color-red-200;
@@ -236,6 +237,12 @@ body {
 
                         &.warning {
                             background-color: $color-orange-200;
+                        }
+                    }
+
+                    &:not(.selected) {
+                        &:focus {
+                            outline: none;
                         }
                     }
                 }

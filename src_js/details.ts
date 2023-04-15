@@ -1,9 +1,9 @@
 import * as u from '@hat-open/util';
 import r from '@hat-open/renderer';
 
+import * as app from './app';
 import * as common from './common';
 import * as notification from './notification';
-import * as dragger from './dragger';
 
 
 export function isVisible(): boolean {
@@ -16,26 +16,16 @@ export function setVisible(visible: boolean) {
 }
 
 
-export function getSelectedEntry(): common.Entry | null {
-    return r.get('local', 'details', 'selected') as common.Entry | null;
-}
-
-
-export function selectEntry(entry: common.Entry | null) {
-    r.set(['local', 'details', 'selected'], entry);
-}
-
-
 export function detailsVt(): u.VNodeChild {
     if (!isVisible())
         return [];
 
-    const entry = getSelectedEntry();
+    const entry = app.getSelectedEntry();
 
     return [
         ['div.details-resizer', {
             on: {
-                mousedown: dragger.mouseDownHandler(evt => {
+                mousedown: u.draggerMouseDownHandler(evt => {
                     const parent = (evt.target as HTMLElement).parentNode;
                     if (!parent)
                         return null;

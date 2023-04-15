@@ -97,6 +97,48 @@ export function getNextEntry(entry: common.Entry): common.Entry | null {
 }
 
 
+export function getSelectedEntry(): common.Entry | null {
+    return r.get('local', 'selectedEntry') as common.Entry | null;
+}
+
+
+export function selectEntry(entry: common.Entry | null) {
+    r.set(['local', 'selectedEntry'], entry);
+
+    if (!entry)
+        return;
+
+    const elm = document.getElementById(`entry-${entry.id}`);
+    if (!elm)
+        return;
+
+    elm.focus();
+}
+
+
+export function selectRelativeEntry(offset: number) {
+    const entries = getEntries();
+    if (entries.length < 1)
+        return;
+
+    let newIndex = (offset < 0 ? entries.length - 1 : 0);
+
+    const selectedEntry = getSelectedEntry();
+    if (selectedEntry) {
+        const index = entries.findIndex(i => i.id == selectedEntry.id);
+        if (index != null) {
+            newIndex = index + offset;
+            if (newIndex < 0)
+                newIndex = 0;
+            if (newIndex > entries.length - 1)
+                newIndex = entries.length - 1;
+        }
+    }
+
+    selectEntry(entries[newIndex]);
+}
+
+
 export function getPreviousEntry(entry: common.Entry): common.Entry | null {
     const entries = r.get('remote', 'entries');
     if (!u.isArray(entries))

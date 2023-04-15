@@ -116,7 +116,6 @@ export type Table = {
 
 export type Details = {
     visible: boolean;
-    selected: Entry | null;
     rawDataVisible: boolean;
     width: number;
 };
@@ -128,6 +127,7 @@ export type LocalState = {
     snackbars: string[];
     pageLastIds: number[];
     filter: Filter;
+    selectedEntry: Entry | null;
 };
 
 export type RemoteState = {
@@ -276,7 +276,6 @@ export const defaultTable: Table = {
 
 export const defaultDetails: Details = {
     visible: true,
-    selected: null,
     rawDataVisible: false,
     width: 400
 };
@@ -288,6 +287,7 @@ export const defaultLocalState: LocalState = {
     snackbars: [],
     pageLastIds: [],
     filter: defaultFilter,
+    selectedEntry: null
 };
 
 export const defaultState: State = {

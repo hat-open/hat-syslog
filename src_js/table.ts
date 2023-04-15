@@ -4,7 +4,6 @@ import r from '@hat-open/renderer';
 import * as app from './app';
 import * as common from './common';
 import * as details from './details';
-import * as dragger from './dragger';
 
 
 export function getColumns(): common.Column[] {
@@ -54,7 +53,7 @@ export function resetLayout() {
 export function tableVt(): u.VNode {
     const columns = getColumns();
     const entries = app.getEntries();
-    const selectEntry = details.getSelectedEntry();
+    const selectEntry = app.getSelectedEntry();
 
     const tableWidth = columns.reduce<number>(
         (acc, i) => acc + (i.visible ? i.width : 0),
@@ -72,21 +71,33 @@ export function tableVt(): u.VNode {
             ],
             ['tbody', {
                 props: {
-                    tabIndex: '0',
+                    tabIndex: 1
                 },
                 on: {
                     keydown: (evt: KeyboardEvent) => {
                         if (evt.key == 'ArrowDown') {
-                            selectRelativeEntry(1);
+                            app.selectRelativeEntry(1);
+                            evt.preventDefault();
 
                         } else if (evt.key == 'ArrowUp') {
-                            selectRelativeEntry(-1);
+                            app.selectRelativeEntry(-1);
+                            evt.preventDefault();
+
+                        } else if (evt.key == 'PageDown') {
+                            app.selectRelativeEntry(20);
+                            evt.preventDefault();
+
+                        } else if (evt.key == 'PageUp') {
+                            app.selectRelativeEntry(-20);
+                            evt.preventDefault();
 
                         } else if (evt.key == 'ArrowLeft') {
                             navigate('previous');
+                            focusTableBody();
 
                         } else if (evt.key == 'ArrowRight') {
                             navigate('next');
+                            focusTableBody();
 
                         } else if (evt.key == 'Enter') {
                             details.setVisible(true);
@@ -96,14 +107,17 @@ export function tableVt(): u.VNode {
                         }
                     }
                 }},
-                entries.map(entry => ['tr', {
+                entries.map(entry => [`tr#entry-${entry.id}`, {
                     class: {
                         error: entry.msg.severity == 'ERROR',
                         warning: entry.msg.severity == 'WARNING',
                         selected: (selectEntry != null && selectEntry.id == entry.id)
                     },
+                    props: {
+                        tabIndex: 1
+                    },
                     on: {
-                        click: () => details.selectEntry(entry),
+                        click: () => app.selectEntry(entry),
                         dblclick: () => details.setVisible(true)
                     }},
                     columns.map(column => bodyCellVt(entry, column))
@@ -212,7 +226,7 @@ function resizerVt(column: common.Column): u.VNodeChild {
 
     return ['div.resizer', {
         on: {
-            mousedown: dragger.mouseDownHandler(evt => {
+            mousedown: u.draggerMouseDownHandler(evt => {
                 let el = evt.target as HTMLElement | null;
                 while (el && el.tagName != 'TH' && el.tagName != 'TD')
                     el = el.parentNode as HTMLElement | null;
@@ -307,24 +321,6 @@ function valueToString(type: common.ColumnType, value: u.JData): string {
 }
 
 
-function selectRelativeEntry(offset: number) {
-    const selectEntry = details.getSelectedEntry();
-    if (selectEntry == null)
-        return;
-
-    const entries = app.getEntries();
-    const index = entries.findIndex(i => i.id == selectEntry.id);
-    if (index == null)
-        return;
-
-    const newIndex = index + offset;
-    if (newIndex < 0 || newIndex > entries.length - 1)
-        return;
-
-    details.selectEntry(entries[newIndex]);
-}
-
-
 function navigate(direction: app.Direction) {
     if (!app.canNavigate(direction))
         return;
@@ -355,4 +351,13 @@ function getNextVisibleColumn(column: common.Column): common.Column | null {
         index += 1;
 
     return (index < columns.length ? columns[index] : null);
+}
+
+
+function focusTableBody() {
+    const tbodyElm = document.querySelector(
+        'body > div.main > div.table > table > tbody'
+    );
+    if (tbodyElm != null)
+        (tbodyElm as HTMLElement).focus();
 }
