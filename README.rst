@@ -33,24 +33,24 @@ as defined by `RFC 5425`_, `RFC 5426`_ and `RFC 6587`_.
 
 This project includes implementations of:
 
-    * `Syslog Server`_
+* `Syslog Server`_
 
-        Central concentrator for syslog messages with web interface for real
-        time monitoring and filtering of log messages.
+    Central concentrator for syslog messages with web interface for real
+    time monitoring and filtering of log messages.
 
-    * `Syslog Handler`_
+* `Syslog Handler`_
 
-        Implementation of Python's standard library `logging.Handler` based on
-        dedicated background logging thread.
+    Implementation of Python's standard library `logging.Handler` based on
+    dedicated background logging thread.
 
-    * `Syslog Generator`_
+* `Syslog Generator`_
 
-        Simple testing tool responsible for generating syslog messages.
+    Simple testing tool responsible for generating syslog messages.
 
 For more information see:
 
-    * `online documentation`_
-    * `git repository`_
+* `online documentation`_
+* `git repository`_
 
 
 Runtime requirements
