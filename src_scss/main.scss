@@ -52,24 +52,6 @@ body {
                 padding: 0.5rem;
             }
 
-            & > .timestamps {
-                display: grid;
-                grid-template-columns: auto auto;
-                align-items: center;
-                row-gap: 0.1rem;
-                column-gap: 0.2rem;
-                margin: 0.2rem;
-
-                & > .title {
-                    grid-column: 1 / 3;
-                    font-weight: 600;
-                }
-
-                & > label:not(.title) {
-                    justify-self: end;
-                }
-            }
-
             & > .filters {
                 display: flex;
                 flex-direction: column;
@@ -206,6 +188,12 @@ body {
                 border-collapse: collapse;
                 table-layout: fixed;
 
+                thead {
+                    &:focus {
+                        outline: none;
+                    }
+                }
+
                 tbody {
                     &:focus {
                         outline: none;
@@ -297,6 +285,24 @@ body {
                             overflow: hidden;
                             white-space: nowrap;
                             text-overflow: ellipsis;
+                        }
+
+                        & > .timestamps {
+                            display: grid;
+                            grid-template-columns: auto 1fr;
+                            align-items: center;
+                            row-gap: 0.1rem;
+                            column-gap: 0.2rem;
+                            margin: 0.2rem;
+
+                            & > .title {
+                                grid-column: 1 / 3;
+                                font-weight: 600;
+                            }
+
+                            & > label:not(.title) {
+                                justify-self: end;
+                            }
                         }
                     }
 

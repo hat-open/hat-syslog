@@ -62,7 +62,10 @@ export function tableVt(): u.VNode {
 
     return ['div.table',
         ['table',
-            ['thead',
+            ['thead', {
+                props: {
+                    tabIndex: 1
+                }},
                 ['tr',
                     columns.map((column, index) =>
                         headerCellVt(tableWidth, column, index)
@@ -260,36 +263,52 @@ function resizerVt(column: common.Column): u.VNodeChild {
 
 
 function filterVt(column: common.Column): u.VNodeChild {
+    if (column.name == 'timestamp')
+        return filterTimestampVt();
+
     if (column.filter == null)
         return [];
 
-    const localFilter = app.getLocalFilter();
-    const value = localFilter[column.filter] || '';
+    if (column.filter == 'facility' || column.filter == 'severity')
+        return filterSelectVt(column.filter);
 
-    let options: string[] | null = null;
-    if (column.name == 'facility') {
+    return filterTextVt(column.filter);
+}
+
+
+function filterTimestampVt(): u.VNode {
+    const localFilter = app.getLocalFilter();
+
+    return ['div.timestamps',
+        datetimePickerVt(
+            'From',
+            localFilter.entry_timestamp_from,
+            app.setFilterValue('entry_timestamp_from')
+        ),
+        datetimePickerVt(
+            'To',
+            localFilter.entry_timestamp_to,
+            app.setFilterValue('entry_timestamp_to')
+        )
+    ];
+}
+
+
+function filterSelectVt(key: 'facility' | 'severity'): u.VNode {
+    const localFilter = app.getLocalFilter();
+    const value = localFilter[key] || '';
+
+    let options: string[] = [];
+    if (key == 'facility') {
         options = ['', ...common.facilities];
-    } else if (column.name == 'severity') {
+    } else if (key == 'severity') {
         options = ['', ...common.severities];
     }
 
     const changeCb = (evt: Event) => {
-        if (column.filter == null)
-            return;
-        const value = (evt.target as HTMLInputElement | HTMLSelectElement).value;
-        app.setFilterValue(column.filter, (value.length > 0 ? value : null));
+        const value = (evt.target as HTMLSelectElement).value;
+        app.setFilterValue(key, (value.length > 0 ? value : null) as any);
     };
-
-    if (options == null)
-        return ['input', {
-            props: {
-                type: 'text',
-                value: value
-            },
-            on: {
-                change: changeCb
-            }
-        }];
 
     return ['select', {
         on: {
@@ -302,6 +321,47 @@ function filterVt(column: common.Column): u.VNodeChild {
             }},
             option
         ])
+    ];
+}
+
+
+function filterTextVt(key: keyof common.Filter): u.VNode {
+    const localFilter = app.getLocalFilter();
+    const value = localFilter[key] || '';
+
+    const changeCb = (evt: Event) => {
+        const value = (evt.target as HTMLInputElement).value;
+        app.setFilterValue(key, (value.length > 0 ? value : null));
+    };
+
+    return ['input', {
+        props: {
+            type: 'text',
+            value: value
+        },
+        on: {
+            change: changeCb
+        }
+    }];
+}
+
+
+function datetimePickerVt(
+    label: string, timestamp: number | null, cb: (timestamp: number | null) => void
+): u.VNodeChild {
+    return [
+        ['label', label],
+        ['input', {
+            props: {
+                type: 'datetime-local',
+                value: timestampToValue(timestamp)
+            },
+            on: {
+                change: (evt: Event) => cb(
+                    timestampFromValue((evt.target as HTMLInputElement).value)
+                )
+            }
+        }]
     ];
 }
 
@@ -355,9 +415,38 @@ function getNextVisibleColumn(column: common.Column): common.Column | null {
 
 
 function focusTableBody() {
+    const theadElm = document.querySelector(
+        'body > div.main > div.table > table > thead'
+    ) as HTMLElement | null;
+    if (theadElm)
+        theadElm.focus();
+
     const tbodyElm = document.querySelector(
         'body > div.main > div.table > table > tbody'
-    );
-    if (tbodyElm != null)
-        (tbodyElm as HTMLElement).focus();
+    ) as HTMLElement | null;
+    if (tbodyElm)
+        tbodyElm.focus({preventScroll: true});
+}
+
+
+function timestampToValue(timestamp: number | null): string {
+    if (timestamp == null)
+        return '';
+
+    const date = new Date(timestamp * 1000);
+    const YYYY = String(date.getFullYear()).padStart(4, '0');
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    const HH = String(date.getHours()).padStart(2, '0');
+    const MM = String(date.getMinutes()).padStart(2, '0');
+    return `${YYYY}-${mm}-${dd} ${HH}:${MM}`;
+}
+
+
+function timestampFromValue(value: string): number | null {
+    if (value.length < 1)
+        return null;
+
+    const date = new Date(value);
+    return date.getTime() / 1000;
 }

@@ -7,7 +7,6 @@ import * as menu from './menu';
 
 
 export function headerVt(): u.VNode {
-    const localFilter = app.getLocalFilter();
     const remoteFilter = app.getRemoteFilter();
 
     return ['div.header', {
@@ -22,19 +21,6 @@ export function headerVt(): u.VNode {
                 click: () => menu.setVisible(!menu.isVisible())
             }},
             ['span.fa.fa-cog']
-        ],
-        ['div.timestamps',
-            ['label.title', 'Timestamp filters'],
-            datetimePickerVt(
-                'From',
-                localFilter.entry_timestamp_from,
-                app.setFilterValue('entry_timestamp_from')
-            ),
-            datetimePickerVt(
-                'To',
-                localFilter.entry_timestamp_to,
-                app.setFilterValue('entry_timestamp_to')
-            )
         ],
         activeFiltersVt(),
         ['div.spacer'],
@@ -51,25 +37,6 @@ export function headerVt(): u.VNode {
     ];
 }
 
-
-function datetimePickerVt(
-    label: string, timestamp: number | null, cb: (timestamp: number | null) => void
-): u.VNodeChild {
-    return [
-        ['label', label],
-        ['input', {
-            props: {
-                type: 'datetime-local',
-                value: timestampToValue(timestamp)
-            },
-            on: {
-                change: (evt: Event) => cb(
-                    timestampFromValue((evt.target as HTMLInputElement).value)
-                )
-            }
-        }]
-    ];
-}
 
 
 function activeFiltersVt(): u.VNodeChild {
@@ -163,29 +130,6 @@ function navigationVt(): u.VNode {
             ]
         ]
     ];
-}
-
-
-function timestampToValue(timestamp: number | null): string {
-    if (timestamp == null)
-        return '';
-
-    const date = new Date(timestamp * 1000);
-    const YYYY = String(date.getFullYear()).padStart(4, '0');
-    const mm = String(date.getMonth() + 1).padStart(2, '0');
-    const dd = String(date.getDate()).padStart(2, '0');
-    const HH = String(date.getHours()).padStart(2, '0');
-    const MM = String(date.getMinutes()).padStart(2, '0');
-    return `${YYYY}-${mm}-${dd} ${HH}:${MM}`;
-}
-
-
-function timestampFromValue(value: string): number | null {
-    if (value.length < 1)
-        return null;
-
-    const date = new Date(value);
-    return date.getTime() / 1000;
 }
 
 
