@@ -35,17 +35,17 @@ This project includes implementations of:
 
 * `Syslog Server`_
 
-    Central concentrator for syslog messages with web interface for real
-    time monitoring and filtering of log messages.
+  Central concentrator for syslog messages with web interface for real
+  time monitoring and filtering of log messages.
 
 * `Syslog Handler`_
 
-    Implementation of Python's standard library `logging.Handler` based on
-    dedicated background logging thread.
+  Implementation of Python's standard library `logging.Handler` based on
+  dedicated background logging thread.
 
 * `Syslog Generator`_
 
-    Simple testing tool responsible for generating syslog messages.
+  Simple testing tool responsible for generating syslog messages.
 
 For more information see:
 
@@ -168,7 +168,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+  http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,

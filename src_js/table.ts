@@ -109,6 +109,10 @@ export function tableVt(): u.VNode {
                             details.setVisible(false);
                         }
                     }
+                },
+                hook: {
+                    insert: (vnode: any) =>
+                        vnode.elm.focus({preventScroll: true})
                 }},
                 entries.map(entry => [`tr#entry-${entry.id}`, {
                     class: {
