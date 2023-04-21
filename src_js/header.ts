@@ -9,7 +9,7 @@ import * as menu from './menu';
 export function headerVt(): u.VNode {
     const remoteFilter = app.getRemoteFilter();
     const isMenuVisible = menu.isVisible();
-    const isDetailsVisible = details.isVisible()
+    const isDetailsVisible = details.isVisible();
 
     return ['div.header', {
         class: {
