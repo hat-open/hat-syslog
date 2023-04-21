@@ -15,6 +15,8 @@
 .. _GitHub releases: https://github.com/hat-open/hat-syslog/releases
 .. _PyPI project: https://pypi.org/project/hat-syslog
 
+.. _pydoit: https://pydoit.org
+
 .. _Hat Open: https://hat-open.com
 .. _Končar Digital: https://www.koncar.hr/en
 
@@ -145,6 +147,33 @@ Command `hat-syslog-generator` is used for running Syslog Generator::
     $ hat-syslog-generator
 
 For additional details and command line options see `Syslog Generator`_.
+
+
+Development requirements
+------------------------
+
+* python >=3.8
+* nodejs >=7
+* yarn
+
+
+Build
+-----
+
+Build tool used for `hat-syslog` is `pydoit`_. It can be installed together
+with other python dependencies by running::
+
+    $ pip install -r requirements.pip.dev.txt
+
+For listing available doit tasks, use::
+
+    $ doit list
+
+Default task::
+
+    $ doit
+
+creates wheel package inside `build` directory.
 
 
 Hat Open
