@@ -8,32 +8,46 @@ import * as menu from './menu';
 
 export function headerVt(): u.VNode {
     const remoteFilter = app.getRemoteFilter();
+    const isMenuVisible = menu.isVisible();
+    const isDetailsVisible = details.isVisible()
 
     return ['div.header', {
         class: {
             frozen: isFrozen(remoteFilter)
         }},
-        ['button', {
-            props: {
-                title: (menu.isVisible() ? 'Hide settings' : 'Show setting')
-            },
+        ['div.toggle', {
             on: {
-                click: () => menu.setVisible(!menu.isVisible())
+                click: () => menu.setVisible(!isMenuVisible)
             }},
-            ['span.fa.fa-cog']
+            ['label', 'Menu'],
+            ['span.fa', {
+                class: {
+                    'fa-toggle-on': isMenuVisible,
+                    'fa-toggle-off': !isMenuVisible
+                },
+                props: {
+                    title: (isMenuVisible ? 'Hide menu' : 'Show menu')
+                }
+            }]
         ],
         activeFiltersVt(),
         ['div.spacer'],
         navigationVt(),
-        ['button', {
-            props: {
-                title: (details.isVisible() ? 'Hide details' : 'Show details')
-            },
+        ['div.toggle', {
             on: {
-                click: () => details.setVisible(!details.isVisible())
+                click: () => details.setVisible(!isDetailsVisible)
             }},
-            ['span.fa.fa-bars']
-        ],
+            ['label', 'Details'],
+            ['span.fa', {
+                class: {
+                    'fa-toggle-on': isDetailsVisible,
+                    'fa-toggle-off': !isDetailsVisible
+                },
+                props: {
+                    title: (isDetailsVisible ? 'Hide details' : 'Show details')
+                }
+            }]
+        ]
     ];
 }
 
@@ -45,18 +59,7 @@ function activeFiltersVt(): u.VNodeChild {
         return [];
 
     return ['div.filters',
-        ['div',
-            ['label.title', 'Active filters'],
-            ['button.clear', {
-                props: {
-                    title: 'Clear filters'
-                },
-                on: {
-                    click: () => app.clearFilter()
-                }},
-                ['span.fa.fa-trash']
-            ]
-        ],
+        ['label.title', 'Active filters'],
         ['div',
             activeFilters.map(({name, label, value}) => ['label.chip', {
                 props: {
@@ -68,7 +71,17 @@ function activeFiltersVt(): u.VNodeChild {
                         click: () => app.setFilterValue(name, null)
                     }
                 }]
-            ])
+            ]),
+            ['button.clear', {
+                props: {
+                    title: 'Clear filters'
+                },
+                on: {
+                    click: () => app.clearFilter()
+                }},
+                ['span.fa.fa-trash'],
+                ' Clear all'
+            ]
         ]
     ];
 }
@@ -90,7 +103,7 @@ function navigationVt(): u.VNode {
                     )
                 }
             }],
-            'Live update',
+            'Live',
         ],
         ['div.group',
             ['label', 'Page size'],

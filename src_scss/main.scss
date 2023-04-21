@@ -21,6 +21,10 @@ html, body {
     cursor: default;
 }
 
+button {
+    font-size: 1rem;
+}
+
 body {
     & > .main {
         height: 100%;
@@ -48,8 +52,24 @@ body {
                 flex-grow: 1;
             }
 
-            & > button {
-                padding: 0.5rem;
+            & > .toggle {
+                display: flex;
+                flex-direction: column;
+                margin: 0.5rem;
+                align-items: center;
+                justify-content: center;
+
+                & > span {
+                    font-size: 1.2rem;
+
+                    &.fa-toggle-on {
+                        color: $color-blue-grey-800;
+                    }
+
+                    &.fa-toggle-off {
+                        color: $color-blue-grey-400;
+                    }
+                }
             }
 
             & > .filters {
@@ -57,18 +77,19 @@ body {
                 flex-direction: column;
                 margin: 0.2rem;
 
-                & > div {
-                    margin-bottom: 0.5rem;
+                & > .title {
+                    font-weight: 600;
+                }
 
-                    & > .title {
-                        font-weight: 600;
-                        margin-right: 0.2rem;
-                    }
+                & > div {
+                    display: flex;
+                    align-items: center;
+                    font-size: 0.9rem;
 
                     & > .chip {
                         border-radius: 0.2rem;
                         padding: 0.2rem 0.5rem;
-                        margin: 0.2rem;
+                        margin-right: 0.2rem;
                         background-color: $color-blue-grey-200;
                         white-space: nowrap;
 
@@ -81,6 +102,10 @@ body {
                                 background-color: $color-blue-grey-300;
                             }
                         }
+                    }
+
+                    & > button {
+                        font-size: 0.9rem;
                     }
                 }
             }

@@ -21,6 +21,8 @@ export function detailsVt(): u.VNodeChild {
         return [];
 
     const entry = app.getSelectedEntry();
+    if (!entry)
+        return [];
 
     return [
         ['div.details-resizer', {
