@@ -1,50 +1,41 @@
 import * as u from '@hat-open/util';
+import r from '@hat-open/renderer';
 
-import * as app from './app';
 import * as common from './common';
-import * as details from './details';
-import * as menu from './menu';
 
 
 export function headerVt(): u.VNode {
-    const remoteFilter = app.getRemoteFilter();
-    const isMenuVisible = menu.isVisible();
-    const isDetailsVisible = details.isVisible();
+    const state = common.getState();
+    const frozen = state.remote != null && state.remote.filter.last_id != null;
+    const live = state.local.filter.last_id == null;
+    const menuVisible = state.local.menu.visible;
+    const detailsVisible = state.local.details.visible;
 
     return ['div.header', {
         class: {
-            frozen: isFrozen(remoteFilter)
+            frozen: frozen
         }},
-        ['div.toggle', {
-            on: {
-                click: () => menu.setVisible(!isMenuVisible)
-            }},
-            ['label', 'Menu'],
-            ['span.fa', {
-                class: {
-                    'fa-toggle-on': isMenuVisible,
-                    'fa-toggle-off': !isMenuVisible
-                },
-                props: {
-                    title: (isMenuVisible ? 'Hide menu' : 'Show menu')
-                }
-            }]
-        ],
+        toggleVt('Menu', menuVisible, toggleMenu),
         activeFiltersVt(),
-        ['div.spacer'],
+        toggleVt('Live', live, common.toggleLive),
+        pageSizeVt(),
         navigationVt(),
+        toggleVt('Details', detailsVisible, toggleDetails)
+    ];
+}
+
+
+function toggleVt(label: string, value: boolean, changeCb: () => void): u.VNodeChild {
+    return [
+        ['label', label],
         ['div.toggle', {
             on: {
-                click: () => details.setVisible(!isDetailsVisible)
+                click: changeCb
             }},
-            ['label', 'Details'],
             ['span.fa', {
                 class: {
-                    'fa-toggle-on': isDetailsVisible,
-                    'fa-toggle-off': !isDetailsVisible
-                },
-                props: {
-                    title: (isDetailsVisible ? 'Hide details' : 'Show details')
+                    'fa-toggle-on': value,
+                    'fa-toggle-off': !value
                 }
             }]
         ]
@@ -52,15 +43,15 @@ export function headerVt(): u.VNode {
 }
 
 
-
 function activeFiltersVt(): u.VNodeChild {
     const activeFilters = Array.from(getActiveFilters());
-    if (activeFilters.length < 1)
-        return [];
 
-    return ['div.filters',
-        ['label.title', 'Active filters'],
-        ['div',
+    return [
+        ['label.filters', (activeFilters.length > 0 ?
+            'Active filters' :
+            ''
+        )],
+        ['div.filters',
             activeFilters.map(({name, label, value}) => ['label.chip', {
                 props: {
                     title: `${label}: ${value}`,
@@ -68,79 +59,75 @@ function activeFiltersVt(): u.VNodeChild {
                 label,
                 ['span.fa.fa-times', {
                     on: {
-                        click: () => app.setFilterValue(name, null)
+                        click: () => common.setFilterValue(name, null)
                     }
                 }]
             ]),
-            ['button.clear', {
-                props: {
-                    title: 'Clear filters'
-                },
-                on: {
-                    click: () => app.clearFilter()
-                }},
-                ['span.fa.fa-trash'],
-                ' Clear all'
-            ]
+            (activeFilters.length > 0 ?
+                ['button.clear', {
+                    props: {
+                        title: 'Clear filters'
+                    },
+                    on: {
+                        click: common.clearFilter
+                    }},
+                    ['span.fa.fa-trash'],
+                    ' Clear all'
+                ] :
+                []
+            )
         ]
     ];
 }
 
 
-function navigationVt(): u.VNode {
-    const filter = app.getLocalFilter();
+function pageSizeVt(): u.VNodeChild {
+    const state = common.getState();
+    const pageSize = String(state.local.filter.max_results);
 
-    return ['div.navigation',
-        ['label',
-            ['input', {
+    return [
+        ['label', 'Page size'],
+        ['select', {
+            on: {
+                change: (evt: Event) => common.setFilterValue(
+                    'max_results',
+                    u.strictParseInt((evt.target as HTMLInputElement).value)
+                )
+            }},
+            ['20', '50', '100', '200'].map(value => ['option', {
                 props: {
-                    type: 'checkbox',
-                    checked: !isFrozen(filter)
+                    value: value,
+                    label: value,
+                    selected: value == pageSize
+                }
+            }])
+        ]
+    ];
+}
+
+
+function navigationVt(): u.VNodeChild {
+    const state = common.getState();
+    const pageLastIds = state.local.pageLastIds;
+    const currentPage = (pageLastIds.length > 0 ? pageLastIds.length : 1);
+
+    return [
+        ['label', `Page ${currentPage}`],
+        ['div.navigation',
+            ([
+                ['first', 'fa-angle-double-left'],
+                ['previous', 'fa-angle-left'],
+                ['next', 'fa-angle-right']
+            ] as const).map(([direction, icon]) => ['button', {
+                props: {
+                    disabled: !common.canNavigate(direction),
+                    title: direction
                 },
                 on: {
-                    change: (evt: Event) => app.setFrozen(
-                        !(evt.target as HTMLInputElement).checked
-                    )
-                }
-            }],
-            'Live',
-        ],
-        ['div.group',
-            ['label', 'Page size'],
-            ['select', {
-                on: {
-                    change: (evt: Event) => app.setFilterValue(
-                        'max_results',
-                        u.strictParseInt((evt.target as HTMLInputElement).value)
-                    )
+                    click: () => common.navigate(direction)
                 }},
-                ['20', '50', '100', '200'].map(value => ['option', {
-                    props: {
-                        value: value,
-                        label: value,
-                        selected: value == String(filter.max_results)
-                    }
-                }])
-            ]
-        ],
-        ['div.group',
-            ['label', `Page ${app.getCurrentPage()}`],
-            ['div.buttons',
-                ([
-                    ['first', 'fa-angle-double-left'],
-                    ['previous', 'fa-angle-left'],
-                    ['next', 'fa-angle-right']
-                ] as const).map(([direction, icon]) => ['button', {
-                    props: {
-                        disabled: !app.canNavigate(direction),
-                        title: direction
-                    },
-                    on: {
-                        click: () => app.navigate(direction)
-                    }},
-                    [`span.fa.${icon}`]
-                ])
-            ]
+                [`span.fa.${icon}`]
+            ])
         ]
     ];
 }
@@ -151,7 +138,11 @@ function* getActiveFilters(): Generator<{
     label: string,
     value: string
 }> {
-    const filter = app.getRemoteFilter();
+    const state = common.getState();
+    if (!state.remote)
+        return;
+
+    const filter = state.remote.filter;
 
     for (const [name, label] of [
         ['entry_timestamp_from', 'From'],
@@ -182,6 +173,11 @@ function* getActiveFilters(): Generator<{
 }
 
 
-function isFrozen(filter: common.Filter): boolean {
-    return filter.last_id != null;
+function toggleMenu() {
+    r.change(['local', 'menu', 'visible'], u.not);
+}
+
+
+function toggleDetails() {
+    r.change(['local', 'details', 'visible'], u.not);
 }

@@ -1,7 +1,6 @@
 import * as u from '@hat-open/util';
 import r from '@hat-open/renderer';
 
-import * as app from './app';
 import * as common from './common';
 
 import { headerVt } from './header';
@@ -16,12 +15,14 @@ import '../src_scss/main.scss';
 async function main() {
     const root = document.body.appendChild(document.createElement('div'));
     r.init(root, common.defaultState, mainVt);
-    app.init();
+    common.init();
 }
 
 
 function mainVt(): u.VNode {
-    if (!r.get('remote'))
+    const state = common.getState();
+
+    if (!state.remote)
         return ['div.main'];
 
     return ['div.main',

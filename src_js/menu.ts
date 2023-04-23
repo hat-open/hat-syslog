@@ -1,33 +1,23 @@
 import * as u from '@hat-open/util';
 import r from '@hat-open/renderer';
 
-import * as app from './app';
-import * as table from './table';
-
-
-export function isVisible(): boolean {
-    return Boolean(r.get('local', 'menu', 'visible'));
-}
-
-
-export function setVisible(visible: boolean) {
-    r.set(['local', 'menu', 'visible'], visible);
-}
+import * as common from './common';
 
 
 export function menuVt(): u.VNodeChild {
-    if (!isVisible())
+    const state = common.getState();
+    if (!state.local.menu.visible)
         return [];
 
-    const filter = app.getLocalFilter();
-    const columns = table.getColumns();
+    const filter = state.local.filter;
+    const columns = state.local.table.columns;
 
     return ['div.menu',
         ['div.header',
             ['label', 'Settings'],
             ['button', {
                 on: {
-                    click: () => setVisible(false)
+                    click: closeMenu
                 }},
                 ['span.fa.fa-times']
             ]
@@ -60,8 +50,9 @@ export function menuVt(): u.VNodeChild {
                                 checked: column.visible
                             },
                             on: {
-                                change: (evt: Event) => table.setColumnVisible(
-                                    column.name, (evt.target as HTMLInputElement).checked
+                                change: (evt: Event) => r.set(
+                                    ['local', 'table', 'columns', index, 'visible'],
+                                    (evt.target as HTMLInputElement).checked
                                 )
                             }
                         }],
@@ -76,7 +67,7 @@ export function menuVt(): u.VNodeChild {
                         },
                         on: {
                             click: () => (canMoveDown ?
-                                table.moveColumn(column.name, index + 1) :
+                                common.moveColumn(column.name, index + 1) :
                                 null
                             )
                         }
@@ -90,7 +81,7 @@ export function menuVt(): u.VNodeChild {
                         },
                         on: {
                             click: () => (canMoveUp ?
-                                table.moveColumn(column.name, index - 1) :
+                                common.moveColumn(column.name, index - 1) :
                                 null
                             )
                         }
@@ -102,11 +93,21 @@ export function menuVt(): u.VNodeChild {
                     title: 'Clear layout'
                 },
                 on: {
-                    click: table.resetLayout
+                    click: resetLayout
                 }},
                 ['span.fa.fa-undo'],
                 ' Reset layout'
             ]
         ]
     ];
+}
+
+
+function closeMenu() {
+    r.set(['local', 'menu', 'visible'], false);
+}
+
+
+function resetLayout() {
+    r.set(['local', 'table'], common.defaultTable);
 }

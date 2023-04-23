@@ -1,59 +1,16 @@
 import * as u from '@hat-open/util';
 import r from '@hat-open/renderer';
 
-import * as app from './app';
 import * as common from './common';
-import * as details from './details';
-
-
-export function getColumns(): common.Column[] {
-    return r.get('local', 'table', 'columns') as common.Column[];
-}
-
-
-export function setColumnVisible(name: common.ColumnName, visible: boolean) {
-    r.change(['local', 'table', 'columns'], u.map((column: common.Column) =>
-        (column.name == name ?
-            u.set('visible', visible, column) :
-            column
-        )
-    ) as any);
-}
-
-
-export function moveColumn(name: common.ColumnName, index: number) {
-    return r.change(['local', 'table', 'columns'], columns => {
-        if (!u.isArray(columns))
-            return columns;
-
-        if (index < 0 || index > columns.length - 1)
-            return columns;
-
-        const oldIndex = columns.findIndex(u.pipe(
-            u.get('name'),
-            u.equals(name)
-        ));
-        if (oldIndex == null || oldIndex == index)
-            return columns;
-
-        const column = u.get(oldIndex, columns);
-        return u.pipe(
-            u.omit(oldIndex) as any,
-            u.insert<u.JData>(index, column)
-        )(columns);
-    });
-}
-
-
-export function resetLayout() {
-    r.set(['local', 'table'], common.defaultTable);
-}
 
 
 export function tableVt(): u.VNode {
-    const columns = getColumns();
-    const entries = app.getEntries();
-    const selectEntry = app.getSelectedEntry();
+    const state = common.getState();
+
+    const columns = state.local.table.columns;
+    const entries = (state.remote ? state.remote.entries : [] as const);
+    const selectedEntries = state.local.selectedEntries;
+    const selectedEntryIds = selectedEntries.map(entry => entry.id);
 
     const tableWidth = columns.reduce<number>(
         (acc, i) => acc + (i.visible ? i.width : 0),
@@ -79,34 +36,34 @@ export function tableVt(): u.VNode {
                 on: {
                     keydown: (evt: KeyboardEvent) => {
                         if (evt.key == 'ArrowDown') {
-                            app.selectRelativeEntry(1);
+                            selectRelativeEntries(1, evt.ctrlKey || evt.shiftKey);
                             evt.preventDefault();
 
                         } else if (evt.key == 'ArrowUp') {
-                            app.selectRelativeEntry(-1);
+                            selectRelativeEntries(-1, evt.ctrlKey || evt.shiftKey);
                             evt.preventDefault();
 
                         } else if (evt.key == 'PageDown') {
-                            app.selectRelativeEntry(20);
+                            selectRelativeEntries(20, evt.ctrlKey || evt.shiftKey);
                             evt.preventDefault();
 
                         } else if (evt.key == 'PageUp') {
-                            app.selectRelativeEntry(-20);
+                            selectRelativeEntries(-20, evt.ctrlKey || evt.shiftKey);
                             evt.preventDefault();
 
                         } else if (evt.key == 'ArrowLeft') {
-                            navigate('previous');
+                            common.navigate('previous');
                             focusTableBody();
 
                         } else if (evt.key == 'ArrowRight') {
-                            navigate('next');
+                            common.navigate('next');
                             focusTableBody();
 
                         } else if (evt.key == 'Enter') {
-                            details.setVisible(true);
+                            r.set(['local', 'details', 'visible'], true);
 
                         } else if (evt.key == 'Escape') {
-                            details.setVisible(false);
+                            r.set(['local', 'selectedEntries'], []);
                         }
                     }
                 },
@@ -118,14 +75,17 @@ export function tableVt(): u.VNode {
                     class: {
                         error: entry.msg.severity == 'ERROR',
                         warning: entry.msg.severity == 'WARNING',
-                        selected: (selectEntry != null && selectEntry.id == entry.id)
+                        selected: u.contains(entry.id, selectedEntryIds)
                     },
                     props: {
                         tabIndex: 1
                     },
                     on: {
-                        click: () => app.selectEntry(entry),
-                        dblclick: () => details.setVisible(true)
+                        click: (evt: MouseEvent) => selectEntry(
+                            entry,
+                            evt.ctrlKey || evt.shiftKey
+                        ),
+                        dblclick: () => r.set(['local', 'details', 'visible'], true)
                     }},
                     columns.map(column => bodyCellVt(entry, column))
                 ])
@@ -159,7 +119,7 @@ function headerCellVt(tableWidth: number, column: common.Column, index: number):
                 const name = evt.dataTransfer.getData('text/plain');
                 if (!common.isColumnName(name))
                     return;
-                moveColumn(name, index);
+                common.moveColumn(name, index);
             }
         }},
         ['div',
@@ -203,7 +163,7 @@ function bodyCellVt(entry: common.Entry, column: common.Column): u.VNodeChild {
                     on: {
                         click: (evt: Event) => {
                             evt.stopPropagation();
-                            app.setFilterValue('entry_timestamp_from', entry.timestamp);
+                            common.setFilterValue('entry_timestamp_from', entry.timestamp);
                         }
                     }
                 }],
@@ -214,7 +174,7 @@ function bodyCellVt(entry: common.Entry, column: common.Column): u.VNodeChild {
                     on: {
                         click: (evt: Event) => {
                             evt.stopPropagation();
-                            app.setFilterValue('entry_timestamp_to', entry.timestamp);
+                            common.setFilterValue('entry_timestamp_to', entry.timestamp);
                         }
                     }
                 }]
@@ -281,26 +241,28 @@ function filterVt(column: common.Column): u.VNodeChild {
 
 
 function filterTimestampVt(): u.VNode {
-    const localFilter = app.getLocalFilter();
+    const state = common.getState();
+    const filter = state.local.filter;
 
     return ['div.timestamps',
         datetimePickerVt(
             'From',
-            localFilter.entry_timestamp_from,
-            app.setFilterValue('entry_timestamp_from')
+            filter.entry_timestamp_from,
+            common.setFilterValue('entry_timestamp_from')
         ),
         datetimePickerVt(
             'To',
-            localFilter.entry_timestamp_to,
-            app.setFilterValue('entry_timestamp_to')
+            filter.entry_timestamp_to,
+            common.setFilterValue('entry_timestamp_to')
         )
     ];
 }
 
 
 function filterSelectVt(key: 'facility' | 'severity'): u.VNode {
-    const localFilter = app.getLocalFilter();
-    const value = localFilter[key] || '';
+    const state = common.getState();
+    const filter = state.local.filter;
+    const value = filter[key] || '';
 
     let options: string[] = [];
     if (key == 'facility') {
@@ -311,7 +273,7 @@ function filterSelectVt(key: 'facility' | 'severity'): u.VNode {
 
     const changeCb = (evt: Event) => {
         const value = (evt.target as HTMLSelectElement).value;
-        app.setFilterValue(key, (value.length > 0 ? value : null) as any);
+        common.setFilterValue(key, (value.length > 0 ? value : null) as any);
     };
 
     return ['select', {
@@ -330,12 +292,13 @@ function filterSelectVt(key: 'facility' | 'severity'): u.VNode {
 
 
 function filterTextVt(key: keyof common.Filter): u.VNode {
-    const localFilter = app.getLocalFilter();
-    const value = localFilter[key] || '';
+    const state = common.getState();
+    const filter = state.local.filter;
+    const value = filter[key] || '';
 
     const changeCb = (evt: Event) => {
         const value = (evt.target as HTMLInputElement).value;
-        app.setFilterValue(key, (value.length > 0 ? value : null));
+        common.setFilterValue(key, (value.length > 0 ? value : null));
     };
 
     return ['input', {
@@ -385,14 +348,6 @@ function valueToString(type: common.ColumnType, value: u.JData): string {
 }
 
 
-function navigate(direction: app.Direction) {
-    if (!app.canNavigate(direction))
-        return;
-
-    app.navigate(direction);
-}
-
-
 export function setColumnWidth(name: common.ColumnName, width: number) {
     r.change(['local', 'table', 'columns'], u.map((column: common.Column) =>
         (column.name == name ?
@@ -404,7 +359,8 @@ export function setColumnWidth(name: common.ColumnName, width: number) {
 
 
 function getNextVisibleColumn(column: common.Column): common.Column | null {
-    const columns = getColumns();
+    const state = common.getState();
+    const columns = state.local.table.columns;
     let index = 0;
 
     while (index < columns.length && columns[index].name != column.name)
@@ -415,6 +371,99 @@ function getNextVisibleColumn(column: common.Column): common.Column | null {
         index += 1;
 
     return (index < columns.length ? columns[index] : null);
+}
+
+
+function selectEntry(entry: common.Entry, multiple: boolean) {
+    r.change(['local', 'selectedEntries'], ((entries: common.Entry[]) => {
+        if (!multiple)
+            return [entry];
+
+        const index = entries.findIndex(i => i.id == entry.id);
+        if (index < 0)
+            return u.append(entry, entries);
+
+        return u.omit(index, entries);
+    }) as any);
+
+    focusEntry(entry);
+}
+
+
+function selectRelativeEntries(offset: number, multiple: boolean) {
+    if (offset == 0)
+        return;
+
+    r.change([], ((state: common.State) => {
+        if (!state.remote)
+            return u.set(['local', 'selectedEntries'], [], state);
+
+        const entries = state.remote.entries;
+        if (entries.length < 1)
+            return u.set(['local', 'selectedEntries'], [], state);
+
+        let lastIndex: number | null = null;
+        for (const entry of state.local.selectedEntries) {
+            const index = entries.findIndex(i => i.id == entry.id);
+            if (index >= 0) {
+                if (lastIndex == null ||
+                        (offset > 0 && index > lastIndex) ||
+                        (offset < 0 && index < lastIndex))
+                    lastIndex = index;
+            }
+        }
+
+        if (!multiple) {
+            let index = (offset > 0 ? 0 : entries.length - 1);
+            if (lastIndex != null)
+                index = lastIndex + offset;
+            if (index < 0)
+                index = 0;
+            if (index > entries.length - 1)
+                index = entries.length - 1;
+            const entry = entries[index];
+            focusEntry(entry);
+            return u.set(['local', 'selectedEntries'], [entry], state);
+        }
+
+        const indexes = [];
+        if (lastIndex == null) {
+            indexes.push(offset > 0 ? 0 : entries.length - 1);
+
+        } else if (offset > 0) {
+            for (let i = lastIndex + 1; i < entries.length && i <= lastIndex + offset; ++i) {
+                indexes.push(i);
+            }
+
+        } else {
+            for (let i = lastIndex - 1; i >= 0 && i >= lastIndex + offset; --i) {
+                indexes.push(i);
+            }
+        }
+
+        if (indexes.length < 1) {
+            focusEntry(entries[lastIndex as number]);
+            return state;
+        }
+
+        focusEntry(entries[indexes.at(-1) as number]);
+        return u.set(
+            ['local', 'selectedEntries'],
+            state.local.selectedEntries.concat(
+                indexes.map(index => entries[index])
+            ),
+            state
+        );
+    }) as any);
+}
+
+
+function focusEntry(entry: common.Entry) {
+    const elm = document.getElementById(`entry-${entry.id}`);
+    if (!elm)
+        return;
+
+    elm.focus();
 }
 
 

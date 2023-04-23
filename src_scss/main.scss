@@ -38,9 +38,14 @@ body {
         & > .header {
             @include shadow-2dp;
             grid-area: header;
-            display: flex;
+            display: grid;
+            grid-auto-flow: column;
+            grid-template-columns: max-content 1fr repeat(4, max-content);
+            grid-template-rows: repeat(2, max-content);
+            column-gap: 1.5rem;
+            row-gap: 0.2rem;
+            padding: 0.2rem 0.5rem;
             border-bottom: 1px solid $color-grey-400;
-            gap: 1rem;
             z-index: 2;
             background-color: $color-grey-100;
 
@@ -48,14 +53,17 @@ body {
                 background-color: $color-red-100;
             }
 
-            & > .spacer {
-                flex-grow: 1;
+            & > label {
+                justify-self: center;
+
+                &.filters {
+                    justify-self: left;
+                }
             }
+
 
             & > .toggle {
                 display: flex;
-                flex-direction: column;
-                margin: 0.5rem;
                 align-items: center;
                 justify-content: center;
 
@@ -72,64 +80,37 @@ body {
                 }
             }
 
-            & > .filters {
+            & > div.filters {
                 display: flex;
-                flex-direction: column;
-                margin: 0.2rem;
+                align-items: center;
+                font-size: 0.9rem;
 
-                & > .title {
-                    font-weight: 600;
-                }
+                & > .chip {
+                    border-radius: 0.2rem;
+                    padding: 0.2rem 0.5rem;
+                    margin-right: 0.2rem;
+                    background-color: $color-blue-grey-200;
+                    white-space: nowrap;
 
-                & > div {
-                    display: flex;
-                    align-items: center;
-                    font-size: 0.9rem;
-
-                    & > .chip {
+                    & > .fa {
                         border-radius: 0.2rem;
-                        padding: 0.2rem 0.5rem;
-                        margin-right: 0.2rem;
-                        background-color: $color-blue-grey-200;
-                        white-space: nowrap;
+                        padding: 0.1rem;
+                        margin-left: 0.2rem;
 
-                        & > .fa {
-                            border-radius: 0.2rem;
-                            padding: 0.1rem;
-                            margin-left: 0.2rem;
-
-                            &:hover {
-                                background-color: $color-blue-grey-300;
-                            }
+                        &:hover {
+                            background-color: $color-blue-grey-300;
                         }
                     }
+                }
 
-                    & > button {
-                        font-size: 0.9rem;
-                    }
+                & > button {
+                    font-size: 0.9rem;
                 }
             }
 
             & > .navigation {
-                display: flex;
-                align-items: center;
-                gap: 1rem;
-                margin: 0.2rem;
-
-                & > .group {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 0.2rem;
-
-                    & > label {
-                        align-self: center;
-                    }
-
-                    & > .buttons {
-                        display: grid;
-                        grid-template-columns: 1fr 1fr 1fr;
-                    }
-                }
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
             }
         }
 
@@ -438,7 +419,15 @@ body {
 
                 & > label {
                     font-weight: 600;
-                    color: $color-grey-700;
+
+                    &:not(.title) {
+                        color: $color-grey-700;
+                    }
+
+                    &.title {
+                        margin-top: 0.5rem;
+                        border-bottom: 1px solid $color-grey-400;
+                    }
                 }
 
                 & > pre {

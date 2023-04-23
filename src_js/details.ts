@@ -1,28 +1,19 @@
 import * as u from '@hat-open/util';
 import r from '@hat-open/renderer';
 
-import * as app from './app';
 import * as common from './common';
-import * as notification from './notification';
-
-
-export function isVisible(): boolean {
-    return Boolean(r.get('local', 'details', 'visible'));
-}
-
-
-export function setVisible(visible: boolean) {
-    r.set(['local', 'details', 'visible'], visible);
-}
 
 
 export function detailsVt(): u.VNodeChild {
-    if (!isVisible())
+    const state = common.getState();
+    if (!state.local.details.visible)
         return [];
 
-    const entry = app.getSelectedEntry();
-    if (!entry)
+    const entries = state.local.selectedEntries;
+    if (entries.length < 1)
         return [];
+
+    const width = state.local.details.width;
 
     return [
         ['div.details-resizer', {
@@ -38,54 +29,49 @@ export function detailsVt(): u.VNodeChild {
 
                     const width = el.clientWidth;
                     return (_, dx) => {
-                        setWidth(width - dx);
+                        r.set(['local', 'details', 'width'], width - dx);
                     };
                 })
             }
         }],
         ['div.details', {
             props: {
-                style: `width: ${getWidth()}px`
+                style: `width: ${width}px`
             }},
-            headerVt(entry),
-            contentVt(entry)
+            headerVt(),
+            contentVt()
         ]
     ];
 }
 
 
-function headerVt(entry: common.Entry | null): u.VNode {
+function headerVt(): u.VNode {
     return ['div.header',
-        ['label', (!entry ?
-            'Details' :
-            `Entry ${entry.id}`
-        )],
-        (!entry ? [] : [
-            ['button', {
-                props: {
-                    title: 'Copy JSON entry',
-                },
-                on: {
-                    click: () => copy(entry)
-                }},
-                ['span.fa.fa-copy']
-            ],
-            ['button', {
-                props: {
-                    title: 'Download JSON entry',
-                },
-                on: {
-                    click: () => download(entry)
-                }},
-                ['span.fa.fa-download']
-            ]
-        ]),
+        ['label', 'Details'],
+        ['button', {
+            props: {
+                title: 'Copy JSON entry',
+            },
+            on: {
+                click: copy
+            }},
+            ['span.fa.fa-copy']
+        ],
+        ['button', {
+            props: {
+                title: 'Download JSON entry',
+            },
+            on: {
+                click: download
+            }},
+            ['span.fa.fa-download']
+        ],
         ['button', {
             props: {
                 title: 'Close',
             },
             on: {
-                click: () => setVisible(false)
+                click: close
             }},
             ['span.fa.fa-times']
         ]
@@ -93,79 +79,77 @@ function headerVt(entry: common.Entry | null): u.VNode {
 }
 
 
-function contentVt(entry: common.Entry | null): u.VNode {
-    if (!entry)
-        return ['div.content'];
+function contentVt(): u.VNode {
+    const state = common.getState();
+    const entries = state.local.selectedEntries;
 
-    const rawDataVisible = r.get('local', 'details', 'rawDataVisible');
+    return ['div.content', entries.map(entry => {
+        const data = (entry.msg.data ? decodeJson(entry.msg.data) : null);
+        const hatLocation = getHatLocation(u.get('hat@1', data));
+        const hatExcInfo = u.get(['hat@1', 'exc_info'], data);
 
-    const data = (entry.msg.data ? decodeJson(entry.msg.data) : null);
-    const hatLocation = getHatLocation(u.get('hat@1', data));
-    const hatExcInfo = u.get(['hat@1', 'exc_info'], data);
-
-    return ['div.content',
-        ['label.wide', 'Message:'],
-        ['div.wide', entry.msg.msg || ''],
-        (hatExcInfo  ? [
-            ['label.wide', 'Exception:'],
-            ['pre.wide', String(hatExcInfo)],
-        ] : []),
-        [
-            ['Timestamp', u.timestampToLocalString(entry.timestamp)],
-            ['Severity', entry.msg.severity],
-            ['Location', hatLocation],
-            ['Msg time', (entry.msg.timestamp != null ?
-                u.timestampToLocalString(entry.msg.timestamp) :
-                null
-            )],
-            ['Hostname', entry.msg.hostname],
-            ['App name', entry.msg.app_name],
-            ['Proc ID', entry.msg.procid],
-            ['Message ID', entry.msg.msgid],
-            ['Facility', entry.msg.facility],
-            ['Version', String(entry.msg.version)],
-        ].map(([label, value]) => (value != null ? [
-            ['label', `${label}:`],
-            ['div', {
-                props: {
-                    title: value
-                }},
-                value
-            ]
-        ] : [])),
-        ['label.wide.collapsible', {
-            on: {
-                click: () => r.change(['local', 'details', 'rawDataVisible'], u.not)
-            }},
-            (rawDataVisible ?
-                ['span.fa.fa-minus-square-o'] :
-                ['span.fa.fa-plus-square-o']
-            ),
-            ' Raw data:'
-        ],
-        (rawDataVisible ?
-            ['pre.wide', encodeJson(data).replace(/\\n/g, '\n')] :
-            []
-        )
-    ];
+        return [
+            ['label.wide.title', `Entry ${entry.id}`],
+            ['label.wide', 'Message:'],
+            ['div.wide', entry.msg.msg || ''],
+            (hatExcInfo  ? [
+                ['label.wide', 'Exception:'],
+                ['pre.wide', String(hatExcInfo)],
+            ] : []),
+            [
+                ['Timestamp', u.timestampToLocalString(entry.timestamp)],
+                ['Severity', entry.msg.severity],
+                ['Location', hatLocation],
+                ['Msg time', (entry.msg.timestamp != null ?
+                    u.timestampToLocalString(entry.msg.timestamp) :
+                    null
+                )],
+                ['Hostname', entry.msg.hostname],
+                ['App name', entry.msg.app_name],
+                ['Proc ID', entry.msg.procid],
+                ['Message ID', entry.msg.msgid],
+                ['Facility', entry.msg.facility],
+                ['Version', String(entry.msg.version)],
+            ].map(([label, value]) => (value != null ? [
+                ['label', `${label}:`],
+                ['div', {
+                    props: {
+                        title: value
+                    }},
+                    value
+                ]
+            ] : []))
+        ];
+    })];
 }
 
 
-async function copy(entry: common.Entry) {
+async function copy() {
+    const state = common.getState();
+    const entries = state.local.selectedEntries;
+
     try {
-        await writeClipboard(encodeEntry(entry));
-        notification.notify(`Copied entry ${entry.id}`);
+        await writeClipboard(encodeEntries(entries));
+        common.notify('Copied selected entries');
 
     } catch (e) {
-        notification.notify(`Couldn't copy entry ${entry.id}`);
+        common.notify("Couldn't copy selected entries");
     }
 }
 
 
-async function download(entry: common.Entry) {
-    const blob = new Blob([encodeEntry(entry)], {type: 'text/json'});
-    const file = new File([blob], `syslogEntry${entry.id}.json`);
-    saveFile(file);
+async function download() {
+    const state = common.getState();
+    const entries = state.local.selectedEntries;
+    const blob = new Blob([encodeEntries(entries)], {type: 'text/json'});
+    // TODO file name based on entries
+    const file = new File([blob], `syslog.json`);
+    u.saveFile(file);
+}
+
+
+function close() {
+    r.set(['local', 'details', 'visible'], false);
 }
 
 
@@ -180,18 +164,8 @@ async function writeClipboard(text: string) {
 }
 
 
-function saveFile(f: File) {
-    const a = document.createElement('a');
-    a.download = f.name;
-    a.rel = 'noopener';
-    a.href = URL.createObjectURL(f);
-    setTimeout(() => { URL.revokeObjectURL(a.href); }, 20000);
-    setTimeout(() => { a.click(); }, 0);
-}
-
-
-function encodeEntry(entry: common.Entry): string {
-    return u.pipe(
+function encodeEntries(entries: common.Entry[]): string {
+    const data = entries.map(entry => u.pipe(
         u.set(['msg', 'data_raw'], entry.msg.data),
         u.change(['msg', 'data'], data => {
             if (!u.isString(data))
@@ -208,9 +182,10 @@ function encodeEntry(entry: common.Entry): string {
                 ), i) :
                 i
             ))(data as any);
-        }),
-        encodeJson
-    )(entry);
+        })
+    )(entry));
+
+    return encodeJson(data);
 }
 
 
@@ -237,14 +212,4 @@ function getHatLocation(hatData: u.JData): string | null {
     const lineno = u.get('lineno', hatData);
 
     return `${name}.${funcName}:${lineno}`;
-}
-
-
-function getWidth(): number {
-    return r.get('local', 'details', 'width') as number;
-}
-
-
-function setWidth(width: number) {
-    r.set(['local', 'details', 'width'], width);
 }
