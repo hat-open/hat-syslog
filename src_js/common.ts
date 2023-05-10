@@ -182,7 +182,7 @@ export const defaultTable: Table = {
             path: 'timestamp',
             filter: null,
             visible: true,
-            width: 15
+            width: 12
         },
         {
             name: 'facility',
@@ -272,7 +272,7 @@ export const defaultTable: Table = {
             path: ['msg', 'msg'],
             filter: 'msg',
             visible: true,
-            width: 45
+            width: 50
         }
     ]
 };

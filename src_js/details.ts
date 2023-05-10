@@ -208,7 +208,7 @@ function getHatLocation(hatData: u.JData): string | null {
         return null;
 
     const name = u.get('name', hatData);
-    const funcName = u.get('name', hatData);
+    const funcName = u.get('funcName', hatData);
     const lineno = u.get('lineno', hatData);
 
     return `${name}.${funcName}:${lineno}`;

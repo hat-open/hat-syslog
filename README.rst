@@ -1,4 +1,4 @@
-.. |syslog-server-video| replace:: https://user-images.githubusercontent.com/26526989/226031877-cefe2f46-b05c-4c1c-81d0-0614211751bc.mp4
+.. |syslog-server-video| replace:: https://user-images.githubusercontent.com/26526989/237474681-83b9d74a-f95d-4032-a279-12252d052bc9.mp4
 
 .. _Syslog Server: https://hat-syslog.hat-open.com/server.html
 .. _Syslog Handler: https://hat-syslog.hat-open.com/handler.html
