@@ -14,6 +14,7 @@
 .. _AUR package: https://aur.archlinux.org/packages/hat-syslog
 .. _GitHub releases: https://github.com/hat-open/hat-syslog/releases
 .. _PyPI project: https://pypi.org/project/hat-syslog
+.. _Docker image: https://hub.docker.com/r/bozokopic/hat-syslog
 
 .. _pydoit: https://pydoit.org
 
@@ -90,6 +91,19 @@ Python wheel
 `hat-syslog` is available as `PyPI project`_::
 
     $ pip install hat-syslog
+
+
+Docker
+''''''
+
+Syslog Server is available as `Docker image`_::
+
+    $ mkdir -p ~/.local/share/hat
+    $ docker run -p 6514:6514/tcp \
+                 -p 6514:6514/udp \
+                 -p 23020:23020 \
+                 -v $(cd; pwd)/.local/share/hat:/hat-syslog \
+                 bozokopic/hat-syslog
 
 
 Usage
