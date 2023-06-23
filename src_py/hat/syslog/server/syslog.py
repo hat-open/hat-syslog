@@ -24,7 +24,7 @@ SyslogServer = typing.Union['TcpSyslogServer', 'UdpSyslogServer']
 
 async def create_syslog_server(addr: str,
                                msg_cb: MsgCb,
-                               pem_path: typing.Optional[Path]
+                               pem_path: Path | None
                                ) -> SyslogServer:
     """Create syslog server"""
     addr = urllib.parse.urlparse(addr)

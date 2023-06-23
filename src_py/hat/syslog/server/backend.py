@@ -71,17 +71,17 @@ class Backend(aio.Resource):
         return self._async_group
 
     @property
-    def first_id(self) -> typing.Optional[int]:
+    def first_id(self) -> int | None:
         """First entry id"""
         return self._first_id
 
     @property
-    def last_id(self) -> typing.Optional[int]:
+    def last_id(self) -> int | None:
         """Last entry id"""
         return self._last_id
 
     def register_change_cb(self,
-                           cb: typing.Callable[[typing.List[common.Entry]],
+                           cb: typing.Callable[[list[common.Entry]],
                                                None]
                            ) -> util.RegisterCallbackHandle:
         """Register change callback
@@ -111,7 +111,7 @@ class Backend(aio.Resource):
 
     async def query(self,
                     filter: common.Filter
-                    ) -> typing.List[common.Entry]:
+                    ) -> list[common.Entry]:
         """Query entries"""
         return await self._db.query(filter)
 

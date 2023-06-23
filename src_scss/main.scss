@@ -414,6 +414,7 @@ body {
                 grid-template-columns: max-content 1fr;
                 gap: 0.2rem;
                 font-size: 0.9rem;
+                user-select: text;
 
                 & > .wide {
                     grid-column: 1 / 3;

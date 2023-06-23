@@ -3,7 +3,6 @@
 from pathlib import Path
 import logging
 import sqlite3
-import typing
 
 from hat import aio
 
@@ -45,19 +44,19 @@ class Database(aio.Resource):
         """Async group"""
         return self._async_group
 
-    async def get_first_id(self) -> typing.Optional[int]:
+    async def get_first_id(self) -> int | None:
         """Get first entry id"""
         return await self._async_group.spawn(self._executor, _ext_fist_id,
                                              self._conn)
 
-    async def get_last_id(self) -> typing.Optional[int]:
+    async def get_last_id(self) -> int | None:
         """Get last entry id"""
         return await self._async_group.spawn(self._executor, _ext_last_id,
                                              self._conn)
 
     async def add_msgs(self,
-                       msgs: typing.List[typing.Tuple[float, common.Msg]]
-                       ) -> typing.List[common.Entry]:
+                       msgs: list[tuple[float, common.Msg]]
+                       ) -> list[common.Entry]:
         """Add timestamped messages"""
         columns = ['entry_timestamp', 'facility', 'severity', 'version',
                    'msg_timestamp', 'hostname', 'app_name', 'procid', 'msgid',
@@ -79,7 +78,7 @@ class Database(aio.Resource):
                    len(entries))
         return entries
 
-    async def add_entries(self, entries: typing.List[common.Entry]):
+    async def add_entries(self, entries: list[common.Entry]):
         """Add entries"""
         columns = ['rowid', 'entry_timestamp', 'facility', 'severity',
                    'version', 'msg_timestamp', 'hostname', 'app_name',
@@ -97,7 +96,7 @@ class Database(aio.Resource):
 
     async def query(self,
                     filter: common.Filter
-                    ) -> typing.List[common.Entry]:
+                    ) -> list[common.Entry]:
         """Query entries that satisfy filter"""
         conditions = []
         args = {}
@@ -186,7 +185,7 @@ _db_structure = f"""
 
 
 def _ext_connect(path, disable_journal):
-    path.parent.mkdir(exist_ok=True)
+    path.parent.mkdir(exist_ok=True, parents=True)
     conn = sqlite3.connect(f'file:{path}?nolock=1',
                            uri=True,
                            isolation_level=None,

@@ -16,14 +16,14 @@ class Entry(typing.NamedTuple):
 
 
 class Filter(typing.NamedTuple):
-    max_results: typing.Optional[int] = None
-    last_id: typing.Optional[int] = None
-    entry_timestamp_from: typing.Optional[float] = None
-    entry_timestamp_to: typing.Optional[float] = None
-    facility: typing.Optional[Facility] = None
-    severity: typing.Optional[Severity] = None
-    hostname: typing.Optional[str] = None
-    app_name: typing.Optional[str] = None
-    procid: typing.Optional[str] = None
-    msgid: typing.Optional[str] = None
-    msg: typing.Optional[str] = None
+    max_results: int | None = None
+    last_id: int | None = None
+    entry_timestamp_from: float | None = None
+    entry_timestamp_to: float | None = None
+    facility: Facility | None = None
+    severity: Severity | None = None
+    hostname: str | None = None
+    app_name: str | None = None
+    procid: str | None = None
+    msgid: str | None = None
+    msg: str | None = None

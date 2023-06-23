@@ -58,10 +58,10 @@ class Msg(typing.NamedTuple):
     facility: Facility
     severity: Severity
     version: int
-    timestamp: typing.Optional[float]
-    hostname: typing.Optional[str]
-    app_name: typing.Optional[str]
-    procid: typing.Optional[str]
-    msgid: typing.Optional[str]
-    data: typing.Optional[str]
-    msg: typing.Optional[str]
+    timestamp: float | None
+    hostname: str | None
+    app_name: str | None
+    procid: str | None
+    msgid: str | None
+    data: str | None
+    msg: str | None

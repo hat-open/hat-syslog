@@ -59,7 +59,7 @@ For more information see:
 Runtime requirements
 --------------------
 
-* python >=3.8
+* python >=3.10
 
 
 Install
@@ -166,7 +166,7 @@ For additional details and command line options see `Syslog Generator`_.
 Development requirements
 ------------------------
 
-* python >=3.8
+* python >=3.10
 * nodejs >=7
 * yarn
 

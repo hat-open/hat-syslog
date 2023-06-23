@@ -40,7 +40,8 @@ async def create_web_server(addr: str,
     exit_stack = contextlib.ExitStack()
     try:
         ui_path = exit_stack.enter_context(
-            importlib.resources.path(__package__, 'ui'))
+            importlib.resources.as_file(
+                importlib.resources.files(__package__) / 'ui'))
 
         url = urllib.parse.urlparse(addr)
         srv._srv = await juggler.listen(host=url.hostname,

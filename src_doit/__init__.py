@@ -4,7 +4,6 @@ from pathlib import Path
 import subprocess
 import tempfile
 
-from hat import json
 from hat.doit import common
 from hat.doit.docs import (build_sphinx,
                            build_pdoc)

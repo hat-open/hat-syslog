@@ -7,7 +7,6 @@ import contextlib
 import logging.config
 import sys
 import time
-import typing
 
 import appdirs
 
@@ -39,8 +38,8 @@ default_db_low_size: int = int(1e6)
 default_db_high_size: int = int(1e7)
 """Default DB high size count"""
 
-default_syslog_addrs: typing.List[str] = ['tcp://0.0.0.0:6514',
-                                          'udp://0.0.0.0:6514']
+default_syslog_addrs: list[str] = ['tcp://0.0.0.0:6514',
+                                   'udp://0.0.0.0:6514']
 """Default syslog listening addresses"""
 
 
@@ -127,8 +126,8 @@ async def async_main(ui_addr: str,
                      db_high_size: int,
                      db_enable_archive: bool,
                      db_disable_journal: bool,
-                     syslog_pem_path: typing.Optional[Path],
-                     syslog_addrs: typing.List[str]):
+                     syslog_pem_path: Path | None,
+                     syslog_addrs: list[str]):
     """Syslog Server async main"""
     async_group = aio.Group()
 

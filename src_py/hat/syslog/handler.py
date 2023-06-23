@@ -39,7 +39,7 @@ class SyslogHandler(logging.Handler):
     def __init__(self,
                  host: str,
                  port: int,
-                 comm_type: typing.Union[common.CommType, str],
+                 comm_type: common.CommType | str,
                  queue_size: int = 1024,
                  reconnect_delay: float = 5):
         super().__init__()
@@ -107,7 +107,7 @@ class _ThreadState(typing.NamedTuple):
     """Hostname"""
     port: int
     """TCP port"""
-    comm_type: typing.Union[common.CommType, str]
+    comm_type: common.CommType | str
     """Communication type"""
     queue: collections.deque
     """Message queue"""
@@ -119,7 +119,7 @@ class _ThreadState(typing.NamedTuple):
     """Conditional variable"""
     closed: threading.Event
     """Closed flag"""
-    dropped: typing.List[int]
+    dropped: list[int]
     """Dropped message counter"""
 
 
