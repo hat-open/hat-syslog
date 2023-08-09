@@ -9,8 +9,9 @@ from hat.doit.docs import (build_sphinx,
                            build_pdoc)
 from hat.doit.js import (ESLintConf,
                          run_eslint)
-from hat.doit.py import (build_wheel,
-                         run_pytest,
+from hat.doit.py import (get_task_build_wheel,
+                         get_task_run_pytest,
+                         get_task_run_pip_compile,
                          run_flake8)
 
 from . import dist
@@ -21,8 +22,10 @@ __all__ = ['task_clean_all',
            'task_build',
            'task_check',
            'task_test',
+           'task_ui_dir',
            'task_docs',
            'task_ui',
+           'task_pip_compile',
            *dist.__all__]
 
 
@@ -56,21 +59,12 @@ def task_node_modules():
 
 def task_build():
     """Build"""
-
-    def build():
-        build_wheel(
-            src_dir=src_py_dir,
-            dst_dir=build_py_dir,
-            name='hat-syslog',
-            description='Hat Syslog',
-            url='https://github.com/hat-open/hat-syslog',
-            license=common.License.APACHE2,
-            console_scripts=[
-                'hat-syslog-server = hat.syslog.server.main:main',
-                'hat-syslog-generator = hat.syslog.generator:main'])
-
-    return {'actions': [build],
-            'task_dep': ['ui']}
+    return get_task_build_wheel(
+        src_dir=src_py_dir,
+        build_dir=build_py_dir,
+        scripts={'hat-syslog-server': 'hat.syslog.server.main:main',
+                 'hat-syslog-generator': 'hat.syslog.generator:main'},
+        task_dep=['ui'])
 
 
 def task_check():
@@ -83,9 +77,12 @@ def task_check():
 
 def task_test():
     """Test"""
-    return {'actions': [(common.mkdir_p, [ui_dir]),
-                        lambda args: run_pytest(pytest_dir, *(args or []))],
-            'pos_arg': 'args'}
+    return get_task_run_pytest(task_dep=['ui_dir'])
+
+
+def task_ui_dir():
+    """Create empty ui directory"""
+    return {'actions': [(common.mkdir_p, [ui_dir])]}
 
 
 def task_docs():
@@ -126,6 +123,11 @@ def task_ui():
     return {'actions': [build],
             'pos_arg': 'args',
             'task_dep': ['node_modules']}
+
+
+def task_pip_compile():
+    """Run pip-compile"""
+    return get_task_run_pip_compile()
 
 
 _webpack_conf = r"""

@@ -174,12 +174,17 @@ Development requirements
 Build
 -----
 
-Build tool used for `hat-syslog` is `pydoit`_. It can be installed together
-with other python dependencies by running::
+To install editable installation, together with python development
+dependencies, run::
 
-    $ pip install -r requirements.pip.dev.txt
+    $ pip install -e '.[dev]'
 
-For listing available doit tasks, use::
+To install only python development dependencies, run::
+
+    $ pip install -r requirements.pip.txt
+
+Build tool used for `hat-syslog` is `pydoit`_. For listing available doit
+tasks, use::
 
     $ doit list
 

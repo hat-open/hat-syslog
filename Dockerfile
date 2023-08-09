@@ -7,7 +7,7 @@ WORKDIR /hat-syslog
 RUN apt install -qy nodejs yarnpkg && \
     ln -sT /usr/bin/yarnpkg /usr/bin/yarn
 COPY . .
-RUN pip install -qq -r requirements.pip.dev.txt && \
+RUN pip install -qq -r requirements.pip.txt && \
     doit clean_all && \
     doit
 

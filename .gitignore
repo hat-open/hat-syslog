@@ -4,5 +4,4 @@
 /node_modules
 /src_py/**/json_schema_repo.json
 /src_py/hat/syslog/server/ui
-/test_pytest/.coverage
 __pycache__
