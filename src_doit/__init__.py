@@ -11,7 +11,7 @@ from hat.doit.js import (ESLintConf,
                          run_eslint)
 from hat.doit.py import (get_task_build_wheel,
                          get_task_run_pytest,
-                         get_task_run_pip_compile,
+                         get_task_create_pip_requirements,
                          run_flake8)
 
 from . import dist
@@ -25,7 +25,7 @@ __all__ = ['task_clean_all',
            'task_ui_dir',
            'task_docs',
            'task_ui',
-           'task_pip_compile',
+           'task_pip_requirements',
            *dist.__all__]
 
 
@@ -59,12 +59,9 @@ def task_node_modules():
 
 def task_build():
     """Build"""
-    return get_task_build_wheel(
-        src_dir=src_py_dir,
-        build_dir=build_py_dir,
-        scripts={'hat-syslog-server': 'hat.syslog.server.main:main',
-                 'hat-syslog-generator': 'hat.syslog.generator:main'},
-        task_dep=['ui'])
+    return get_task_build_wheel(src_dir=src_py_dir,
+                                build_dir=build_py_dir,
+                                task_dep=['ui'])
 
 
 def task_check():
@@ -125,9 +122,9 @@ def task_ui():
             'task_dep': ['node_modules']}
 
 
-def task_pip_compile():
-    """Run pip-compile"""
-    return get_task_run_pip_compile()
+def task_pip_requirements():
+    """Create pip requirements"""
+    return get_task_create_pip_requirements()
 
 
 _webpack_conf = r"""
