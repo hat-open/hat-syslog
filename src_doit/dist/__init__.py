@@ -14,7 +14,7 @@ package_path = Path(__file__).parent
 build_dir = Path('build')
 cache_dir = Path('cache')
 
-wheel_dir = build_dir / 'py/dist'
+wheel_dir = build_dir / 'py'
 dist_dir = build_dir / 'dist'
 dist_windows_dir = dist_dir / f'hat-syslog-{common.get_version()}-windows'
 
