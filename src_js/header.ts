@@ -1,5 +1,4 @@
 import * as u from '@hat-open/util';
-import r from '@hat-open/renderer';
 
 import * as common from './common';
 
@@ -8,8 +7,6 @@ export function headerVt(): u.VNode {
     const state = common.getState();
     const frozen = state.remote != null && state.remote.filter.last_id != null;
     const live = state.local.filter.last_id == null;
-    const menuVisible = state.local.menu.visible;
-    const detailsVisible = state.local.details.visible;
 
     return ['div.header', {
         class: {
