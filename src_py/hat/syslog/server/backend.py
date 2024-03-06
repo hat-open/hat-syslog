@@ -1,11 +1,11 @@
 """Backend implementation"""
 
+from collections.abc import Callable
 from pathlib import Path
 import asyncio
 import contextlib
 import itertools
 import logging
-import typing
 
 from hat import aio
 from hat import util
@@ -81,8 +81,7 @@ class Backend(aio.Resource):
         return self._last_id
 
     def register_change_cb(self,
-                           cb: typing.Callable[[list[common.Entry]],
-                                               None]
+                           cb: Callable[[list[common.Entry]], None]
                            ) -> util.RegisterCallbackHandle:
         """Register change callback
 

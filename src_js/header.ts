@@ -15,29 +15,40 @@ export function headerVt(): u.VNode {
         class: {
             frozen: frozen
         }},
-        toggleVt('Menu', menuVisible, toggleMenu),
+        ['button', {
+            props: {
+                title: (menuVisible ? 'Hide menu' : 'Show menu')
+            },
+            on: {
+                click: toggleMenu
+            }},
+            common.icon(menuVisible ? 'pane-hide-symbolic-rtl' : 'pane-show-symbolic-rtl'),
+            ' Menu'
+        ],
         activeFiltersVt(),
-        toggleVt('Live', live, common.toggleLive),
+        ['label.toggle',
+            ['input', {
+                props: {
+                    type: 'checkbox',
+                    checked: live
+                },
+                on: {
+                    change: common.toggleLive
+                }
+            }],
+            'Live'
+        ],
         pageSizeVt(),
         navigationVt(),
-        toggleVt('Details', detailsVisible, toggleDetails)
-    ];
-}
-
-
-function toggleVt(label: string, value: boolean, changeCb: () => void): u.VNodeChild {
-    return [
-        ['label', label],
-        ['div.toggle', {
+        ['button', {
+            props: {
+                title: (detailsVisible ? 'Hide details' : 'Show details')
+            },
             on: {
-                click: changeCb
+                click: toggleDetails
             }},
-            ['span.fa', {
-                class: {
-                    'fa-toggle-on': value,
-                    'fa-toggle-off': !value
-                }
-            }]
+            common.icon(detailsVisible ? 'pane-hide-symbolic' : 'pane-show-symbolic'),
+            ' Details'
         ]
     ];
 }
@@ -56,12 +67,13 @@ function activeFiltersVt(): u.VNodeChild {
                 props: {
                     title: `${label}: ${value}`,
                 }},
-                label,
-                ['span.fa.fa-times', {
+                `${label} `,
+                ['button', {
                     on: {
                         click: () => common.setFilterValue(name, null)
-                    }
-                }]
+                    }},
+                    common.icon('window-close')
+                ]
             ]),
             (activeFilters.length > 0 ?
                 ['button.clear', {
@@ -71,7 +83,7 @@ function activeFiltersVt(): u.VNodeChild {
                     on: {
                         click: common.clearFilter
                     }},
-                    ['span.fa.fa-trash'],
+                    common.icon('user-trash'),
                     ' Clear all'
                 ] :
                 []
@@ -115,9 +127,9 @@ function navigationVt(): u.VNodeChild {
         ['label', `Page ${currentPage}`],
         ['div.navigation',
             ([
-                ['first', 'fa-angle-double-left'],
-                ['previous', 'fa-angle-left'],
-                ['next', 'fa-angle-right']
+                ['first', 'go-first'],
+                ['previous', 'go-previous'],
+                ['next', 'go-next']
             ] as const).map(([direction, icon]) => ['button', {
                 props: {
                     disabled: !common.canNavigate(direction),
@@ -126,7 +138,7 @@ function navigationVt(): u.VNodeChild {
                 on: {
                     click: () => common.navigate(direction)
                 }},
-                [`span.fa.${icon}`]
+                common.icon(icon)
             ])
         ]
     ];

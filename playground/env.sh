@@ -1,7 +1,8 @@
-: ${RUN_PATH:?} ${ROOT_PATH:?}
+: ${PLAYGROUND_PATH:?}
 
 PYTHON=${PYTHON:-python3}
-DATA_PATH=$RUN_PATH/data
+ROOT_PATH=$PLAYGROUND_PATH/..
+DATA_PATH=$PLAYGROUND_PATH/data
 VERSION=$($PYTHON -m hat.json.convert $ROOT_PATH/pyproject.toml | \
           jq -r .project.version)
 

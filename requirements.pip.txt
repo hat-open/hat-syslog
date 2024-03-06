@@ -1,7 +1,7 @@
 appdirs ~=1.4.4
-hat-aio ~=0.7.8
-hat-doit ~=0.15.5
-hat-json ~=0.5.19
+hat-aio ~=0.7.9
+hat-doit ~=0.15.8
+hat-json ~=0.5.24
 hat-juggler ~=0.6.11
 hat-util ~=0.6.10
 sphinxcontrib-plantuml >=0.25

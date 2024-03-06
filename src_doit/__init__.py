@@ -25,6 +25,7 @@ __all__ = ['task_clean_all',
            'task_ui_dir',
            'task_docs',
            'task_ui',
+           'task_static',
            'task_pip_requirements',
            *dist.__all__]
 
@@ -54,7 +55,7 @@ def task_clean_all():
 
 def task_node_modules():
     """Install node_modules"""
-    return {'actions': ['yarn install --silent']}
+    return {'actions': ['npm install --silent --progress false']}
 
 
 def task_build():
@@ -103,8 +104,6 @@ def task_ui():
 
     def build(args):
         args = args or []
-        common.rm_rf(ui_dir)
-        common.cp_r(src_static_dir, ui_dir)
 
         with tempfile.TemporaryDirectory() as tmpdir:
             tmpdir = Path(tmpdir)
@@ -119,7 +118,24 @@ def task_ui():
 
     return {'actions': [build],
             'pos_arg': 'args',
-            'task_dep': ['node_modules']}
+            'task_dep': ['node_modules',
+                         'static']}
+
+
+def task_static():
+    """Copy static files"""
+    for src_dir, dst_dir in [(src_static_dir, ui_dir)]:
+        for src_path in src_dir.rglob('*'):
+            if not src_path.is_file():
+                continue
+
+            dst_path = dst_dir / src_path.relative_to(src_dir)
+
+            yield {'name': str(dst_path),
+                   'actions': [(common.mkdir_p, [dst_path.parent]),
+                               (common.cp_r, [src_path, dst_path])],
+                   'file_dep': [src_path],
+                   'targets': [dst_path]}
 
 
 def task_pip_requirements():
@@ -137,20 +153,6 @@ module.exports = {{
     }},
     module: {{
         rules: [
-            {{
-                test: /\.scss$/,
-                use: [
-                    "style-loader",
-                    {{
-                        loader: "css-loader",
-                        options: {{url: false}}
-                    }},
-                    {{
-                        loader: "sass-loader",
-                        options: {{sourceMap: true}}
-                    }}
-                ]
-            }},
             {{
                 test: /\.ts$/,
                 use: [

@@ -55,7 +55,7 @@ function headerVt(): u.VNode {
             on: {
                 click: copy
             }},
-            ['span.fa.fa-copy']
+            common.icon('edit-copy')
         ],
         ['button', {
             props: {
@@ -64,7 +64,7 @@ function headerVt(): u.VNode {
             on: {
                 click: download
             }},
-            ['span.fa.fa-download']
+            common.icon('browser-download')
         ],
         ['button', {
             props: {
@@ -73,7 +73,7 @@ function headerVt(): u.VNode {
             on: {
                 click: close
             }},
-            ['span.fa.fa-times']
+            common.icon('window-close')
         ]
     ];
 }

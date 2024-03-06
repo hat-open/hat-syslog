@@ -9,9 +9,6 @@ import { tableVt } from './table';
 import { detailsVt } from './details';
 
 
-import '../src_scss/main.scss';
-
-
 async function main() {
     const root = document.body.appendChild(document.createElement('div'));
     r.init(root, common.defaultState, mainVt);

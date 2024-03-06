@@ -477,6 +477,15 @@ export function notify(text: string) {
 }
 
 
+export function icon(name: string): u.VNode {
+    return ['img.icon', {
+        props: {
+            src: `icons/${name}.svg`
+        }
+    }];
+}
+
+
 async function setRemoteFilter(filter: Filter) {
     await app.send('filter', filter);
 }

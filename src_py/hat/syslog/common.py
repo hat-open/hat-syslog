@@ -52,7 +52,7 @@ class Severity(enum.Enum):
 class Msg(typing.NamedTuple):
     """Message
 
-    `data` containes JSON serialized Dict[str, Dict[str, str]]
+    `data` containes JSON serialized dict[str, dict[str, str]]
 
     """
     facility: Facility

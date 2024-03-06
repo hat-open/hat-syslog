@@ -7,7 +7,10 @@ import itertools
 import logging
 import urllib
 
+import aiohttp.web
+
 from hat import aio
+from hat import json
 from hat import juggler
 
 from hat.syslog.server import common
@@ -43,13 +46,16 @@ async def create_web_server(addr: str,
             importlib.resources.as_file(
                 importlib.resources.files(__package__) / 'ui'))
 
+        additional_routes = [aiohttp.web.get('/backup', srv._backup_handler)]
+
         url = urllib.parse.urlparse(addr)
         srv._srv = await juggler.listen(host=url.hostname,
                                         port=url.port,
                                         connection_cb=srv._on_connection,
                                         request_cb=srv._on_request,
                                         static_dir=ui_path,
-                                        autoflush_delay=autoflush_delay)
+                                        autoflush_delay=autoflush_delay,
+                                        additional_routes=additional_routes)
 
         try:
             srv.async_group.spawn(aio.call_on_cancel, exit_stack.close)
@@ -158,6 +164,36 @@ class WebServer(aio.Resource):
                                 'entries': entries_json,
                                 'first_id': self._backend.first_id,
                                 'last_id': self._backend.last_id})
+
+    async def _backup_handler(self, request):
+        response = aiohttp.web.StreamResponse()
+        response.content_type = 'application/octet-stream'
+        await response.prepare(request)
+
+        max_results = 256
+        last_id = None
+
+        while True:
+            entries = await self._backend.query(
+                common.Filter(max_results=max_results,
+                              last_id=last_id))
+            if not entries:
+                break
+
+            for entry in entries:
+                entry_json = encoder.entry_to_json(entry)
+                entry_str = json.encode(entry_json)
+                entry_bytes = entry_str.encode('utf-8')
+
+                await response.write(entry_bytes + b'\n')
+
+                last_id = entry.id - 1
+
+            await asyncio.sleep(0)
+
+        await response.write_eof()
+
+        return response
 
 
 def _sanitize_filter(f):

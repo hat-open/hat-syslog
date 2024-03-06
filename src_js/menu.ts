@@ -19,7 +19,7 @@ export function menuVt(): u.VNodeChild {
                 on: {
                     click: closeMenu
                 }},
-                ['span.fa.fa-times']
+                common.icon('window-close')
             ]
         ],
         ['div.content',
@@ -58,34 +58,32 @@ export function menuVt(): u.VNodeChild {
                         }],
                         column.label
                     ],
-                    ['span.fa.fa-arrow-down', {
-                        class : {
-                            disabled: !canMoveDown
-                        },
+                    ['button.move', {
                         props: {
-                            title: 'Move down'
+                            title: 'Move down',
+                            disabled: !canMoveDown
                         },
                         on: {
                             click: () => (canMoveDown ?
                                 common.moveColumn(column.name, index + 1) :
                                 null
                             )
-                        }
-                    }],
-                    ['span.fa.fa-arrow-up', {
-                        class : {
-                            disabled: !canMoveUp
-                        },
+                        }},
+                        common.icon('go-down')
+                    ],
+                    ['button.move', {
                         props: {
-                            title: 'Move up'
+                            title: 'Move up',
+                            disabled: !canMoveUp
                         },
                         on: {
                             click: () => (canMoveUp ?
                                 common.moveColumn(column.name, index - 1) :
                                 null
                             )
-                        }
-                    }]
+                        }},
+                        common.icon('go-up')
+                    ]
                 ];
             })],
             ['button', {
@@ -95,7 +93,7 @@ export function menuVt(): u.VNodeChild {
                 on: {
                     click: resetLayout
                 }},
-                ['span.fa.fa-undo'],
+                common.icon('view-refresh'),
                 ' Reset layout'
             ]
         ]

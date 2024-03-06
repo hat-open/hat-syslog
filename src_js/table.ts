@@ -156,7 +156,7 @@ function bodyCellVt(entry: common.Entry, column: common.Column): u.VNodeChild {
         ['div',
             ['div.content', valueToString(column.type, value)],
             (column.name == 'timestamp' ? [
-                ['span.filter.fa.fa-chevron-up', {
+                ['button.filter', {
                     props: {
                         title: 'Set as timestamp from'
                     },
@@ -165,9 +165,10 @@ function bodyCellVt(entry: common.Entry, column: common.Column): u.VNodeChild {
                             evt.stopPropagation();
                             common.setFilterValue('entry_timestamp_from', entry.timestamp);
                         }
-                    }
-                }],
-                ['span.filter.fa.fa-chevron-down', {
+                    }},
+                    common.icon('go-top')
+                ],
+                ['button.filter', {
                     props: {
                         title: 'Set as timestamp to'
                     },
@@ -176,8 +177,9 @@ function bodyCellVt(entry: common.Entry, column: common.Column): u.VNodeChild {
                             evt.stopPropagation();
                             common.setFilterValue('entry_timestamp_to', entry.timestamp);
                         }
-                    }
-                }]
+                    }},
+                    common.icon('go-bottom')
+                ]
             ] : []),
             resizerVt(column)
         ]
