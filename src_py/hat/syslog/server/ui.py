@@ -188,8 +188,7 @@ class WebServer(aio.Resource):
                 await response.write(entry_bytes + b'\n')
 
                 last_id = entry.id - 1
-
-            await asyncio.sleep(0)
+                await asyncio.sleep(0)
 
         await response.write_eof()
 

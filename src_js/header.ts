@@ -15,16 +15,6 @@ export function headerVt(): u.VNode {
         class: {
             frozen: frozen
         }},
-        ['button', {
-            props: {
-                title: (menuVisible ? 'Hide menu' : 'Show menu')
-            },
-            on: {
-                click: toggleMenu
-            }},
-            common.icon(menuVisible ? 'pane-hide-symbolic-rtl' : 'pane-show-symbolic-rtl'),
-            ' Menu'
-        ],
         activeFiltersVt(),
         ['label.toggle',
             ['input', {
@@ -39,17 +29,7 @@ export function headerVt(): u.VNode {
             'Live'
         ],
         pageSizeVt(),
-        navigationVt(),
-        ['button', {
-            props: {
-                title: (detailsVisible ? 'Hide details' : 'Show details')
-            },
-            on: {
-                click: toggleDetails
-            }},
-            common.icon(detailsVisible ? 'pane-hide-symbolic' : 'pane-show-symbolic'),
-            ' Details'
-        ]
+        navigationVt()
     ];
 }
 
@@ -182,14 +162,4 @@ function* getActiveFilters(): Generator<{
         if (value)
             yield {name, label, value};
     }
-}
-
-
-function toggleMenu() {
-    r.change(['local', 'menu', 'visible'], u.not);
-}
-
-
-function toggleDetails() {
-    r.change(['local', 'details', 'visible'], u.not);
 }

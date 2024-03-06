@@ -6,13 +6,30 @@ import * as common from './common';
 
 export function detailsVt(): u.VNodeChild {
     const state = common.getState();
-    if (!state.local.details.visible)
-        return [];
+    const visible = state.local.details.visible;
 
-    const entries = state.local.selectedEntries;
-    if (entries.length < 1)
-        return [];
+    return visible ? visibleVt() : hiddenVt();
+}
 
+
+function hiddenVt(): u.VNode {
+    return ['div.details.hidden',
+        ['button', {
+            props: {
+                title: 'Show details',
+            },
+            on: {
+                click: openDetails
+            }},
+            common.icon('dialog-information'),
+            ' Details'
+        ]
+    ];
+}
+
+
+function visibleVt(): u.VNodeChild {
+    const state = common.getState();
     const width = state.local.details.width;
 
     return [
@@ -34,7 +51,7 @@ export function detailsVt(): u.VNodeChild {
                 })
             }
         }],
-        ['div.details', {
+        ['div.details.visible', {
             props: {
                 style: `width: ${width}px`
             }},
@@ -46,11 +63,18 @@ export function detailsVt(): u.VNodeChild {
 
 
 function headerVt(): u.VNode {
+    const state = common.getState();
+    const entries = state.local.selectedEntries;
+
     return ['div.header',
-        ['label', 'Details'],
+        ['label',
+            common.icon('dialog-information'),
+            ' Details'
+        ],
         ['button', {
             props: {
                 title: 'Copy JSON entry',
+                disabled: entries.length < 1
             },
             on: {
                 click: copy
@@ -60,6 +84,7 @@ function headerVt(): u.VNode {
         ['button', {
             props: {
                 title: 'Download JSON entry',
+                disabled: entries.length < 1
             },
             on: {
                 click: download
@@ -68,10 +93,10 @@ function headerVt(): u.VNode {
         ],
         ['button', {
             props: {
-                title: 'Close',
+                title: 'Close'
             },
             on: {
-                click: close
+                click: closeDetails
             }},
             common.icon('window-close')
         ]
@@ -148,11 +173,6 @@ async function download() {
 }
 
 
-function close() {
-    r.set(['local', 'details', 'visible'], false);
-}
-
-
 async function writeClipboard(text: string) {
     const navigator = window.navigator;
     const permissions = await navigator.permissions.query({name: "clipboard-write"} as any);
@@ -212,4 +232,14 @@ function getHatLocation(hatData: u.JData): string | null {
     const lineno = u.get('lineno', hatData);
 
     return `${name}.${funcName}:${lineno}`;
+}
+
+
+function openDetails() {
+    r.set(['local', 'details', 'visible'], true);
+}
+
+
+function closeDetails() {
+    r.set(['local', 'details', 'visible'], false);
 }

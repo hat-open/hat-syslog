@@ -1,0 +1,72 @@
+
+body > .main > .menu {
+    box-shadow: var(--box-shadow-2dp);
+    grid-area: menu;
+    border-right: 1px solid var(--color-grey-400);
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+
+    &.hidden {
+        background-color: var(--color-blue-grey-100);
+        writing-mode: vertical-rl;
+        align-items: flex-start;
+    }
+
+    &.visible {
+        overflow: hidden;
+        flex-shrink: 0;
+
+        & > .header {
+            display: flex;
+            border-bottom: 1px solid var(--color-grey-400);
+            background-color: var(--color-blue-grey-100);
+            align-items: center;
+
+            & > label {
+                flex-grow: 1;
+                font-weight: 600;
+                padding: 0.2rem;
+            }
+        }
+
+        & > .content {
+            overflow: auto;
+            display: flex;
+            flex-direction: column;
+
+            & > .title {
+                font-weight: 600;
+                padding: 0.5rem 0.2rem 0.2rem 0.2rem;
+            }
+
+            & > .columns {
+                & > div {
+                    display: flex;
+                    align-items: center;
+
+                    & > label {
+                        flex-grow: 1;
+                        margin-right: 0.5rem;
+                    }
+
+                    & > button {
+                        font-size: 0.8rem;
+                        visibility: hidden;
+                    }
+
+                    &:hover {
+                        & > button {
+                            visibility: visible;
+                        }
+                    }
+                }
+            }
+
+            & > button {
+                padding: 0.2rem;
+                margin: 0.2rem;
+            }
+        }
+    }
+}

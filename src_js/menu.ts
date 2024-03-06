@@ -4,17 +4,41 @@ import r from '@hat-open/renderer';
 import * as common from './common';
 
 
-export function menuVt(): u.VNodeChild {
+export function menuVt(): u.VNode {
     const state = common.getState();
-    if (!state.local.menu.visible)
-        return [];
+    const visible = state.local.menu.visible;
 
+    return visible ? visibleVt() : hiddenVt();
+}
+
+
+function hiddenVt(): u.VNode {
+    return ['div.menu.hidden',
+        ['button', {
+            props: {
+                title: 'Show settings',
+            },
+            on: {
+                click: openMenu
+            }},
+            common.icon('open-menu'),
+            ' Settings'
+        ]
+    ];
+}
+
+
+function visibleVt(): u.VNode {
+    const state = common.getState();
     const filter = state.local.filter;
     const columns = state.local.table.columns;
 
-    return ['div.menu',
+    return ['div.menu.visible',
         ['div.header',
-            ['label', 'Settings'],
+            ['label',
+                common.icon('open-menu'),
+                ' Settings'
+            ],
             ['button', {
                 on: {
                     click: closeMenu
@@ -98,6 +122,11 @@ export function menuVt(): u.VNodeChild {
             ]
         ]
     ];
+}
+
+
+function openMenu() {
+    r.set(['local', 'menu', 'visible'], true);
 }
 
 
