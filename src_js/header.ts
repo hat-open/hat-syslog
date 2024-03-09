@@ -1,6 +1,6 @@
 import * as u from '@hat-open/util';
 
-import * as common from './common';
+import * as common from './common.js';
 
 
 export function headerVt(): u.VNode {

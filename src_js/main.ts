@@ -1,12 +1,12 @@
 import * as u from '@hat-open/util';
 import r from '@hat-open/renderer';
 
-import * as common from './common';
+import * as common from './common.js';
 
-import { headerVt } from './header';
-import { menuVt } from './menu';
-import { tableVt } from './table';
-import { detailsVt } from './details';
+import { headerVt } from './header.js';
+import { menuVt } from './menu.js';
+import { tableVt } from './table.js';
+import { detailsVt } from './details.js';
 
 
 async function main() {

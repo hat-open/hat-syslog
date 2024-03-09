@@ -8,7 +8,17 @@
     <link rel="license" href="https://www.apache.org/licenses/LICENSE-2.0" />
     <link rel="help" href="https://github.com/hat-open/hat-syslog" />
     <link rel="stylesheet" href="style/main.css" />
-    <script src="main.js"></script>
+    <script type="importmap">
+    {
+        "imports": {
+            "@hat-open/juggler": "./script/@hat-open/juggler/index.js",
+            "@hat-open/renderer": "./script/@hat-open/renderer/index.js",
+            "@hat-open/util": "./script/@hat-open/util/index.js",
+            "snabbdom": "./script/snabbdom/index.js"
+        }
+    }
+    </script>
+    <script type="module" src="script/syslog/main.js"></script>
 </head>
 <body>
 </body>

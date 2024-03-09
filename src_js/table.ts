@@ -1,7 +1,7 @@
 import * as u from '@hat-open/util';
 import r from '@hat-open/renderer';
 
-import * as common from './common';
+import * as common from './common.js';
 
 
 export function tableVt(): u.VNode {

@@ -1,6 +1,6 @@
 [project]
 name = "hat-syslog"
-version = "0.7.11"
+version = "0.7.12"
 description = "Hat Syslog"
 readme = "README.rst"
 requires-python = ">=3.10"
@@ -9,8 +9,8 @@ dependencies = [
     "appdirs ~=1.4.4",
     "hat-aio ~=0.7.9",
     "hat-json ~=0.5.24",
-    "hat-juggler ~=0.6.11",
-    "hat-util ~=0.6.10",
+    "hat-juggler ~=0.6.13",
+    "hat-util ~=0.6.13",
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -28,13 +28,13 @@ Documentation = "http://hat-syslog.hat-open.com"
 
 [project.optional-dependencies]
 dev = [
-    "hat-doit ~=0.15.8",
+    "hat-doit ~=0.15.10",
     "sphinxcontrib-plantuml >=0.25",
     "sphinxcontrib-programoutput >=0.17",
 ]
 
 [build-system]
-requires = ["hat-doit ~=0.15.8"]
+requires = ["hat-doit ~=0.15.10"]
 build-backend = "hat.doit.pep517"
 
 [tool.pytest.ini_options]

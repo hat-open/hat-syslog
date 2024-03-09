@@ -4,8 +4,7 @@ RUN apt update -y
 
 FROM hat-syslog-base as hat-syslog-build
 WORKDIR /hat-syslog
-RUN apt install -y nodejs yarnpkg && \
-    ln -sT /usr/bin/yarnpkg /usr/bin/yarn
+RUN apt install -y nodejs npm
 COPY . .
 RUN pip install -r requirements.pip.txt && \
     doit clean_all && \

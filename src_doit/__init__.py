@@ -2,7 +2,6 @@ from .dist import *  # NOQA
 
 from pathlib import Path
 import subprocess
-import tempfile
 
 from hat.doit import common
 from hat.doit.docs import (build_sphinx,
@@ -24,23 +23,23 @@ __all__ = ['task_clean_all',
            'task_test',
            'task_ui_dir',
            'task_docs',
-           'task_ui',
+           'task_ts',
            'task_static',
            'task_pip_requirements',
            *dist.__all__]
 
 
 build_dir = Path('build')
-src_py_dir = Path('src_py')
-src_js_dir = Path('src_js')
-src_static_dir = Path('src_static')
-pytest_dir = Path('test_pytest')
 docs_dir = Path('docs')
-schemas_json_dir = Path('schemas_json')
 node_modules_dir = Path('node_modules')
+pytest_dir = Path('test_pytest')
+schemas_json_dir = Path('schemas_json')
+src_js_dir = Path('src_js')
+src_py_dir = Path('src_py')
+src_static_dir = Path('src_static')
 
-build_py_dir = build_dir / 'py'
 build_docs_dir = build_dir / 'docs'
+build_py_dir = build_dir / 'py'
 
 ui_dir = src_py_dir / 'hat/syslog/server/ui'
 json_schema_repo_path = src_py_dir / 'hat/syslog/server/json_schema_repo.json'
@@ -62,7 +61,8 @@ def task_build():
     """Build"""
     return get_task_build_wheel(src_dir=src_py_dir,
                                 build_dir=build_py_dir,
-                                task_dep=['ui'])
+                                task_dep=['ts',
+                                          'static'])
 
 
 def task_check():
@@ -99,32 +99,33 @@ def task_docs():
     return {'actions': [build]}
 
 
-def task_ui():
-    """Build UI"""
+def task_ts():
+    """Build TypeScript"""
 
     def build(args):
         args = args or []
-
-        with tempfile.TemporaryDirectory() as tmpdir:
-            tmpdir = Path(tmpdir)
-            config_path = tmpdir / 'webpack.config.js'
-            config_path.write_text(_webpack_conf.format(
-                src_path=(src_js_dir / 'main.ts').resolve(),
-                dst_dir=ui_dir.resolve()))
-            subprocess.run([str(node_modules_dir / '.bin/webpack'),
-                            '--config', str(config_path),
-                            *args],
-                           check=True)
+        subprocess.run(['npx', 'tsc', *args],
+                       check=True)
 
     return {'actions': [build],
             'pos_arg': 'args',
-            'task_dep': ['node_modules',
-                         'static']}
+            'task_dep': ['node_modules']}
 
 
 def task_static():
     """Copy static files"""
-    for src_dir, dst_dir in [(src_static_dir, ui_dir)]:
+    src_dst_dirs = [(src_static_dir,
+                     ui_dir),
+                    (node_modules_dir / '@hat-open/juggler',
+                     ui_dir / 'script/@hat-open/juggler'),
+                    (node_modules_dir / '@hat-open/renderer',
+                     ui_dir / 'script/@hat-open/renderer'),
+                    (node_modules_dir / '@hat-open/util',
+                     ui_dir / 'script/@hat-open/util'),
+                    (node_modules_dir / 'snabbdom/build',
+                     ui_dir / 'script/snabbdom')]
+
+    for src_dir, dst_dir in src_dst_dirs:
         for src_path in src_dir.rglob('*'):
             if not src_path.is_file():
                 continue
@@ -135,46 +136,10 @@ def task_static():
                    'actions': [(common.mkdir_p, [dst_path.parent]),
                                (common.cp_r, [src_path, dst_path])],
                    'file_dep': [src_path],
-                   'targets': [dst_path]}
+                   'targets': [dst_path],
+                   'task_dep': ['node_modules']}
 
 
 def task_pip_requirements():
     """Create pip requirements"""
     return get_task_create_pip_requirements()
-
-
-_webpack_conf = r"""
-module.exports = {{
-    mode: 'none',
-    entry: '{src_path}',
-    output: {{
-        filename: 'main.js',
-        path: '{dst_dir}'
-    }},
-    module: {{
-        rules: [
-            {{
-                test: /\.ts$/,
-                use: [
-                    {{
-                        loader: 'ts-loader',
-                        options: {{
-                            compilerOptions: {{
-                                sourceMap: true
-                            }}
-                        }}
-                    }}
-                ]
-            }}
-        ]
-    }},
-    resolve: {{
-        extensions: ['.ts', '.js']
-    }},
-    watchOptions: {{
-        ignored: /node_modules/
-    }},
-    devtool: 'source-map',
-    stats: 'errors-only'
-}};
-"""
