@@ -8,7 +8,7 @@ license = {text = "Apache-2.0"}
 dependencies = [
     "appdirs ~=1.4.4",
     "hat-aio ~=0.7.9",
-    "hat-json ~=0.5.25",
+    "hat-json ~=0.5.26",
     "hat-juggler ~=0.6.14",
     "hat-util ~=0.6.13",
 ]
