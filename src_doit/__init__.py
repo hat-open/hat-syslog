@@ -3,6 +3,8 @@ from .dist import *  # NOQA
 from pathlib import Path
 import subprocess
 
+import doit
+
 from hat.doit import common
 from hat.doit.docs import (build_sphinx,
                            build_pdoc)
@@ -112,6 +114,7 @@ def task_ts():
             'task_dep': ['node_modules']}
 
 
+@doit.create_after('node_modules')
 def task_static():
     """Copy static files"""
     src_dst_dirs = [(src_static_dir,
