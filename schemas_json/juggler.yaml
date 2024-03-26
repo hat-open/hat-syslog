@@ -1,6 +1,5 @@
----
-"$schema": "http://json-schema.org/schema#"
-id: "hat-syslog://juggler.yaml#"
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$id: "hat-syslog://juggler.yaml"
 definitions:
     state:
         type: object
@@ -11,11 +10,11 @@ definitions:
             - last_id
         properties:
             filter:
-                "$ref": "hat-syslog://juggler.yaml#/definitions/filter"
+                "$ref": "hat-syslog://juggler.yaml#/$defs/filter"
             entries:
                 type: array
                 items:
-                    "$ref": "hat-syslog://juggler.yaml#/definitions/entry"
+                    "$ref": "hat-syslog://juggler.yaml#/$defs/entry"
             first_id:
                 type:
                     - 'null'
@@ -26,7 +25,7 @@ definitions:
                     - integer
     request:
         filter:
-            "$ref": "hat-syslog://juggler.yaml#/definitions/filter"
+            "$ref": "hat-syslog://juggler.yaml#/$defs/filter"
     filter:
         type: object
         required:
@@ -61,11 +60,11 @@ definitions:
             facility:
                 oneOf:
                     - type: 'null'
-                    - "$ref": "hat-syslog://juggler.yaml#/definitions/facility"
+                    - "$ref": "hat-syslog://juggler.yaml#/$defs/facility"
             severity:
                 oneOf:
                     - type: 'null'
-                    - "$ref": "hat-syslog://juggler.yaml#/definitions/severity"
+                    - "$ref": "hat-syslog://juggler.yaml#/$defs/severity"
             hostname:
                 type:
                     - 'null'
@@ -98,7 +97,7 @@ definitions:
             timestamp:
                 type: number
             msg:
-                "$ref": "hat-syslog://juggler.yaml#/definitions/msg"
+                "$ref": "hat-syslog://juggler.yaml#/$defs/msg"
     msg:
         type: object
         required:
@@ -116,11 +115,11 @@ definitions:
             facility:
                 oneOf:
                     - type: 'null'
-                    - "$ref": "hat-syslog://juggler.yaml#/definitions/facility"
+                    - "$ref": "hat-syslog://juggler.yaml#/$defs/facility"
             severity:
                 oneOf:
                     - type: 'null'
-                    - "$ref": "hat-syslog://juggler.yaml#/definitions/severity"
+                    - "$ref": "hat-syslog://juggler.yaml#/$defs/severity"
             version:
                 type: integer
             timestamp:

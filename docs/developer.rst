@@ -62,7 +62,7 @@ Server state is used for providing continuously updated list of log entries
 to clients, based on applied filters.
 
 State structure is defined by JSON schema
-``hat-syslog://juggler.yaml#/definitions/state`` (see `Juggler JSON Schemas`_).
+``hat-syslog://juggler.yaml#/$defs/state`` (see `Juggler JSON Schemas`_).
 
 
 Request/response
@@ -71,7 +71,7 @@ Request/response
 Juggler request/response communication is used for changing filter parameters.
 
 Request data structures are defined by JSON schema
-``hat-syslog://juggler.yaml#/definitions/request`` (see
+``hat-syslog://juggler.yaml#/$defs/request`` (see
 `Juggler JSON Schemas`_).
 
 In case of successful request execution, response data is ``null``.
