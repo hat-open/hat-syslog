@@ -28,13 +28,13 @@ Documentation = "http://hat-syslog.hat-open.com"
 
 [project.optional-dependencies]
 dev = [
-    "hat-doit ~=0.15.11",
+    "hat-doit ~=0.15.12",
     "sphinxcontrib-plantuml >=0.25",
     "sphinxcontrib-programoutput >=0.17",
 ]
 
 [build-system]
-requires = ["hat-doit ~=0.15.11"]
+requires = ["hat-doit ~=0.15.12"]
 build-backend = "hat.doit.pep517"
 
 [tool.pytest.ini_options]

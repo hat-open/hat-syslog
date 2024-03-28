@@ -3,8 +3,6 @@ from .dist import *  # NOQA
 from pathlib import Path
 import subprocess
 
-import doit
-
 from hat.doit import common
 from hat.doit.docs import (build_sphinx,
                            build_pdoc)
@@ -114,33 +112,19 @@ def task_ts():
             'task_dep': ['node_modules']}
 
 
-@doit.create_after('node_modules')
 def task_static():
     """Copy static files"""
-    src_dst_dirs = [(src_static_dir,
-                     ui_dir),
-                    (node_modules_dir / '@hat-open/juggler',
-                     ui_dir / 'script/@hat-open/juggler'),
-                    (node_modules_dir / '@hat-open/renderer',
-                     ui_dir / 'script/@hat-open/renderer'),
-                    (node_modules_dir / '@hat-open/util',
-                     ui_dir / 'script/@hat-open/util'),
-                    (node_modules_dir / 'snabbdom/build',
-                     ui_dir / 'script/snabbdom')]
-
-    for src_dir, dst_dir in src_dst_dirs:
-        for src_path in src_dir.rglob('*'):
-            if not src_path.is_file():
-                continue
-
-            dst_path = dst_dir / src_path.relative_to(src_dir)
-
-            yield {'name': str(dst_path),
-                   'actions': [(common.mkdir_p, [dst_path.parent]),
-                               (common.cp_r, [src_path, dst_path])],
-                   'file_dep': [src_path],
-                   'targets': [dst_path],
-                   'task_dep': ['node_modules']}
+    return common.get_task_copy([(src_static_dir,
+                                  ui_dir),
+                                 (node_modules_dir / '@hat-open/juggler',
+                                  ui_dir / 'script/@hat-open/juggler'),
+                                 (node_modules_dir / '@hat-open/renderer',
+                                  ui_dir / 'script/@hat-open/renderer'),
+                                 (node_modules_dir / '@hat-open/util',
+                                  ui_dir / 'script/@hat-open/util'),
+                                 (node_modules_dir / 'snabbdom/build',
+                                  ui_dir / 'script/snabbdom')],
+                                task_dep=['node_modules'])
 
 
 def task_pip_requirements():
