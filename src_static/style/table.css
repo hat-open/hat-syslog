@@ -27,7 +27,7 @@ body > .main > .table {
         }
 
         tr {
-            /* height: 1px;  /* HACK expand div to cell height */
+            height: 100%;  /* expand div to cell height */
 
             &.error {
                 background-color: var(--color-red-100);
@@ -59,7 +59,7 @@ body > .main > .table {
 
         th, td {
             padding: 0;
-            /* height: 1px;  /* HACK expand div to cell height */
+            height: 100%;  /* expand div to cell height */
 
             & > div {
                 display: flex;
