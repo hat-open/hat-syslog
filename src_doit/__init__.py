@@ -123,9 +123,7 @@ def task_static():
                                  (node_modules_dir / '@hat-open/util',
                                   ui_dir / 'script/@hat-open/util'),
                                  (node_modules_dir / 'snabbdom/build',
-                                  ui_dir / 'script/snabbdom'),
-                                 (node_modules_dir / 'fast-json-patch',
-                                  ui_dir / 'script/fast-json-patch')],
+                                  ui_dir / 'script/snabbdom')],
                                 task_dep=['node_modules'])
 
 
