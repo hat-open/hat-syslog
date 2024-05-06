@@ -1,6 +1,6 @@
 [project]
 name = "hat-syslog"
-version = "0.7.15"
+version = "0.7.16"
 description = "Hat Syslog"
 readme = "README.rst"
 requires-python = ">=3.10"
@@ -9,7 +9,7 @@ dependencies = [
     "appdirs ~=1.4.4",
     "hat-aio ~=0.7.9",
     "hat-json ~=0.5.27",
-    "hat-juggler ~=0.6.14",
+    "hat-juggler ~=0.6.17",
     "hat-util ~=0.6.14",
 ]
 classifiers = [
