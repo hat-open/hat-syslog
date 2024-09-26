@@ -157,7 +157,7 @@ async function copy() {
         await writeClipboard(encodeEntries(entries));
         common.notify('Copied selected entries');
 
-    } catch (e) {
+    } catch {
         common.notify("Couldn't copy selected entries");
     }
 }
@@ -212,7 +212,7 @@ function encodeEntries(entries: common.Entry[]): string {
 function decodeJson(text: string): u.JData | null {
     try {
         return JSON.parse(text);
-    } catch (e) {
+    } catch {
         return null;
     }
 }

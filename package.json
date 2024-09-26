@@ -3,12 +3,12 @@
   "dependencies": {
     "@hat-open/juggler": "^0.6.18",
     "@hat-open/renderer": "^0.6.4",
-    "@hat-open/util": "^0.6.13"
+    "@hat-open/util": "^0.6.16"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^7.1.1",
-    "@typescript-eslint/parser": "^7.1.1",
-    "eslint": "^8.57.0",
-    "typescript": "^5.4.2"
+    "@typescript-eslint/eslint-plugin": "^8.7.0",
+    "@typescript-eslint/parser": "^8.7.0",
+    "eslint": "^8.57.1",
+    "typescript": "^5.6.2"
   }
 }

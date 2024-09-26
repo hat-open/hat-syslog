@@ -314,6 +314,11 @@ let app: juggler.Application;
 export function init() {
     app = new juggler.Application('remote');
     (window as any).app = app;
+
+    app.addEventListener('connected', () => {
+        const filter = r.get('local', 'filter') as Filter;
+        setRemoteFilter(filter);
+    });
 }
 
 
