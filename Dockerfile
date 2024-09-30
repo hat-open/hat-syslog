@@ -1,8 +1,8 @@
-FROM python:3.11-slim-bookworm as hat-syslog-base
+FROM python:3.11-slim-bookworm AS hat-syslog-base
 WORKDIR /hat-syslog
 RUN apt update -y
 
-FROM hat-syslog-base as hat-syslog-build
+FROM hat-syslog-base AS hat-syslog-build
 WORKDIR /hat-syslog
 RUN apt install -y nodejs npm
 COPY . .
@@ -10,7 +10,7 @@ RUN pip install -r requirements.pip.txt && \
     doit clean_all && \
     doit
 
-FROM hat-syslog-base as hat-syslog-run
+FROM hat-syslog-base AS hat-syslog-run
 WORKDIR /hat-syslog
 COPY --from=hat-syslog-build /hat-syslog/build/py/*.whl .
 RUN pip install *.whl && \
