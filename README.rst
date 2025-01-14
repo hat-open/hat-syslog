@@ -209,7 +209,7 @@ Development of Hat Open and associated repositories is sponsored by
 License
 -------
 
-Copyright 2020-2024 Hat Open AUTHORS
+Copyright 2020-2025 Hat Open AUTHORS
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
