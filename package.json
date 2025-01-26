@@ -1,7 +1,7 @@
 {
   "private": true,
   "dependencies": {
-    "@hat-open/juggler": "^0.6.18",
+    "@hat-open/juggler": "^0.7.0",
     "@hat-open/renderer": "^0.6.4",
     "@hat-open/util": "^0.6.16"
   },
