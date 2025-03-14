@@ -83,8 +83,19 @@ class TcpSyslogServer(aio.Resource):
     async def _client_loop(self, reader, writer):
         try:
             while True:
-                size = await reader.readuntil(b' ')
-                buff = await reader.readexactly(int(size[:-1]))
+                start = await reader.readexactly(1)
+
+                if start == b'<':
+                    buff_rest = await reader.readuntil(b'\n')
+
+                    buff = start + buff_rest[:-1]
+
+                else:
+                    size_rest = await reader.readuntil(b' ')
+                    size = int(start + size_rest[:-1])
+
+                    buff = await reader.readexactly(size)
+
                 msg = encoder.msg_from_str(buff.decode())
                 mlog.debug("received new syslog message")
 
