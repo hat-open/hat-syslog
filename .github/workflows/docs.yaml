@@ -14,7 +14,7 @@ jobs:
           - name: install python
             uses: actions/setup-python@v1
             with:
-                python-version: "3.10"
+                python-version: "3.13"
           - name: install ubuntu requirements
             run: |
                 sudo apt update
