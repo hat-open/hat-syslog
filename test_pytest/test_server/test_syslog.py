@@ -109,7 +109,7 @@ async def test_msg(message_queue, logger):
     assert int(msg_data['hat@1']['thread']) == threading.current_thread().ident
     assert msg_data['hat@1']['funcName'] == 'test_msg'
     assert int(msg_data['hat@1']['lineno']) == lineno
-    assert not msg_data['hat@1']['exc_info']
+    assert 'exc_info' not in msg_data['hat@1']
 
 
 async def test_exc_info(message_queue, logger):
