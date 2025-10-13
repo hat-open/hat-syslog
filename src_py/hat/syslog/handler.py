@@ -185,11 +185,19 @@ def _logging_handler_thread(state):
 
 
 def _record_to_msg(record):
-    exc_info = ''
+    hat_data = {'name': str(record.name),
+                'thread': str(record.thread),
+                'funcName': str(record.funcName),
+                'lineno': str(record.lineno)}
+
     with contextlib.suppress(Exception):
         if record.exc_info:
-            exc_info = ''.join(
+            hat_data['exc_info'] = ''.join(
                 traceback.TracebackException(*record.exc_info).format())
+
+    with contextlib.suppress(Exception):
+        if hasattr(record, 'info'):
+            hat_data['info'] = json.encode(record.info)
 
     return common.Msg(
         facility=common.Facility.USER,
@@ -200,17 +208,16 @@ def _record_to_msg(record):
         app_name=sys.argv[0],  # record.processName
         procid=str(record.process) if record.process else None,
         msgid=record.name[:32],
-        data=json.encode({
-            'hat@1': {
-                'name': str(record.name),
-                'thread': str(record.thread),
-                'funcName': str(record.funcName),
-                'lineno': str(record.lineno),
-                'exc_info': exc_info}}),
+        data=json.encode({'hat@1': hat_data}),
         msg=record.getMessage())
 
 
 def _create_dropped_msg(dropped, func_name, lineno):
+    hat_data = {'name': __name__,
+                'thread': str(threading.get_ident()),
+                'funcName': str(func_name),
+                'lineno': str(lineno)}
+
     return common.Msg(
         facility=common.Facility.USER,
         severity=common.Severity.ERROR,
@@ -219,14 +226,8 @@ def _create_dropped_msg(dropped, func_name, lineno):
         hostname=socket.gethostname(),
         app_name=sys.argv[0],  # record.processName
         procid=str(os.getpid()),
-        msgid=__name__,
-        data=json.encode({
-            'hat@1': {
-                'name': __name__,
-                'thread': str(threading.get_ident()),
-                'funcName': str(func_name),
-                'lineno': str(lineno),
-                'exc_info': ''}}),
+        msgid=__name__[:32],
+        data=json.encode({'hat@1': hat_data}),
         msg=f'dropped {dropped} log messages')
 
 

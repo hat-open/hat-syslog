@@ -112,6 +112,7 @@ function contentVt(): u.VNode {
         const data = (entry.msg.data ? decodeJson(entry.msg.data) : null);
         const hatLocation = getHatLocation(u.get('hat@1', data));
         const hatExcInfo = u.get(['hat@1', 'exc_info'], data);
+        const hatInfo = u.get(['hat@1', 'info'], data);
 
         return [
             ['label.wide.title', `Entry ${entry.id}`],
@@ -120,6 +121,10 @@ function contentVt(): u.VNode {
             (hatExcInfo  ? [
                 ['label.wide', 'Exception:'],
                 ['pre.wide', String(hatExcInfo)],
+            ] : []),
+            (hatInfo  ? [
+                ['label.wide', 'Info:'],
+                ['pre.wide', JSON.stringify(decodeJson(String(hatInfo)), null, 2)],
             ] : []),
             [
                 ['Timestamp', u.timestampToLocalString(entry.timestamp)],
@@ -195,13 +200,25 @@ function encodeEntries(entries: common.Entry[]): string {
             if (!u.isObject(data))
                 return data;
 
-            return u.map<u.JData, u.JData>(i => (u.get('exc_info', i) ?
-                u.change('exc_info', value => (u.isString(value) ?
-                    value.split('\n') :
-                    value
-                ), i) :
-                i
-            ))(data as any);
+            if (u.get(['hat@1', 'exc_info'], data))
+                data = u.change(
+                    ['hat@1', 'exc_info'],
+                    value => (u.isString(value) ?
+                        value.split('\n') :
+                        value
+                    )
+                )(data);
+
+            if (u.get(['hat@1', 'info'], data))
+                data = u.change(
+                    ['hat@1', 'info'],
+                    value => (u.isString(value) ?
+                        decodeJson(value) :
+                        value
+                    )
+                )(data);
+
+            return data;
         })
     )(entry));
 

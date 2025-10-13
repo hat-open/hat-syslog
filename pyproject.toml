@@ -1,6 +1,6 @@
 [project]
 name = "hat-syslog"
-version = "0.7.24"
+version = "0.7.25"
 description = "Hat Syslog"
 readme = "README.rst"
 requires-python = ">=3.10"
@@ -8,9 +8,9 @@ license = {text = "Apache-2.0"}
 dependencies = [
     "appdirs ~=1.4.4",
     "hat-aio ~=0.7.12",
-    "hat-json ~=0.6.2",
+    "hat-json ~=0.6.3",
     "hat-juggler ~=0.7.1",
-    "hat-util ~=0.6.19",
+    "hat-util ~=0.6.20",
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
