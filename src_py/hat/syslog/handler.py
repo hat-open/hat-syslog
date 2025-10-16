@@ -196,8 +196,8 @@ def _record_to_msg(record):
                 traceback.TracebackException(*record.exc_info).format())
 
     with contextlib.suppress(Exception):
-        if hasattr(record, 'info'):
-            hat_data['info'] = json.encode(record.info)
+        if hasattr(record, 'meta'):
+            hat_data['meta'] = json.encode(record.meta)
 
     return common.Msg(
         facility=common.Facility.USER,
