@@ -176,11 +176,7 @@ Build
 To install editable installation, together with python development
 dependencies, run::
 
-    $ pip install -e '.[dev]'
-
-To install only python development dependencies, run::
-
-    $ pip install -r requirements.pip.txt
+    $ pip install --group dev -e .
 
 Build tool used for `hat-syslog` is `pydoit`_. For listing available doit
 tasks, use::
@@ -209,7 +205,7 @@ Development of Hat Open and associated repositories is sponsored by
 License
 -------
 
-Copyright 2020-2025 Hat Open AUTHORS
+Copyright 2020-2026 Hat Open AUTHORS
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.

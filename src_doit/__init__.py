@@ -10,7 +10,6 @@ from hat.doit.js import (ESLintConf,
                          run_eslint)
 from hat.doit.py import (get_task_build_wheel,
                          get_task_run_pytest,
-                         get_task_create_pip_requirements,
                          run_flake8)
 
 from . import dist
@@ -25,7 +24,6 @@ __all__ = ['task_clean_all',
            'task_docs',
            'task_ts',
            'task_static',
-           'task_pip_requirements',
            *dist.__all__]
 
 
@@ -125,8 +123,3 @@ def task_static():
                                  (node_modules_dir / 'snabbdom/build',
                                   ui_dir / 'script/snabbdom')],
                                 task_dep=['node_modules'])
-
-
-def task_pip_requirements():
-    """Create pip requirements"""
-    return get_task_create_pip_requirements()

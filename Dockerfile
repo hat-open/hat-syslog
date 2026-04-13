@@ -6,7 +6,8 @@ FROM hat-syslog-base AS hat-syslog-build
 WORKDIR /hat-syslog
 RUN apt install -y nodejs npm
 COPY . .
-RUN pip install -r requirements.pip.txt && \
+RUN pip install --upgrade pip && \
+    pip install --group dev && \
     doit clean_all && \
     doit
 
