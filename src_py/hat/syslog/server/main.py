@@ -11,6 +11,7 @@ import time
 import appdirs
 
 from hat import aio
+from hat import json
 
 from hat.syslog.server.backend import create_backend
 from hat.syslog.server.syslog import create_syslog_server
@@ -55,6 +56,13 @@ def create_argument_parser() -> argparse.ArgumentParser:
         choices=['DEBUG', 'INFO', 'WARNING', 'ERROR'],
         help=f"console log level (default {default_log_level})")
     parser.add_argument(
+        '--log-access', action='store_true',
+        help="include access logs in console log")
+    parser.add_argument(
+        '--log-conf', metavar='PATH', type=Path, default=None,
+        help="path to json/yaml/toml custom log configuration as specified by "
+             "https://docs.python.org/3/library/logging.config.html#configuration-dictionary-schema")  # NOQA
+    parser.add_argument(
         '--ui-addr', metavar='ADDR', default=default_ui_addr,
         help=f"UI listening address (default {default_ui_addr})")
     parser.add_argument(
@@ -88,12 +96,20 @@ def create_argument_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main():
-    """Syslog Server"""
-    parser = create_argument_parser()
-    args = parser.parse_args()
+def get_logging_conf(log_level: str,
+                     log_access: bool,
+                     log_conf_path: Path | None
+                     ) -> json.Data:
+    """Get logging configuration"""
+    if log_conf_path:
+        conf = json.decode_file(log_conf_path)
 
-    logging.config.dictConfig({
+        validator = json.DefaultSchemaValidator(json.json_schema_repo)
+        validator.validate('hat-json://logging.yaml', conf)
+
+        return conf
+
+    return {
         'version': 1,
         'formatters': {
             'console_formater': {
@@ -102,11 +118,25 @@ def main():
             'console_handler': {
                 'class': 'logging.StreamHandler',
                 'formatter': 'console_formater',
-                'level': args.log_level}},
+                'level': log_level}},
         'root': {
-            'level': args.log_level,
+            'level': log_level,
             'handlers': ['console_handler']},
-        'disable_existing_loggers': False})
+        'loggers': {
+            'aiohttp.access': {
+                'propagate': log_access}},
+        'disable_existing_loggers': False}
+
+
+def main():
+    """Syslog Server"""
+    parser = create_argument_parser()
+    args = parser.parse_args()
+
+    logging_conf = get_logging_conf(log_level=args.log_level,
+                                    log_access=args.log_access,
+                                    log_conf_path=args.log_conf)
+    logging.config.dictConfig(logging_conf)
 
     aio.init_asyncio()
     with contextlib.suppress(asyncio.CancelledError):
