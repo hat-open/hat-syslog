@@ -44,12 +44,28 @@ class SyslogHandler(logging.Handler):
                  reconnect_delay: float = 5):
         super().__init__()
 
+        # Choose the matching CommType member from a string
+        if isinstance(comm_type, str):
+            needle = comm_type
+            haystack = frozenset(common.CommType.__members__)
+            vary = lambda x: {
+                x, x.upper(),
+                x.casefold(), x.casefold().upper(),
+                x.lower(), x.lower().upper(),
+            }
+            found = vary(needle).intersection(haystack)
+            if found:
+                member = tuple(found)[0]
+                comm_type = common.CommType[member]
+            else:
+                raise ValueError(f'Specify a valid comm_type from this list: {list(haystack)}')
+        if not isinstance(comm_type, common.CommType):
+            raise ValueError('Invalid comm_type argument')
+
         self.__state = _ThreadState(
             host=host,
             port=port,
-            comm_type=(common.CommType[comm_type]
-                       if not isinstance(comm_type, common.CommType)
-                       else comm_type),
+            comm_type=comm_type,
             queue=collections.deque(),
             queue_size=queue_size,
             reconnect_delay=reconnect_delay,
@@ -107,7 +123,7 @@ class _ThreadState(typing.NamedTuple):
     """Hostname"""
     port: int
     """TCP port"""
-    comm_type: common.CommType | str
+    comm_type: common.CommType
     """Communication type"""
     queue: collections.deque
     """Message queue"""
