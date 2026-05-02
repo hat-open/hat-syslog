@@ -88,6 +88,10 @@ class SyslogHandler(logging.Handler):
                 return
 
             state.queue.append(msg)
+            dropped_count = state.dropped[0]
+            if dropped_count > 1_000_000:
+                state.dropped.append(dropped_count)
+                state.dropped[0] = 0
             while len(state.queue) > state.queue_size:
                 state.queue.popleft()
                 state.dropped[0] += 1
@@ -163,8 +167,10 @@ def _logging_handler_thread(state):
                     if state.dropped[0]:
                         msg = _create_dropped_msg(
                             state.dropped[0], '_logging_handler_thread', 0)
-                        state.dropped[0] = 0
-
+                        new_value = 0
+                        if len(state.dropped)-1:
+                            new_value = state.dropped.pop()
+                        state.dropped[0] = new_value
                     else:
                         msg = state.queue.popleft()
 
