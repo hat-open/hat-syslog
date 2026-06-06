@@ -6,6 +6,7 @@ import re
 from hat import json
 
 from hat.syslog import common
+from hat.syslog import older_formats
 
 
 def msg_to_str(msg: common.Msg) -> str:
@@ -25,7 +26,10 @@ def msg_to_str(msg: common.Msg) -> str:
 
 def msg_from_str(msg_str: str) -> common.Msg:
     """Parse message string formatted according to RFC 5424"""
-    match = _msg_pattern.fullmatch(msg_str).groupdict()
+    match = _msg_pattern.fullmatch(msg_str)
+    if match is None:
+        return older_formats.msg_from_rfc3164_str(msg_str)
+    match = match.groupdict()
     prival = int(match['prival'])
     return common.Msg(
         facility=common.Facility(prival // 8),
