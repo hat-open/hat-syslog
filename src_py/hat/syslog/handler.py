@@ -107,7 +107,7 @@ class _ThreadState(typing.NamedTuple):
     """Hostname"""
     port: int
     """TCP port"""
-    comm_type: common.CommType | str
+    comm_type: common.CommType
     """Communication type"""
     queue: collections.deque
     """Message queue"""
