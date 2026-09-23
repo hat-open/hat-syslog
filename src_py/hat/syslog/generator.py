@@ -69,7 +69,7 @@ def main():
                 'class': 'hat.syslog.handler.SyslogHandler',
                 'host': args.host,
                 'port': args.port,
-                'comm_type': 'TCP',
+                'comm_type': args.comm_type,
                 'level': args.level,
                 'formatter': 'default',
                 'queue_size': args.queue_size}},
