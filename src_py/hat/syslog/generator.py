@@ -19,7 +19,7 @@ def create_argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '--comm-type', choices=[i.name for i in common.CommType],
-        default='TCP', help="syslog server host name (default TCP)")
+        default='TCP', help="communication protocol (default TCP)")
     parser.add_argument(
         '--host', metavar='HOST', default='127.0.0.1',
         help="syslog server host name (default 127.0.0.1)")
