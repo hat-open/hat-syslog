@@ -1,4 +1,6 @@
-FROM python:3.11-slim-bookworm AS hat-syslog-base
+ARG IMAGE_BASE_TAG=3.12-slim-bookworm
+
+FROM "python:${IMAGE_BASE_TAG}" AS hat-syslog-base
 WORKDIR /hat-syslog
 RUN apt update -y
 
