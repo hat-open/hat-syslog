@@ -7,11 +7,12 @@ jobs:
         runs-on: ubuntu-latest
         steps:
           - name: checkout repository
-            uses: actions/checkout@v2
+            uses: actions/checkout@v7
           - name: install python
-            uses: actions/setup-python@v1
+            uses: actions/setup-python@v7.0.0
             with:
-                python-version: "3.14"
+                cache: 'pip'
+                python-version: '3.14'
           - name: install python requirements
             run: |
                 python -m pip install --upgrade pip
@@ -20,3 +21,30 @@ jobs:
             run: doit check
           - name: doit test
             run: doit test
+
+    docker-image:
+        uses: docker/github-builder/.github/workflows/build.yml@v1
+        permissions:
+            contents: read
+            id-token: write
+        secrets:
+            registry-auths: |
+                - registry: ghcr.io
+                    username: ${{ github.actor }}
+                    password: ${{ secrets.GITHUB_TOKEN }}
+        with:
+            build-args: |
+                IMAGE_BASE_TAG=3.14-slim-trixie
+            cache: true
+            cache-mode: max
+            meta-flavor: latest=false
+            meta-images: ghcr.io/${{ github.actor }}/hat-syslog
+            meta-tags: |
+                type=schedule,pattern=weekly
+                type=raw,enable={{is_default_branch}},value=latest
+                type=raw,enable={{is_not_default_branch}},value=test
+                type=ref,event=tag
+                type=ref,event=pr
+            output: image
+            platforms: linux/amd64,linux/arm64
+            push: ${{ 'hat-open' == github.repository_owner && 'pull_request' != github.event_name }}
