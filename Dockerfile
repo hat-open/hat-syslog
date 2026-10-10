@@ -11,6 +11,8 @@ RUN apt-get install -y nodejs npm
 FROM hat-syslog-npm AS hat-syslog-build
 WORKDIR /hat-syslog
 COPY . .
+ENV DEBIAN_FRONTEND='noninteractive' \
+    PIP_ROOT_USER_ACTION='ignore'
 RUN pip install --upgrade pip && \
     pip install --group dev && \
     doit clean_all && \
@@ -20,7 +22,7 @@ FROM hat-syslog-base AS hat-syslog-run
 WORKDIR /hat-syslog
 RUN --mount=type=tmpfs,target=/stages \
     --mount=type=bind,source=/hat-syslog/build,target=/stages/build,from=hat-syslog-build \
-    pip install /stages/build/py/*.whl
+    pip install --root-user-action=ignore /stages/build/py/*.whl
 EXPOSE 6514/tcp \
        6514/udp \
        23020/tcp
