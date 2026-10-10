@@ -34,7 +34,7 @@ jobs:
                     password: ${{ secrets.GITHUB_TOKEN }}
         with:
             build-args: |
-                IMAGE_BASE_TAG=3.14-slim-bookworm
+                IMAGE_BASE_TAG=3.14-slim-trixie
             cache: true
             cache-mode: max
             meta-flavor: latest=false
