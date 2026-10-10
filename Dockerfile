@@ -10,10 +10,11 @@ RUN apt-get install -y nodejs npm
 
 FROM hat-syslog-npm AS hat-syslog-build
 ENV PIP_ROOT_USER_ACTION='ignore'
+WORKDIR /root
+RUN pip install --upgrade pip
 WORKDIR /hat-syslog
 COPY . .
-RUN pip install --upgrade pip && \
-    pip install --group dev && \
+RUN pip install --group dev && \
     doit clean_all && \
     doit
 
