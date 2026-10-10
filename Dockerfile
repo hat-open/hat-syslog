@@ -2,11 +2,11 @@ ARG IMAGE_BASE_TAG=3.12-slim-bookworm
 
 FROM "python:${IMAGE_BASE_TAG}" AS hat-syslog-base
 WORKDIR /hat-syslog
-RUN apt update -y
+RUN apt-get update
 
 FROM hat-syslog-base AS hat-syslog-build
 WORKDIR /hat-syslog
-RUN apt install -y nodejs npm
+RUN apt-get install -y nodejs npm
 COPY . .
 RUN pip install --upgrade pip && \
     pip install --group dev && \
@@ -15,9 +15,9 @@ RUN pip install --upgrade pip && \
 
 FROM hat-syslog-base AS hat-syslog-run
 WORKDIR /hat-syslog
-COPY --from=hat-syslog-build /hat-syslog/build/py/*.whl .
-RUN pip install *.whl && \
-    rm *.whl
+RUN --mount=type=tmpfs,target=/stages \
+    --mount=type=bind,source=/hat-syslog/build,target=/stages/build,from=hat-syslog-build \
+    pip install /stages/build/py/*.whl
 EXPOSE 6514/tcp \
        6514/udp \
        23020/tcp
