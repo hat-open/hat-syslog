@@ -151,8 +151,10 @@ def _logging_handler_thread(state):
             time.sleep(state.reconnect_delay)
             continue
 
+        msg = None
         try:
             while True:
+                dropped = 0
                 with state.cv:
                     state.cv.wait_for(lambda: (state.closed.is_set() or
                                                len(state.queue) or
@@ -161,23 +163,28 @@ def _logging_handler_thread(state):
                         return
 
                     if state.dropped[0]:
+                        dropped = state.dropped[0]
                         msg = _create_dropped_msg(
-                            state.dropped[0], '_logging_handler_thread', 0)
-                        state.dropped[0] = 0
+                            dropped, '_logging_handler_thread', 0)
 
                     else:
                         msg = state.queue.popleft()
 
-                msg_bytes = encoder.msg_to_str(msg).encode()
-
-                if state.comm_type == common.CommType.UDP:
-                    s.send(msg_bytes)
-
+                if dropped:
+                    dropped_msg = msg
+                    msg = None
+                    _send_message(s, dropped_msg, state.comm_type == common.CommType.UDP)
+                    with state.cv:
+                        state.dropped[0] -= dropped
                 else:
-                    s.send(f'{len(msg_bytes)} '.encode() + msg_bytes)
+                    _send_message(s, msg, state.comm_type == common.CommType.UDP)
+                msg = None
 
         except Exception:
-            pass
+            # When failing with msg assigned, put the msg back.
+            # After reconnecting we will try it again.
+            if msg is not None:
+                state.queue.appendleft(msg)
 
         finally:
             with contextlib.suppress(Exception):
@@ -210,6 +217,14 @@ def _record_to_msg(record):
         msgid=record.name[:32],
         data=json.encode({'hat@1': hat_data}),
         msg=record.getMessage())
+
+
+def _send_message(s, msg, only_bytes=False):
+    msg_bytes = encoder.msg_to_str(msg).encode()
+    if only_bytes:
+        s.send(msg_bytes)
+    else:
+        s.send(f'{len(msg_bytes)} '.encode() + msg_bytes)
 
 
 def _create_dropped_msg(dropped, func_name, lineno):
