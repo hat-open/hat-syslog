@@ -5,17 +5,40 @@ env:
 jobs:
     main:
         runs-on: ubuntu-latest
+        defaults:
+            run:
+                shell: 'bash'
         steps:
           - name: checkout repository
-            uses: actions/checkout@v2
-          - name: install python
-            uses: actions/setup-python@v1
+            uses: actions/checkout@v7
             with:
-                python-version: "3.14"
+                persist-credentials: false
+                submodules: 'true'
+          - name: install python
+            uses: actions/setup-python@v7.1.0
+            with:
+                python-version-file: '.python-version'
           - name: install python requirements
             run: |
                 python -m pip install --upgrade pip
-                pip install --group dev -e .
+                build_vendored() (
+                    local dir
+
+                    PIP_FIND_LINKS="$(realpath "${1}")"
+                    export PIP_FIND_LINKS
+                    mkdir -p "${PIP_FIND_LINKS}"
+                    shift
+
+                    for dir in "${@}"
+                    do
+                        pushd "${dir}" || continue
+                        pip wheel --wheel-dir "${PIP_FIND_LINKS}" . || :
+                        popd
+                    done
+                )
+                build_vendored ./.vendor-dist vendor/hat-{aio,util,json,juggler}
+                pip install --find-links ./.vendor-dist --group dev -e .
+
           - name: doit check
             run: doit check
           - name: doit test
