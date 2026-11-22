@@ -1,0 +1,12 @@
+[submodule "hat-aio"]
+	path = vendor/hat-aio
+	url = https://github.com/hat-open/hat-aio.git
+[submodule "hat-json"]
+	path = vendor/hat-json
+	url = https://github.com/hat-open/hat-json.git
+[submodule "hat-juggler"]
+	path = vendor/hat-juggler
+	url = https://github.com/hat-open/hat-juggler.git
+[submodule "hat-util"]
+	path = vendor/hat-util
+	url = https://github.com/hat-open/hat-util.git

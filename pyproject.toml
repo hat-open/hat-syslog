@@ -3,7 +3,7 @@ name = "hat-syslog"
 version = "0.7.28"
 description = "Hat Syslog"
 readme = "README.rst"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = {text = "Apache-2.0"}
 dependencies = [
     "appdirs ~=1.4.4",
@@ -58,3 +58,9 @@ show_missing = true
 [tool.coverage.run]
 include = ["src_py/*"]
 data_file = "build/.coverage"
+
+[tool.uv.sources]
+hat-aio = { path = "vendor/hat-aio" }
+hat-json = { path = "vendor/hat-json" }
+hat-juggler = { path = "vendor/hat-juggler" }
+hat-util = { path = "vendor/hat-util" }

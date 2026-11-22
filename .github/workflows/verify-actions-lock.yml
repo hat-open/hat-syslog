@@ -1,0 +1,67 @@
+# Fails when .github/workflows/actions.lock is out of sync with the
+# workflows or a locked pin no longer verifies upstream.
+#
+# https://github.blog/changelog/2026-10-28-github-actions-workflow-lockfiles-are-generally-available/
+
+name: verify-actions-lockfile
+
+on:
+    pull_request:
+    push:
+        branches:
+            - 'master'
+
+permissions:
+    contents: 'read'
+
+env:
+    GH_EXTENSION_VERSION: 'v0.5.1'
+
+jobs:
+    verify:
+        runs-on: ubuntu-slim
+        defaults:
+            run:
+                shell: 'bash'
+        steps:
+            - name: checkout repository
+              uses: actions/checkout@v7.0.1
+              with:
+                  persist-credentials: false
+                  submodules: 'true'
+            - name: install actions-lock
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  gh extension install github/gh-actions-lock --pin "${GH_EXTENSION_VERSION}"
+            - name: verify locked actions
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  gh actions-lock --verify
+
+    lock:
+        if: failure()
+        needs: 'verify'
+        runs-on: ubuntu-slim
+        defaults:
+            run:
+                shell: 'bash'
+        steps:
+            - name: checkout repository
+              uses: actions/checkout@v7.0.1
+              with:
+                  persist-credentials: false
+                  submodules: 'true'
+            - name: install actions-lock
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  gh extension install github/gh-actions-lock --pin "${GH_EXTENSION_VERSION}"
+            - name: lock actions
+              env:
+                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: |
+                  gh actions-lock
+                  git add -N .github
+                  git diff -a

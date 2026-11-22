@@ -8,31 +8,34 @@ env:
 jobs:
     docs:
         runs-on: ubuntu-latest
+        defaults:
+            run:
+                shell: 'bash'
         steps:
-          - name: checkout repository
-            uses: actions/checkout@v2
-          - name: install python
-            uses: actions/setup-python@v1
-            with:
-                python-version: "3.14"
-          - name: install ubuntu requirements
-            run: |
-                sudo apt update
-                sudo apt install -q -y plantuml
-          - name: install python requirements
-            run: |
-                python -m pip install --upgrade pip
-                pip install --group dev -e .
-          - name: doit docs
-            run: doit docs
-          - name: create CNAME
-            if: github.repository == 'hat-open/hat-syslog'
-            run: |
-                 echo "hat-syslog.hat-open.com" > build/docs/CNAME
-          - name: deploy
-            uses: peaceiris/actions-gh-pages@v3
-            with:
-                github_token: ${{ secrets.GITHUB_TOKEN }}
-                publish_dir: ./build/docs
-                publish_branch: gh-pages
-                force_orphan: true
+            - name: checkout repository
+              uses: actions/checkout@v7.0.1
+            - name: install python
+              uses: actions/setup-python@v7.1.0
+              with:
+                  python-version-file: '.python-version'
+            - name: install ubuntu requirements
+              run: |
+                  sudo apt update
+                  sudo apt install -q -y plantuml
+            - name: install python requirements
+              run: |
+                  python -m pip install --upgrade pip
+                  pip install --group dev -e .
+            - name: doit docs
+              run: doit docs
+            - name: create CNAME
+              if: github.repository == 'hat-open/hat-syslog'
+              run: |
+                   echo 'hat-syslog.hat-open.com' > build/docs/CNAME
+            - name: deploy
+              uses: peaceiris/actions-gh-pages@v4.1.0
+              with:
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  publish_dir: ./build/docs
+                  publish_branch: gh-pages
+                  force_orphan: true
