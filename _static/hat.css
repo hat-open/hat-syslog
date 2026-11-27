@@ -1,0 +1,22 @@
+
+body > div > nav > div > div.wy-side-nav-search > div.version {
+    margin-bottom: 0px;
+}
+
+dl {
+    padding: 5px;
+}
+
+blockquote {
+    border-left: none;
+    font-style: normal;
+    padding: 0 0 0.5rem 0;
+    margin-block-start: 0.5em;
+    margin-block-end: 0.5em;
+    background: transparent;
+}
+
+ol, ul {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
