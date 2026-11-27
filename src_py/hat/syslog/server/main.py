@@ -138,7 +138,6 @@ def main():
                                     log_conf_path=args.log_conf)
     logging.config.dictConfig(logging_conf)
 
-    aio.init_asyncio()
     with contextlib.suppress(asyncio.CancelledError):
         aio.run_asyncio(async_main(ui_addr=args.ui_addr,
                                    db_path=args.db_path,

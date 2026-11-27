@@ -58,8 +58,6 @@ def main():
     parser = create_argument_parser()
     args = parser.parse_args()
 
-    aio.init_asyncio()
-
     logging.config.dictConfig({
         'version': 1,
         'formatters': {

@@ -1,20 +1,19 @@
 [project]
 name = "hat-syslog"
-version = "0.7.28"
+version = "0.7.29"
 description = "Hat Syslog"
 readme = "README.rst"
 requires-python = ">=3.10"
-license = {text = "Apache-2.0"}
+license = "Apache-2.0"
 dependencies = [
     "appdirs ~=1.4.4",
-    "hat-aio ~=0.7.13",
-    "hat-json ~=0.6.8",
-    "hat-juggler ~=0.7.2",
-    "hat-util ~=0.6.22",
+    "hat-aio ~=0.7.15",
+    "hat-json ~=0.6.9",
+    "hat-juggler ~=0.7.8",
+    "hat-util ~=0.6.25",
 ]
 classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: Apache Software License"
+    "Programming Language :: Python :: 3"
 ]
 
 [project.scripts]
@@ -29,12 +28,12 @@ Documentation = "http://hat-syslog.hat-open.com"
 [dependency-groups]
 run = [
     "appdirs ~=1.4.4",
-    "hat-aio ~=0.7.13",
-    "hat-json ~=0.6.8",
-    "hat-juggler ~=0.7.2",
-    "hat-util ~=0.6.22",
+    "hat-aio ~=0.7.15",
+    "hat-json ~=0.6.9",
+    "hat-juggler ~=0.7.8",
+    "hat-util ~=0.6.25",
 ]
-build = ["hat-doit ~=0.16.4"]
+build = ["hat-doit ~=0.17.1"]
 dev = [
     {include-group = "run"},
     {include-group = "build"},
@@ -43,7 +42,7 @@ dev = [
 ]
 
 [build-system]
-requires = ["hat-doit ~=0.16.4"]
+requires = ["hat-doit ~=0.17.1"]
 build-backend = "hat.doit.pep517"
 
 [tool.pytest.ini_options]
